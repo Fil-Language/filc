@@ -1,0 +1,64 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+env:
+  CC: clang # Force usage of clang
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set matrix data
+        id: set-matrix
+        run: |
+          echo -e "Using json:\n$(cat ./tools/ci/build-matrix.json)"
+
+          echo 'matrix<<EOF' >> "$GITHUB_OUTPUT"
+          echo "$(cat ./tools/ci/build-matrix.json)" >> "$GITHUB_OUTPUT"
+          echo EOF >> "$GITHUB_OUTPUT"
+
+  build:
+    name: "Build & Run [${{ matrix.os }} - ${{ matrix.triple }}]"
+    needs: configure
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.configure.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+      - name: Build then run
+        uses: workflow/nix-shell-action@v3
+        with:
+          script: |
+            bazel build //:filc --copt="--target=${{ matrix.triple }}"
+            bazel run //:filc
+
+  unit-tests:
+    name: "Unit tests [${{ matrix.os }} - ${{ matrix.triple }}]"
+    needs: configure
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.configure.outputs.matrix) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+      - name: Run tests
+        uses: workflow/nix-shell-action@v3
+        with:
+          script: |
+            bazel build //:unit-tests --copt="--target=${{ matrix.triple }}"
+            bazel test //:unit-tests

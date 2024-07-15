@@ -1,0 +1,12 @@
+{
+  "include": [
+    {
+      "os": "ubuntu-22.04",
+      "triple": "x86_64-unknown-linux"
+    },
+    {
+      "os": "macos-14",
+      "triple": "arm64-apple-darwin"
+    }
+  ]
+}
