@@ -1,0 +1,8 @@
+[*]
+indent_style = space
+
+[*.nix]
+indent_size = 2
+
+[*.bazel]
+indent_size = 4

@@ -1,0 +1,18 @@
+cc_library(
+    name = "filc_lib",
+    srcs = glob([
+        "src/*.cpp",
+        "src/**/*.cpp",
+    ]),
+    hdrs = glob([
+        "include/filc/*.h",
+        "include/filc/**/*.h",
+    ]),
+    includes = ["include"],
+)
+
+cc_binary(
+    name = "filc",
+    srcs = ["main.cpp"],
+    deps = ["//:filc_lib"],
+)
