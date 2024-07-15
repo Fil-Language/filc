@@ -16,3 +16,16 @@ cc_binary(
     srcs = ["main.cpp"],
     deps = ["//:filc_lib"],
 )
+
+cc_test(
+    name = "unit-tests",
+    srcs = glob([
+        "tests/unit/*.cpp",
+        "tests/unit/**/*.cpp",
+    ]),
+    deps = [
+        "//:filc_lib",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
