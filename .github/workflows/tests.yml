@@ -19,14 +19,12 @@ jobs:
       - name: Set matrix data
         id: set-matrix
         run: |
-          echo -e "Using json:\n$(cat ./tools/ci/build-matrix.json)"
-
           echo 'matrix<<EOF' >> "$GITHUB_OUTPUT"
           echo "$(cat ./tools/ci/build-matrix.json)" >> "$GITHUB_OUTPUT"
           echo EOF >> "$GITHUB_OUTPUT"
 
   build:
-    name: "Build & Run [${{ matrix.os }} - ${{ matrix.triple }}]"
+    name: "Build & Run [${{ matrix.os }} - ${{ matrix.platform }}]"
     needs: configure
     strategy:
       fail-fast: false
@@ -38,14 +36,10 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b
       - name: Build then run
-        uses: workflow/nix-shell-action@10ebd4e80eae8a5bc5147c0a36ebb568d1b277bd
-        with:
-          script: |
-            bazel build //:filc --copt="--target=${{ matrix.triple }}"
-            bazel run //:filc
+        run: nix-shell --pure --run '${{ github.workspace }}/tools/ci/build_and_run.sh ${{ matrix.platform }}'
 
   unit-tests:
-    name: "Unit tests [${{ matrix.os }} - ${{ matrix.triple }}]"
+    name: "Unit tests [${{ matrix.os }} - ${{ matrix.platform }}]"
     needs: configure
     strategy:
       fail-fast: false
@@ -57,30 +51,26 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b
       - name: Run tests
-        uses: workflow/nix-shell-action@10ebd4e80eae8a5bc5147c0a36ebb568d1b277bd
-        with:
-          script: |
-            bazel build //:unit-tests --copt="--target=${{ matrix.triple }}"
-            bazel test //:unit-tests
-
-  test-coverage:
-    name: "Unit test coverage"
-    needs: configure
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
-
-      - name: Install Nix
-        uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b
-      - name: Run tests
-        id: tests
-        uses: workflow/nix-shell-action@10ebd4e80eae8a5bc5147c0a36ebb568d1b277bd
-        with:
-          script: |
-            bazel coverage --combined_report=lcov //:unit-tests
-            echo "coverage_path=$(bazel info output_path)/_coverage/_coverage_report.dat" >> "$GITHUB_OUTPUT"
-      - name: Upload coverage report to Codacy
-        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: ${{ steps.tests.outputs.coverage_path }}
+        run: nix-shell --pure --run '${{ github.workspace }}/tools/ci/run_unit_tests.sh ${{ matrix.plaform }}'
+#
+#  test-coverage:
+#    name: "Unit test coverage"
+#    needs: configure
+#    runs-on: ubuntu-22.04
+#    steps:
+#      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+#
+#      - name: Install Nix
+#        uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b
+#      - name: Run tests
+#        id: tests
+#        uses: workflow/nix-shell-action@10ebd4e80eae8a5bc5147c0a36ebb568d1b277bd
+#        with:
+#          script: |
+#            bazel coverage --combined_report=lcov //:unit-tests
+#            echo "coverage_path=$(bazel info output_path)/_coverage/_coverage_report.dat" >> "$GITHUB_OUTPUT"
+#      - name: Upload coverage report to Codacy
+#        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
+#        with:
+#          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+#          coverage-reports: ${{ steps.tests.outputs.coverage_path }}

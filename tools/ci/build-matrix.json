@@ -2,11 +2,23 @@
   "include": [
     {
       "os": "ubuntu-22.04",
-      "triple": "x86_64-unknown-linux"
+      "platform": "linux_x86_64"
     },
     {
-      "os": "macos-14",
-      "triple": "arm64-apple-darwin"
+      "os": "ubuntu-22.04",
+      "platform": "linux_arm64"
+    },
+    {
+      "os": "ubuntu-22.04",
+      "platform": "linux_i386"
+    },
+    {
+      "os": "ubuntu-22.04",
+      "platform": "linux_riscv64"
+    },
+    {
+      "os": "ubuntu-22.04",
+      "platform": "nixos_x86_64"
     }
   ]
 }

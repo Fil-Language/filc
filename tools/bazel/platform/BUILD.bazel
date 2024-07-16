@@ -1,0 +1,41 @@
+# --- Linux ---
+platform(
+    name = "linux_x86_64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ]
+)
+
+platform(
+    name = "linux_arm64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:arm64",
+    ]
+)
+
+platform(
+    name = "linux_i386",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:i386",
+    ]
+)
+
+platform(
+    name = "linux_riscv64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:riscv64",
+    ]
+)
+
+# --- NixOS ---
+platform(
+    name = "nixos_x86_64",
+    constraint_values = [
+        "@platforms//os:nixos",
+        "@platforms//cpu:x86_64",
+    ]
+)
