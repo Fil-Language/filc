@@ -4,7 +4,6 @@
 
 ...
 
-
 ## Checklist before requesting a review
 
 - [ ] I've followed Contributions guidelines

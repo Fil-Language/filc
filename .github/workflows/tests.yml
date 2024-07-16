@@ -11,11 +11,11 @@ env:
 
 jobs:
   configure:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
       - name: Set matrix data
         id: set-matrix
         run: |
@@ -33,7 +33,7 @@ jobs:
       matrix: ${{ fromJson(needs.configure.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
 
       - name: Install Nix
         uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b
@@ -52,7 +52,7 @@ jobs:
       matrix: ${{ fromJson(needs.configure.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
 
       - name: Install Nix
         uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b
@@ -62,3 +62,25 @@ jobs:
           script: |
             bazel build //:unit-tests --copt="--target=${{ matrix.triple }}"
             bazel test //:unit-tests
+
+  test-coverage:
+    name: "Unit test coverage"
+    needs: configure
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b
+      - name: Run tests
+        id: tests
+        uses: workflow/nix-shell-action@10ebd4e80eae8a5bc5147c0a36ebb568d1b277bd
+        with:
+          script: |
+            bazel coverage --combined_report=lcov //:unit-tests
+            echo "coverage_path=$(bazel info output_path)/_coverage/_coverage_report.dat" >> "$GITHUB_OUTPUT"
+      - name: Upload coverage report to Codacy
+        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: ${{ steps.tests.outputs.coverage_path }}
