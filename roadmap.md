@@ -15,6 +15,7 @@ Here it is the planned roadmap for filc development until v1.0.0. As filc is the
 
 - Functions and lambdas
 - Loops and conditions
+- Modules, export and import
 
 ## v0.3.0
 
