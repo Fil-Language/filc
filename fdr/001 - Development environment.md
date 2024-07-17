@@ -3,6 +3,7 @@
 > - Author: Kevin Traini
 > - Status: Published
 > - Publication date: 2024-07-15
+> - Last revision: 2024-07-17 
 > - License: MIT
 
 #### Abstract
@@ -11,7 +12,9 @@ This FDR describe all choosen tools (and why them) for filc development.
 
 #### Table of Contents
 
-**TODO**
+- [1. Development environment](#1-development-environment)
+- [2. Build system](#2-build-system)
+- [3. Test system](#3-test-system)
 
 ## 1. Development environment
 
@@ -23,7 +26,7 @@ We also use Renovate bot to have automatic updates of nixpkgs and filc dependenc
 
 We use Bazel build system to build whole project and manage dependencies. The preferred compiler is clang as it's a LLVM based tool which allow an easy cross platform compilation.
 
-## Test system
+## 3. Test system
 
 Unit testing is performed with library googletest. Linting is also enabled through clang-format, clang-tidy and .editorconfig. Husky can be used to auto perform linting before commiting.
 
