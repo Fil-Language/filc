@@ -8,36 +8,19 @@ on:
   pull_request:
 
 jobs:
-  configure:
-    runs-on: ubuntu-22.04
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
-      - name: Set matrix data
-        id: set-matrix
-        run: |
-          echo 'matrix<<EOF' >> "$GITHUB_OUTPUT"
-          echo "$(cat ./tools/ci/build-matrix.json)" >> "$GITHUB_OUTPUT"
-          echo EOF >> "$GITHUB_OUTPUT"
-
   build:
-    name: "Build [${{ matrix.os }} - ${{ matrix.platform }}]"
-    needs: configure
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.configure.outputs.matrix) }}
-    runs-on: ${{ matrix.os }}
+    name: Build
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
 
       - name: Install Nix
         uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
       - name: Build
-        run: nix-shell --pure --run '${{ github.workspace }}/tools/ci/build.sh ${{ matrix.platform }}'
+        run: nix-shell --pure --run 'bazel build //:filc'
 
       - name: Archive binary
         uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
-          name: "filc-${{ matrix.platform }}"
+          name: filc
           path: ${{ github.workspace }}/bazel-bin/filc
