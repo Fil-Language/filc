@@ -1,4 +1,2 @@
 # Enable Bzlmod for every Bazel command
 common --enable_bzlmod
-
---repo_env=CC=clang
