@@ -1,0 +1,26 @@
+name: Package
+
+on:
+  push:
+    branches:
+      - master
+      - dev-workflow
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
+      - name: Build
+        run: nix-shell --pure --run 'bazel build //:filc'
+
+      - name: Archive binary
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
+        with:
+          name: filc
+          path: ${{ github.workspace }}/bazel-bin/filc
