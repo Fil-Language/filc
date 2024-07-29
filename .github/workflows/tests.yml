@@ -16,7 +16,10 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
       - name: Build then run
-        run: nix-shell --pure --run 'bazel run //:filc'
+        run: |
+          nix-shell --pure --run '${{ github.workspace }}/bin/build_release.sh'
+          
+          ${{ github.workspace }}/filc
 
   unit-tests:
     name: "Unit tests"
@@ -27,4 +30,23 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
       - name: Run tests
-        run: nix-shell --pure --run 'bazel test //:unit-tests'
+        run: nix-shell --pure --run '${{ github.workspace }}/bin/run_unit_tests.sh'
+
+      - name: Build coverage
+        run: nix-shell --pure --run '${{ github.workspace }}/bin/build_coverage.sh'
+      - name: Upload coverage report to Codacy
+        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699 # v1.3.0
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: ${{ github.workspace }}/coverage.info
+
+  e2e-tests:
+    name: "e2e tests"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
+      - name: Run tests
+        run: nix-shell --pure --run '${{ github.workspace }}/bin/run_e2e_tests.sh'

@@ -21,15 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "filc/filc.h"
+#include "test_tools.h"
+#include <gtest/gtest.h>
 
-using namespace filc;
-
-auto FilCompiler::parseArguments(int argc, char **argv) -> FilCompiler& {
-    return *this;
-}
-
-auto FilCompiler::run() -> int {
-    // Nothing to do now
-    return 0;
+TEST(filc, run) {
+    auto out = run_with_args();
+    ASSERT_STREQ("", out.c_str());
 }

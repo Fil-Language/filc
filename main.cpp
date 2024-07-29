@@ -22,9 +22,8 @@
  * SOFTWARE.
  */
 #include <filc/filc.h>
-#include <iostream>
 
-auto main() -> int {
-    std::cout << hello_world() << "\n";
-    return 0;
+auto main(int argc, char **argv) -> int {
+    auto compiler = filc::FilCompiler();
+    return compiler.parseArguments(argc, argv).run();
 }

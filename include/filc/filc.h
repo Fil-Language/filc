@@ -24,8 +24,13 @@
 #ifndef FILC_FILC_H
 #define FILC_FILC_H
 
-#include <string>
+namespace filc {
+    class FilCompiler final {
+    public:
+        auto parseArguments(int argc, char **argv) -> FilCompiler&;
 
-auto hello_world() -> std::string;
+        auto run() -> int;
+    };
+}
 
 #endif // FILC_FILC_H

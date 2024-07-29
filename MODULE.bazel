@@ -1,3 +1,0 @@
-module(name = "filc")
-
-bazel_dep(name = "googletest", version = "1.14.0", dev_dependency=True)
