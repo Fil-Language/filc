@@ -1,5 +1,6 @@
 # filc
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/de430eeb0b874e3c903fdf0dacafcee5)](https://app.codacy.com/gh/Fil-Language/filc?utm_source=github.com&utm_medium=referral&utm_content=Fil-Language/filc&utm_campaign=Badge_Grade)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Version](version.svg)
 
