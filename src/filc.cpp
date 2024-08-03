@@ -25,7 +25,7 @@
 
 using namespace filc;
 
-auto FilCompiler::parseArguments(int argc, char **argv) -> FilCompiler& {
+auto FilCompiler::parseArguments(int argc, char **argv) -> FilCompiler & {
     return *this;
 }
 

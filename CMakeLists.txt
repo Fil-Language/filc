@@ -15,6 +15,7 @@ project(
 )
 
 include(FetchContent)
+cmake_policy(SET CMP0135 NEW)
 
 # _.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-.
 # Library
@@ -57,6 +58,7 @@ target_link_libraries(filc PRIVATE filc_lib)
 target_compile_options(filc PUBLIC -Wall -O3)
 
 add_custom_target(filc_path ALL "echo" $<TARGET_FILE:filc> ">" "filc.path")
+add_dependencies(filc_path filc)
 
 # _.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-.
 # Tests

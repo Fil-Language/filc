@@ -1,5 +1,5 @@
 let
-  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/53e81e790209e41f0c1efa9ff26ff2fd7ab35e27.tar.gz";
+  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/63dacb46bf939521bdc93981b4cbb7ecb58427a0.tar.gz"; # 24.05
   pkgs = import nixpkgs { config = {}; overlays = []; };
 in
 
@@ -10,6 +10,7 @@ pkgs.mkShell {
     pkgs.cmake
     pkgs.ninja
     pkgs.lcov
+    pkgs.libclang
   ];
 
   shellHook = ''

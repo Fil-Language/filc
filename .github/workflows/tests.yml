@@ -50,3 +50,16 @@ jobs:
         uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
       - name: Run tests
         run: nix-shell --pure --run '${{ github.workspace }}/bin/run_e2e_tests.sh'
+
+  clang-format:
+    name: "Run clang-format"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
+      - name: Run clang-format
+        run: nix-shell --pure --run '${{ github.workspace }}/bin/run_clang-format.sh'
+      - name: Check no changes
+        run: ${{ github.workspace }}/bin/check_no_changes.sh

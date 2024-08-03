@@ -25,12 +25,12 @@
 #define FILC_FILC_H
 
 namespace filc {
-    class FilCompiler final {
-    public:
-        auto parseArguments(int argc, char **argv) -> FilCompiler&;
+class FilCompiler final {
+  public:
+    auto parseArguments(int argc, char **argv) -> FilCompiler &;
 
-        auto run() -> int;
-    };
-}
+    auto run() -> int;
+};
+} // namespace filc
 
 #endif // FILC_FILC_H
