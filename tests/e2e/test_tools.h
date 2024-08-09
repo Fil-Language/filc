@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_FILC_H
-#define FILC_FILC_H
+#ifndef FILC_TEST_TOOLS_H
+#define FILC_TEST_TOOLS_H
 
-namespace filc {
-class FilCompiler final {
-  public:
-    auto parseArguments(int argc, char **argv) -> FilCompiler &;
+#include <string>
 
-    auto run() -> int;
-};
-} // namespace filc
+auto exec_output(const char *cmd) -> std::string;
 
-#endif // FILC_FILC_H
+#define run_with_args_and_input(args, input)                                   \
+    exec_output("echo '" input "' | " FILC_BIN " " args)
+
+#define run_with_args(args) run_with_args_and_input(args, "")
+
+#endif // FILC_TEST_TOOLS_H

@@ -23,4 +23,13 @@
  */
 #include "filc/filc.h"
 
-auto hello_world() -> std::string { return "Hello World!"; }
+using namespace filc;
+
+auto FilCompiler::parseArguments(int argc, char **argv) -> FilCompiler & {
+    return *this;
+}
+
+auto FilCompiler::run() -> int {
+    // Nothing to do now
+    return 0;
+}

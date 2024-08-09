@@ -21,16 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_FILC_H
-#define FILC_FILC_H
+#include "test_tools.h"
+#include <memory>
+#include <stdexcept>
 
-namespace filc {
-class FilCompiler final {
-  public:
-    auto parseArguments(int argc, char **argv) -> FilCompiler &;
+auto exec_output(const char *cmd) -> std::string {
+    char buffer[128];
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
 
-    auto run() -> int;
-};
-} // namespace filc
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
 
-#endif // FILC_FILC_H
+    while (fgets(buffer, sizeof buffer, pipe.get()) != nullptr) {
+        result += buffer;
+    }
+
+    return result;
+}

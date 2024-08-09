@@ -24,4 +24,7 @@
 #include <filc/filc.h>
 #include <gtest/gtest.h>
 
-TEST(filc, hello_world) { ASSERT_STREQ("Hello World!", hello_world().c_str()); }
+TEST(FilCompiler, run) {
+    auto filc = filc::FilCompiler();
+    ASSERT_EQ(0, filc.run());
+}

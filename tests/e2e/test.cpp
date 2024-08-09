@@ -21,16 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_FILC_H
-#define FILC_FILC_H
+#include "test_tools.h"
+#include <gtest/gtest.h>
 
-namespace filc {
-class FilCompiler final {
-  public:
-    auto parseArguments(int argc, char **argv) -> FilCompiler &;
-
-    auto run() -> int;
-};
-} // namespace filc
-
-#endif // FILC_FILC_H
+TEST(filc, run) {
+    auto out = run_with_args();
+    ASSERT_STREQ("", out.c_str());
+}
