@@ -21,21 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "filc/filc.h"
-#include <iostream>
+#include "test_tools.h"
 
-using namespace filc;
-
-auto FilCompiler::run(int argc, char **argv) -> int {
-    _options_parser.parse(argc, argv);
-    if (_options_parser.isHelp()) {
-        _options_parser.showHelp(std::cout);
-        return 0;
-    }
-    if (_options_parser.isVersion()) {
-        OptionsParser::showVersion(std::cout);
-        return 0;
+auto toStringArray(const std::vector<std::string> &data)
+    -> std::vector<char *> {
+    std::vector<char *> strings;
+    strings.reserve(data.size());
+    for (auto &item : data) {
+        strings.push_back(const_cast<char *>(item.c_str()));
     }
 
-    return 1;
+    return strings;
 }

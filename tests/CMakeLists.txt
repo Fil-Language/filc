@@ -1,6 +1,7 @@
 FetchContent_Declare(
         googletest
-        URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG f8d7d77c06936315286eb55f8de22cd23c188571 #v1.14.0
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
@@ -40,7 +41,7 @@ message(E2E_TEST_FILES=${E2E_TEST_FILES})
 add_executable(e2e-tests ${E2E_TEST_FILES})
 add_dependencies(e2e-tests filc)
 target_include_directories(e2e-tests PUBLIC e2e)
-target_compile_definitions(e2e-tests PUBLIC FILC_BIN="$<TARGET_FILE:filc>")
+target_compile_definitions(e2e-tests PUBLIC FILC_BIN="$<TARGET_FILE:filc>" FILC_VERSION="${FILC_VERSION}")
 
 target_link_libraries(e2e-tests PRIVATE gtest_main gtest gmock)
 

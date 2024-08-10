@@ -32,6 +32,14 @@ else ()
     target_compile_options(additional_config INTERFACE -O3)
 endif ()
 
+FetchContent_Declare(
+        cxxopts
+        GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
+        GIT_TAG 3bf268481da8208d171d8908e6491459de3651d7 #v3.2.0
+)
+FetchContent_MakeAvailable(cxxopts)
+message(cxxopts="${cxxopts_SOURCE_DIR}/include")
+
 file(GLOB_RECURSE SRC_FILES
         "${PROJECT_SOURCE_DIR}/src/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/**/*.cpp"
@@ -39,12 +47,12 @@ file(GLOB_RECURSE SRC_FILES
 message(SRC_FILES=${SRC_FILES})
 
 add_library(filc_lib ${SRC_FILES})
-target_link_libraries(filc_lib PRIVATE additional_config)
+target_link_libraries(filc_lib PRIVATE additional_config cxxopts::cxxopts)
 
-target_include_directories(filc_lib PUBLIC "${PROJECT_SOURCE_DIR}/include")
+target_include_directories(filc_lib PUBLIC "${PROJECT_SOURCE_DIR}/include" "${cxxopts_SOURCE_DIR}/include")
 
 target_compile_definitions(filc_lib
-        PUBLIC FILC_VERSION=${FILC_VERSION}
+        PUBLIC FILC_VERSION="${FILC_VERSION}"
 )
 
 target_compile_options(filc_lib PUBLIC -Wall)

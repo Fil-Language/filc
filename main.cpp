@@ -25,5 +25,5 @@
 
 auto main(int argc, char **argv) -> int {
     auto compiler = filc::FilCompiler();
-    return compiler.parseArguments(argc, argv).run();
+    return compiler.run(argc, argv);
 }

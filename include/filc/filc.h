@@ -24,12 +24,15 @@
 #ifndef FILC_FILC_H
 #define FILC_FILC_H
 
+#include "filc/options/OptionsParser.h"
+
 namespace filc {
 class FilCompiler final {
   public:
-    auto parseArguments(int argc, char **argv) -> FilCompiler &;
+    auto run(int argc, char **argv) -> int;
 
-    auto run() -> int;
+  private:
+    OptionsParser _options_parser;
 };
 } // namespace filc
 

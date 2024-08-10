@@ -7,10 +7,12 @@ pkgs.mkShell {
   name = "filc-dev-env";
 
   packages = [
+    pkgs.git
     pkgs.cmake
     pkgs.ninja
     pkgs.lcov
     pkgs.libclang
+    pkgs.valgrind
   ];
 
   shellHook = ''
