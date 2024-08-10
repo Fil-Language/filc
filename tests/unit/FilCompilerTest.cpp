@@ -21,21 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "filc/filc.h"
-#include <iostream>
+#include "test_tools.h"
+#include <filc/filc.h>
+#include <gtest/gtest.h>
 
-using namespace filc;
+TEST(FilCompiler, run) {
+    auto compiler = filc::FilCompiler();
 
-auto FilCompiler::run(int argc, char **argv) -> int {
-    _options_parser.parse(argc, argv);
-    if (_options_parser.isHelp()) {
-        _options_parser.showHelp(std::cout);
-        return 0;
-    }
-    if (_options_parser.isVersion()) {
-        OptionsParser::showVersion(std::cout);
-        return 0;
-    }
+    SCOPED_TRACE("No argument");
+    ASSERT_EQ(0, compiler.run(1, toStringArray({"filc"}).data()));
 
-    return 1;
+    SCOPED_TRACE("--help");
+    ASSERT_EQ(0, compiler.run(2, toStringArray({"filc", "--help"}).data()));
+
+    SCOPED_TRACE("--version");
+    ASSERT_EQ(0, compiler.run(2, toStringArray({"filc", "--version"}).data()));
 }

@@ -21,21 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "filc/filc.h"
-#include <iostream>
+#include "test_tools.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-using namespace filc;
+/**
+ * This test file aims to check memory usage of filc
+ * We should try to reduce memory leak to the minimum (all memory used must be
+ * freed)
+ */
 
-auto FilCompiler::run(int argc, char **argv) -> int {
-    _options_parser.parse(argc, argv);
-    if (_options_parser.isHelp()) {
-        _options_parser.showHelp(std::cout);
-        return 0;
-    }
-    if (_options_parser.isVersion()) {
-        OptionsParser::showVersion(std::cout);
-        return 0;
-    }
+#ifdef __linux__
 
-    return 1;
+#define VALGRIND_OUTPUT_ZERO "in use at exit: 0 bytes in 0 blocks"
+
+#define valgrind_run(args) exec_output("valgrind " FILC_BIN " " args " 2>&1");
+
+TEST(Memory, filc) {
+    const auto result = valgrind_run();
+    ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
 }
+
+TEST(Memory, filc_help) {
+    const auto result = valgrind_run("--help");
+    ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
+}
+
+TEST(Memory, filc_version) {
+    const auto result = valgrind_run("--version");
+    ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
+}
+
+#endif

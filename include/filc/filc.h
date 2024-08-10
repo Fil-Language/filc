@@ -24,8 +24,16 @@
 #ifndef FILC_FILC_H
 #define FILC_FILC_H
 
-#include <string>
+#include "filc/options/OptionsParser.h"
 
-auto hello_world() -> std::string;
+namespace filc {
+class FilCompiler final {
+  public:
+    auto run(int argc, char **argv) -> int;
+
+  private:
+    OptionsParser _options_parser;
+};
+} // namespace filc
 
 #endif // FILC_FILC_H

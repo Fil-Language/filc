@@ -21,21 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "filc/filc.h"
-#include <iostream>
+#ifndef FILC_TEST_TOOLS_H
+#define FILC_TEST_TOOLS_H
 
-using namespace filc;
+#include <string>
 
-auto FilCompiler::run(int argc, char **argv) -> int {
-    _options_parser.parse(argc, argv);
-    if (_options_parser.isHelp()) {
-        _options_parser.showHelp(std::cout);
-        return 0;
-    }
-    if (_options_parser.isVersion()) {
-        OptionsParser::showVersion(std::cout);
-        return 0;
-    }
+auto exec_output(const char *cmd) -> std::string;
 
-    return 1;
-}
+#define run_with_args(args) exec_output(FILC_BIN " " args)
+
+#endif // FILC_TEST_TOOLS_H
