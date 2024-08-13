@@ -27,10 +27,16 @@ function(filc_package)
     set(CPACK_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR}")
     set(CPACK_PACKAGE_CONTACT "Kevin Traini <kevin@ktraini.com>")
     set(CPACK_PACKAGE_DESCRIPTION "Fil compiler")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Fil compiler")
     set(CPACK_PACKAGE_HOMEPAGE_URL "https://fil.ktraini.com")
     set(CPACK_PACKAGE_CHECKSUM "SHA512")
     set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
     set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.md")
+
+    # RPM package
+    set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+    set(CPACK_RPM_PACKAGE_GROUP "Development/Tools")
+    set(CPACK_RPM_PACKAGE_DESCRIPTION "Fil compiler")
 
     include(CPack)
 endfunction()
