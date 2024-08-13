@@ -8,9 +8,23 @@ on:
   pull_request:
 
 jobs:
+  metadata:
+    name: Get metadata
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+
+      - name: Version
+        id: version
+        run: |
+          echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+
   binary:
     name: Build binary
     runs-on: ubuntu-22.04
+    needs: metadata
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
 
@@ -22,12 +36,13 @@ jobs:
       - name: Archive binary
         uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
-          name: filc
+          name: filc-${{ needs.metadata.outputs.version }}
           path: ${{ github.workspace }}/filc
 
   debian:
     name: Build debian package
     runs-on: ubuntu-22.04
+    needs: metadata
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
 
@@ -39,7 +54,7 @@ jobs:
       - name: Archive package
         uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
-          name: Debian package
+          name: filc-${{ needs.metadata.outputs.version }}_deb
           path: |
             ${{ github.workspace }}/build_deb_package/*.deb
             ${{ github.workspace }}/build_deb_package/*.deb.sha512
