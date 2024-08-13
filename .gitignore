@@ -4,8 +4,6 @@ build
 filc
 !include/*
 !src/*
-build_release
-build_e2e_tests
-build_unit_tests
+build_*
 coverage.info
 .idea
