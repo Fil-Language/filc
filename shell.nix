@@ -13,6 +13,8 @@ pkgs.mkShell {
     pkgs.lcov
     pkgs.libclang
     pkgs.valgrind
+    pkgs.dpkg
+    pkgs.rpm
   ];
 
   shellHook = ''

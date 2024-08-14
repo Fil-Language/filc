@@ -6,11 +6,31 @@ on:
       - master
       - dev-workflow
   pull_request:
+  release:
+    types: [published]
 
 jobs:
-  build:
-    name: Build
+  metadata:
+    name: Get metadata
     runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+
+      - name: Version
+        id: version
+        run: |
+          if ${{ startsWith(github.ref, 'refs/tags/') }}; then
+            echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=devel" >> "$GITHUB_OUTPUT"
+          fi
+
+  binary:
+    name: Build binary
+    runs-on: ubuntu-22.04
+    needs: metadata
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
 
@@ -22,5 +42,65 @@ jobs:
       - name: Archive binary
         uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
         with:
-          name: filc
+          name: filc-${{ needs.metadata.outputs.version }}
           path: ${{ github.workspace }}/filc
+
+  debian:
+    name: Build debian package
+    runs-on: ubuntu-22.04
+    needs: metadata
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
+      - name: Build
+        run: nix-shell --run '${{ github.workspace }}/bin/build_deb_package.sh'
+
+      - name: Archive package
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
+        with:
+          name: filc-${{ needs.metadata.outputs.version }}_deb
+          path: |
+            ${{ github.workspace }}/build_deb_package/*.deb
+            ${{ github.workspace }}/build_deb_package/*.deb.sha512
+      - name: Upload to release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: xresloader/upload-to-github-release@26f7cc1d7d924dc9b6d5008808be8278b7177811  # v1.6.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: |
+            ${{ github.workspace }}/build_deb_package/*.deb
+            ${{ github.workspace }}/build_deb_package/*.deb.sha512
+          tags: true
+
+  rpm:
+    name: Build rpm package
+    runs-on: ubuntu-22.04
+    needs: metadata
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 #v4.1.7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
+      - name: Build
+        run: nix-shell --run '${{ github.workspace }}/bin/build_rpm_package.sh'
+
+      - name: Archive package
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
+        with:
+          name: filc-${{ needs.metadata.outputs.version }}_rpm
+          path: |
+            ${{ github.workspace }}/build_rpm_package/*.rpm
+            ${{ github.workspace }}/build_rpm_package/*.rpm.sha512
+      - name: Upload to release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: xresloader/upload-to-github-release@26f7cc1d7d924dc9b6d5008808be8278b7177811  # v1.6.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: |
+            ${{ github.workspace }}/build_rpm_package/*.rpm
+            ${{ github.workspace }}/build_rpm_package/*.rpm.sha512
+          tags: true

@@ -76,3 +76,12 @@ if (BUILD_TESTING AND (PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR))
     enable_testing()
     add_subdirectory(tests)
 endif ()
+
+# _.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-.
+# Packaging
+
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    install(TARGETS filc)
+    include(packaging)
+    filc_package()
+endif ()
