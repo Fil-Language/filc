@@ -22,14 +22,17 @@
  * SOFTWARE.
  */
 #include "filc/filc.h"
+#include "filc/grammar/program/Program.h"
 #include <filesystem>
 #include <iostream>
 #include <utility>
 
 using namespace filc;
 
-FilCompiler::FilCompiler(OptionsParser options_parser, ParserProxy parser_proxy)
-    : _options_parser(std::move(options_parser)), _parser_proxy(parser_proxy) {}
+FilCompiler::FilCompiler(OptionsParser options_parser,
+                         DumpVisitor ast_dump_visitor)
+    : _options_parser(std::move(options_parser)),
+      _ast_dump_visitor(std::move(ast_dump_visitor)) {}
 
 auto FilCompiler::run(int argc, char **argv) -> int {
     _options_parser.parse(argc, argv);
@@ -48,8 +51,15 @@ auto FilCompiler::run(int argc, char **argv) -> int {
         std::cerr << "File " << filename << " not found";
         return 1;
     }
+    const auto dump_option = _options_parser.getDump();
 
     const auto program = ParserProxy::parse(filename);
+    if (dump_option == "ast" || dump_option == "all") {
+        program->accept(&_ast_dump_visitor);
+        if (dump_option == "ast") {
+            return 0;
+        }
+    }
 
     return 1;
 }

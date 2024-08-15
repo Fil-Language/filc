@@ -25,15 +25,18 @@
 #define FILC_PROGRAM_H
 
 #include "filc/grammar/ast.h"
+#include "filc/grammar/Visitor.h"
 #include <vector>
 #include <memory>
 
 namespace filc {
-class Program {
+class Program final: public Visitable {
   public:
     explicit Program(const std::vector<std::shared_ptr<Expression>> &expressions);
 
     [[nodiscard]] auto getExpressions() const -> const std::vector<std::shared_ptr<Expression>> &;
+
+    auto accept(Visitor *visitor) -> void override;
 
   private:
     std::vector<std::shared_ptr<Expression>> _expressions;

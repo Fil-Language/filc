@@ -43,3 +43,7 @@ auto CharacterLiteral::stringToChar(const std::string &snippet) -> char {
     throw std::logic_error("Lexer found a character that is not regular: " +
                            snippet);
 }
+
+auto CharacterLiteral::accept(Visitor *visitor) -> void {
+    visitor->visitCharacterLiteral(this);
+}

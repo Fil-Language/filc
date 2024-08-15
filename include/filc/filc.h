@@ -26,17 +26,18 @@
 
 #include "filc/grammar/Parser.h"
 #include "filc/options/OptionsParser.h"
+#include "filc/grammar/DumpVisitor.h"
 
 namespace filc {
 class FilCompiler final {
   public:
-    FilCompiler(OptionsParser options_parser, ParserProxy parser_proxy);
+    FilCompiler(OptionsParser options_parser, DumpVisitor ast_dump_visitor);
 
     auto run(int argc, char **argv) -> int;
 
   private:
     OptionsParser _options_parser;
-    ParserProxy _parser_proxy;
+    DumpVisitor _ast_dump_visitor;
 };
 } // namespace filc
 

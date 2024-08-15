@@ -25,6 +25,6 @@
 
 auto main(int argc, char **argv) -> int {
     auto compiler =
-        filc::FilCompiler(filc::OptionsParser(), filc::ParserProxy());
+        filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout));
     return compiler.run(argc, argv);
 }

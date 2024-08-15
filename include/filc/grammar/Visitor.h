@@ -21,21 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#ifndef FILC_VISITOR_H
+#define FILC_VISITOR_H
 
 #include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
-#include <string>
 
 namespace filc {
-class Expression: public Visitable {
+class Visitor {
   public:
-    virtual ~Expression() = default;
+    virtual ~Visitor() = default;
+
+    virtual auto visitProgram(Program *program) -> void = 0;
+
+    virtual auto visitBooleanLiteral(BooleanLiteral *literal) -> void = 0;
+
+    virtual auto visitIntegerLiteral(IntegerLiteral *literal) -> void = 0;
+
+    virtual auto visitFloatLiteral(FloatLiteral *literal) -> void = 0;
+
+    virtual auto visitCharacterLiteral(CharacterLiteral *literal) -> void = 0;
+
+    virtual auto visitStringLiteral(StringLiteral *literal) -> void = 0;
 
   protected:
-    Expression();
+    Visitor() = default;
+};
+
+class Visitable {
+  public:
+    virtual auto accept(Visitor *visitor) -> void = 0;
 };
 }
 
-#endif // FILC_EXPRESSION_H
+#endif // FILC_VISITOR_H

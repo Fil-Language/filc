@@ -24,10 +24,11 @@
 #include "test_tools.h"
 #include <filc/filc.h>
 #include <gtest/gtest.h>
+#include <sstream>
 
 TEST(FilCompiler, run) {
     auto compiler =
-        filc::FilCompiler(filc::OptionsParser(), filc::ParserProxy());
+        filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout));
 
     SCOPED_TRACE("No argument");
     ASSERT_EQ(0, compiler.run(1, toStringArray({"filc"}).data()));
@@ -37,4 +38,20 @@ TEST(FilCompiler, run) {
 
     SCOPED_TRACE("--version");
     ASSERT_EQ(0, compiler.run(2, toStringArray({"filc", "--version"}).data()));
+}
+
+TEST(FilCompiler, dumpAST) {
+    std::stringstream ss;
+    auto compiler =
+        filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(ss));
+    ASSERT_EQ(0, compiler.run(3, toStringArray({"filc", "--dump=ast",
+                                                FIXTURES_PATH "/sample.fil"})
+                                     .data()));
+    std::string result(std::istreambuf_iterator<char>(ss), {});
+    ASSERT_STREQ("=== Begin AST dump ===\n"
+                 "[Boolean:true]\n"
+                 "[Float:6.82]\n"
+                 "[String:\"hEllO\"]\n"
+                 "=== End AST dump ===\n",
+                 result.c_str());
 }

@@ -21,21 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#ifndef FILC_DUMPVISITOR_H
+#define FILC_DUMPVISITOR_H
 
-#include "filc/grammar/ast.h"
 #include "filc/grammar/Visitor.h"
-#include <string>
+#include <iostream>
 
 namespace filc {
-class Expression: public Visitable {
+class DumpVisitor final: public Visitor {
   public:
-    virtual ~Expression() = default;
+    explicit DumpVisitor(std::ostream &out);
 
-  protected:
-    Expression();
+    auto visitProgram(Program *program) -> void override;
+
+    auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
+
+    auto visitIntegerLiteral(IntegerLiteral *literal) -> void override;
+
+    auto visitFloatLiteral(FloatLiteral *literal) -> void override;
+
+    auto visitCharacterLiteral(CharacterLiteral *literal) -> void override;
+
+    auto visitStringLiteral(StringLiteral *literal) -> void override;
+
+  private:
+    std::ostream &_out;
 };
 }
 
-#endif // FILC_EXPRESSION_H
+#endif // FILC_DUMPVISITOR_H

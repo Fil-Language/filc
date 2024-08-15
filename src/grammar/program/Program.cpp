@@ -32,3 +32,7 @@ auto Program::getExpressions() const
     -> const std::vector<std::shared_ptr<Expression>> & {
     return _expressions;
 }
+
+auto Program::accept(filc::Visitor *visitor) -> void {
+    visitor->visitProgram(this);
+}

@@ -45,16 +45,22 @@ class Literal: public Expression {
 class BooleanLiteral final: public Literal<bool> {
   public:
     explicit BooleanLiteral(bool value);
+
+    auto accept(Visitor *visitor) -> void override;
 };
 
 class IntegerLiteral final: public Literal<int> {
   public:
     explicit IntegerLiteral(int value);
+
+    auto accept(Visitor *visitor) -> void override;
 };
 
 class FloatLiteral final: public Literal<double> {
   public:
     explicit FloatLiteral(double value);
+
+    auto accept(Visitor *visitor) -> void override;
 };
 
 class CharacterLiteral final: public Literal<char> {
@@ -62,11 +68,15 @@ class CharacterLiteral final: public Literal<char> {
     explicit CharacterLiteral(char value);
 
     static auto stringToChar(const std::string &snippet) -> char;
+
+    auto accept(Visitor *visitor) -> void override;
 };
 
 class StringLiteral final: public Literal<std::string> {
   public:
     explicit StringLiteral(const std::string &value);
+
+    auto accept(Visitor *visitor) -> void override;
 };
 }
 
