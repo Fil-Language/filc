@@ -21,50 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_OPTIONSPARSER_H
-#define FILC_OPTIONSPARSER_H
+#include "test_tools.h"
+#include <filc/grammar/literal/Literal.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include <cxxopts.hpp>
-#include <exception>
-#include <string>
-#include <ostream>
+using namespace ::testing;
 
-namespace filc {
-class OptionsParser final {
-  public:
-    OptionsParser();
-
-    auto parse(int argc, char **argv) -> void;
-
-    [[nodiscard]] auto isHelp() -> bool;
-
-    auto showHelp(std::ostream &out) -> void;
-
-    [[nodiscard]] auto isVersion() -> bool;
-
-    static auto showVersion(std::ostream &out) -> void;
-
-    [[nodiscard]] auto getFile() -> std::string;
-
-    [[nodiscard]] auto getDump() -> std::string;
-
-  private:
-    cxxopts::Options _options;
-    bool _parsed;
-    cxxopts::ParseResult _result;
-};
-
-class OptionsParserException : public std::exception {
-  public:
-    explicit OptionsParserException(std::string message);
-
-    ~OptionsParserException() _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override = default;
-
-    [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
-
-  private:
-    std::string _message;
-};
+TEST(IntegerLiteral, parsing) {
+    const auto program = parseString("73");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    auto literal =
+        std::dynamic_pointer_cast<filc::IntegerLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal);
+    ASSERT_EQ(73, literal->getValue());
 }
-
-#endif // FILC_OPTIONSPARSER_H

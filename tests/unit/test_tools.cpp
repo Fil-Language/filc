@@ -22,6 +22,9 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+#include "FilLexer.h"
+#include "FilParser.h"
+#include "antlr4-runtime.h"
 
 auto toStringArray(const std::vector<std::string> &data)
     -> std::vector<char *> {
@@ -32,4 +35,15 @@ auto toStringArray(const std::vector<std::string> &data)
     }
 
     return strings;
+}
+
+auto parseString(const std::string &content) -> std::shared_ptr<filc::Program> {
+    antlr4::ANTLRInputStream input(content);
+    filc::FilLexer lexer(&input);
+    antlr4::CommonTokenStream tokens(&lexer);
+    tokens.fill();
+
+    filc::FilParser parser(&tokens);
+
+    return parser.program()->tree;
 }

@@ -24,9 +24,13 @@
 #ifndef FILC_TEST_TOOLS_H
 #define FILC_TEST_TOOLS_H
 
+#include <filc/grammar/program/Program.h>
 #include <string>
 #include <vector>
+#include <memory>
 
 auto toStringArray(const std::vector<std::string> &data) -> std::vector<char *>;
+
+auto parseString(const std::string &content) -> std::shared_ptr<filc::Program>;
 
 #endif // FILC_TEST_TOOLS_H

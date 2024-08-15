@@ -21,50 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_OPTIONSPARSER_H
-#define FILC_OPTIONSPARSER_H
+#include <filc/grammar/Parser.h>
+#include <filc/grammar/literal/Literal.h>
+#include <filc/grammar/program/Program.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include <cxxopts.hpp>
-#include <exception>
-#include <string>
-#include <ostream>
+using namespace ::testing;
 
-namespace filc {
-class OptionsParser final {
-  public:
-    OptionsParser();
+TEST(Parser, parseSample) {
+    const auto program = filc::ParserProxy::parse(FIXTURES_PATH "/sample.fil");
+    ASSERT_THAT(program->getExpressions(), SizeIs(3));
 
-    auto parse(int argc, char **argv) -> void;
+    SCOPED_TRACE("Expression 1");
+    {
+        const auto expression = std::dynamic_pointer_cast<filc::BooleanLiteral>(
+            program->getExpressions()[0]);
+        ASSERT_NE(nullptr, expression);
+        ASSERT_TRUE(expression->getValue());
+    }
 
-    [[nodiscard]] auto isHelp() -> bool;
+    SCOPED_TRACE("Expression 2");
+    {
+        const auto expression = std::dynamic_pointer_cast<filc::FloatLiteral>(
+            program->getExpressions()[1]);
+        ASSERT_NE(nullptr, expression);
+        ASSERT_EQ(6.82, expression->getValue());
+    }
 
-    auto showHelp(std::ostream &out) -> void;
-
-    [[nodiscard]] auto isVersion() -> bool;
-
-    static auto showVersion(std::ostream &out) -> void;
-
-    [[nodiscard]] auto getFile() -> std::string;
-
-    [[nodiscard]] auto getDump() -> std::string;
-
-  private:
-    cxxopts::Options _options;
-    bool _parsed;
-    cxxopts::ParseResult _result;
-};
-
-class OptionsParserException : public std::exception {
-  public:
-    explicit OptionsParserException(std::string message);
-
-    ~OptionsParserException() _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override = default;
-
-    [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
-
-  private:
-    std::string _message;
-};
+    SCOPED_TRACE("Expression 3");
+    {
+        const auto expression = std::dynamic_pointer_cast<filc::StringLiteral>(
+            program->getExpressions()[2]);
+        ASSERT_NE(nullptr, expression);
+        ASSERT_STREQ("hEllO", expression->getValue().c_str());
+    }
 }
-
-#endif // FILC_OPTIONSPARSER_H

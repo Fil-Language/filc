@@ -21,50 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_OPTIONSPARSER_H
-#define FILC_OPTIONSPARSER_H
+#include "filc/grammar/program/Program.h"
 
-#include <cxxopts.hpp>
-#include <exception>
-#include <string>
-#include <ostream>
+using namespace filc;
 
-namespace filc {
-class OptionsParser final {
-  public:
-    OptionsParser();
+Program::Program(const std::vector<std::shared_ptr<Expression>> &expressions)
+    : _expressions(expressions) {}
 
-    auto parse(int argc, char **argv) -> void;
-
-    [[nodiscard]] auto isHelp() -> bool;
-
-    auto showHelp(std::ostream &out) -> void;
-
-    [[nodiscard]] auto isVersion() -> bool;
-
-    static auto showVersion(std::ostream &out) -> void;
-
-    [[nodiscard]] auto getFile() -> std::string;
-
-    [[nodiscard]] auto getDump() -> std::string;
-
-  private:
-    cxxopts::Options _options;
-    bool _parsed;
-    cxxopts::ParseResult _result;
-};
-
-class OptionsParserException : public std::exception {
-  public:
-    explicit OptionsParserException(std::string message);
-
-    ~OptionsParserException() _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override = default;
-
-    [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
-
-  private:
-    std::string _message;
-};
+auto Program::getExpressions() const
+    -> const std::vector<std::shared_ptr<Expression>> & {
+    return _expressions;
 }
-
-#endif // FILC_OPTIONSPARSER_H

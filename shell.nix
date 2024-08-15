@@ -15,6 +15,7 @@ pkgs.mkShell {
     pkgs.valgrind
     pkgs.dpkg
     pkgs.rpm
+    pkgs.temurin-jre-bin-18
   ];
 
   shellHook = ''

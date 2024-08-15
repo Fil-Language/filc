@@ -10,8 +10,8 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -21,10 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <filc/filc.h>
+lexer grammar FilLexer;
 
-auto main(int argc, char **argv) -> int {
-    auto compiler =
-        filc::FilCompiler(filc::OptionsParser(), filc::ParserProxy());
-    return compiler.run(argc, argv);
-}
+VAR: 'var';
+VAL: 'val';
+TRUE: 'true';
+FALSE: 'false';
+
+fragment UPPERCASE: [A-Z];
+fragment LOWERCASE: [a-z];
+fragment LETTER: UPPERCASE | LOWERCASE;
+fragment ESCAPE_CHAR: '\\' ['"?abfnrtv\\];
+fragment STRING_CHAR: ~('"' | '\\' | '\n') | ESCAPE_CHAR;
+STRING: '"' (STRING_CHAR | '\\"' | '\\\\')* '"';
+CHARACTER: '\'' (~('\'' | '\\' | '\n') | ESCAPE_CHAR) '\'';
+
+fragment DIGIT: [0-9];
+fragment SIGN: '+'|'-';
+INTEGER: SIGN? DIGIT+;
+FLOAT: SIGN? DIGIT* '.' DIGIT+;
+
+IDENTIFIER: (LETTER | '_') (LETTER | DIGIT | '_')*;
+
+SEPARATOR: (' ' | '\t' | '\r' | '\n' | EOF) -> skip;

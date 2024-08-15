@@ -17,10 +17,15 @@ file(GLOB_RECURSE UNIT_TEST_FILES
         "${PROJECT_SOURCE_DIR}/tests/unit/*.h"
         "${PROJECT_SOURCE_DIR}/tests/unit/**/*.h"
 )
-message(UNIT_TEST_FILES=${UNIT_TEST_FILES})
+message(DEBUG UNIT_TEST_FILES=${UNIT_TEST_FILES})
 
 add_executable(unit-tests ${UNIT_TEST_FILES})
-target_include_directories(unit-tests PUBLIC "${PROJECT_SOURCE_DIR}/tests/unit")
+target_include_directories(unit-tests PUBLIC
+        "${PROJECT_SOURCE_DIR}/tests/unit"
+        ${ANTLR4_INCLUDE_DIRS}
+        ${ANTLR_Lexer_OUTPUT_DIR}
+        ${ANTLR_Parser_OUTPUT_DIR})
+target_compile_definitions(unit-tests PUBLIC FIXTURES_PATH="${PROJECT_SOURCE_DIR}/tests/unit/Fixtures")
 
 target_link_libraries(unit-tests PRIVATE gtest_main gtest gmock filc_lib)
 
@@ -36,7 +41,7 @@ file(GLOB_RECURSE E2E_TEST_FILES
         "${PROJECT_SOURCE_DIR}/tests/e2e/*.h"
         "${PROJECT_SOURCE_DIR}/tests/e2e/**/*.h"
 )
-message(E2E_TEST_FILES=${E2E_TEST_FILES})
+message(DEBUG E2E_TEST_FILES=${E2E_TEST_FILES})
 
 add_executable(e2e-tests ${E2E_TEST_FILES})
 add_dependencies(e2e-tests filc)

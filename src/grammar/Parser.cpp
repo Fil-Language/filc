@@ -21,50 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_OPTIONSPARSER_H
-#define FILC_OPTIONSPARSER_H
+#include "filc/grammar/Parser.h"
+#include "FilLexer.h"
+#include "FilParser.h"
+#include "antlr4-runtime.h"
 
-#include <cxxopts.hpp>
-#include <exception>
-#include <string>
-#include <ostream>
+using namespace filc;
 
-namespace filc {
-class OptionsParser final {
-  public:
-    OptionsParser();
+auto ParserProxy::parse(const std::string &filename)
+    -> std::shared_ptr<Program> {
+    antlr4::ANTLRFileStream input;
+    input.loadFromFile(filename);
+    FilLexer lexer(&input);
+    antlr4::CommonTokenStream tokens(&lexer);
+    tokens.fill();
 
-    auto parse(int argc, char **argv) -> void;
+    FilParser parser(&tokens);
 
-    [[nodiscard]] auto isHelp() -> bool;
-
-    auto showHelp(std::ostream &out) -> void;
-
-    [[nodiscard]] auto isVersion() -> bool;
-
-    static auto showVersion(std::ostream &out) -> void;
-
-    [[nodiscard]] auto getFile() -> std::string;
-
-    [[nodiscard]] auto getDump() -> std::string;
-
-  private:
-    cxxopts::Options _options;
-    bool _parsed;
-    cxxopts::ParseResult _result;
-};
-
-class OptionsParserException : public std::exception {
-  public:
-    explicit OptionsParserException(std::string message);
-
-    ~OptionsParserException() _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override = default;
-
-    [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
-
-  private:
-    std::string _message;
-};
+    return parser.program()->tree;
 }
-
-#endif // FILC_OPTIONSPARSER_H

@@ -8,3 +8,4 @@ build_*
 !bin/*
 coverage.info
 .idea
+FilLexer.tokens

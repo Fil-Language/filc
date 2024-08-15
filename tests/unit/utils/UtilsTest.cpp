@@ -21,50 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_OPTIONSPARSER_H
-#define FILC_OPTIONSPARSER_H
+#include <filc/utils/utils.h>
+#include <gtest/gtest.h>
 
-#include <cxxopts.hpp>
-#include <exception>
-#include <string>
-#include <ostream>
+TEST(Utils, parseEscapedChar) {
+    SCOPED_TRACE("Normal cases");
+    ASSERT_EQ('\'', filc::parseEscapedChar("\\'"));
+    ASSERT_EQ('\"', filc::parseEscapedChar("\\\""));
+    ASSERT_EQ('\?', filc::parseEscapedChar("\\?"));
+    ASSERT_EQ('\a', filc::parseEscapedChar("\\a"));
+    ASSERT_EQ('\b', filc::parseEscapedChar("\\b"));
+    ASSERT_EQ('\f', filc::parseEscapedChar("\\f"));
+    ASSERT_EQ('\n', filc::parseEscapedChar("\\n"));
+    ASSERT_EQ('\r', filc::parseEscapedChar("\\r"));
+    ASSERT_EQ('\t', filc::parseEscapedChar("\\t"));
+    ASSERT_EQ('\v', filc::parseEscapedChar("\\v"));
+    ASSERT_EQ('\\', filc::parseEscapedChar("\\\\"));
 
-namespace filc {
-class OptionsParser final {
-  public:
-    OptionsParser();
-
-    auto parse(int argc, char **argv) -> void;
-
-    [[nodiscard]] auto isHelp() -> bool;
-
-    auto showHelp(std::ostream &out) -> void;
-
-    [[nodiscard]] auto isVersion() -> bool;
-
-    static auto showVersion(std::ostream &out) -> void;
-
-    [[nodiscard]] auto getFile() -> std::string;
-
-    [[nodiscard]] auto getDump() -> std::string;
-
-  private:
-    cxxopts::Options _options;
-    bool _parsed;
-    cxxopts::ParseResult _result;
-};
-
-class OptionsParserException : public std::exception {
-  public:
-    explicit OptionsParserException(std::string message);
-
-    ~OptionsParserException() _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override = default;
-
-    [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
-
-  private:
-    std::string _message;
-};
+    SCOPED_TRACE("Edge cases");
+    ASSERT_EQ('a', filc::parseEscapedChar("ab"));
+    ASSERT_EQ('\\', filc::parseEscapedChar("\\q"));
 }
-
-#endif // FILC_OPTIONSPARSER_H

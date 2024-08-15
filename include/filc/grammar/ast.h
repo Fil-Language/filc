@@ -21,50 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_OPTIONSPARSER_H
-#define FILC_OPTIONSPARSER_H
-
-#include <cxxopts.hpp>
-#include <exception>
-#include <string>
-#include <ostream>
+#ifndef FILC_AST_H
+#define FILC_AST_H
 
 namespace filc {
-class OptionsParser final {
-  public:
-    OptionsParser();
+class Program;
 
-    auto parse(int argc, char **argv) -> void;
+class Expression;
 
-    [[nodiscard]] auto isHelp() -> bool;
+template<typename T>
+class Literal;
 
-    auto showHelp(std::ostream &out) -> void;
+class BooleanLiteral;
 
-    [[nodiscard]] auto isVersion() -> bool;
+class IntegerLiteral;
 
-    static auto showVersion(std::ostream &out) -> void;
+class FloatLiteral;
 
-    [[nodiscard]] auto getFile() -> std::string;
+class CharacterLiteral;
 
-    [[nodiscard]] auto getDump() -> std::string;
-
-  private:
-    cxxopts::Options _options;
-    bool _parsed;
-    cxxopts::ParseResult _result;
-};
-
-class OptionsParserException : public std::exception {
-  public:
-    explicit OptionsParserException(std::string message);
-
-    ~OptionsParserException() _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override = default;
-
-    [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
-
-  private:
-    std::string _message;
-};
+class StringLiteral;
 }
 
-#endif // FILC_OPTIONSPARSER_H
+#endif // FILC_AST_H

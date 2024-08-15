@@ -22,19 +22,37 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
-#include <filc/filc.h>
+#include <filc/grammar/literal/Literal.h>
+#include <filc/utils/utils.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-TEST(FilCompiler, run) {
-    auto compiler =
-        filc::FilCompiler(filc::OptionsParser(), filc::ParserProxy());
+using namespace ::testing;
 
-    SCOPED_TRACE("No argument");
-    ASSERT_EQ(0, compiler.run(1, toStringArray({"filc"}).data()));
+TEST(CharacterLiteral, parsing) {
+    SCOPED_TRACE("Simple char");
+    {
+        const auto program = parseString("'a'");
+        const auto expressions = program->getExpressions();
+        ASSERT_THAT(expressions, SizeIs(1));
+        auto literal =
+            std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);
+        ASSERT_NE(nullptr, literal);
+        ASSERT_EQ('a', literal->getValue());
+    }
 
-    SCOPED_TRACE("--help");
-    ASSERT_EQ(0, compiler.run(2, toStringArray({"filc", "--help"}).data()));
-
-    SCOPED_TRACE("--version");
-    ASSERT_EQ(0, compiler.run(2, toStringArray({"filc", "--version"}).data()));
+    SCOPED_TRACE("Escaped char");
+    for (const std::string content :
+         {"'\\''", "'\\\"'", "'\\?'", "'\\a'", "'\\b'", "'\\f'", "'\\n'",
+          "'\\r'", "'\\t'", "'\\v'", "'\\\\'"}) {
+        const auto program = parseString(content);
+        const auto expressions = program->getExpressions();
+        ASSERT_THAT(expressions, SizeIs(1));
+        auto literal =
+            std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);
+        ASSERT_NE(nullptr, literal);
+        ASSERT_EQ(
+            filc::parseEscapedChar(content.substr(1, content.length() - 2)),
+            literal->getValue());
+    }
 }

@@ -30,9 +30,19 @@ using namespace filc;
 
 OptionsParser::OptionsParser()
     : _options("filc", "Fil compiler"), _parsed(false) {
+    _options.add_options()("file", "Path of file to compile.",
+                           cxxopts::value<std::string>()->default_value(""));
+    _options.parse_positional("file");
+    _options.positional_help("file");
+
     _options.add_options("Troubleshooting")(
-        "help", "Show this help message and exit")("version",
-                                                   "Show version and exit");
+        "help", "Show this help message and exit.")("version",
+                                                    "Show version and exit.");
+
+    _options.add_options("Debug")(
+        "dump", "Dump some data. One of these values: ast.",
+        cxxopts::value<std::string>()->implicit_value("all")->default_value(
+            "none"));
 }
 
 auto OptionsParser::parse(int argc, char **argv) -> void {
@@ -62,6 +72,29 @@ auto OptionsParser::isVersion() -> bool {
     }
 
     return _result.count("version") > 0;
+}
+
+auto OptionsParser::getFile() -> std::string {
+    if (!_parsed) {
+        throw OptionsParserException(NOT_PARSED_MESSAGE);
+    }
+
+    return _result["file"].as<std::string>();
+}
+
+auto OptionsParser::getDump() -> std::string {
+    if (!_parsed) {
+        throw OptionsParserException(NOT_PARSED_MESSAGE);
+    }
+
+    auto dump = _result["dump"].as<std::string>();
+    auto valid = {"none", "all", "ast"};
+    if (std::find(valid.begin(), valid.end(), dump) == valid.end()) {
+        throw OptionsParserException("Dump option value '" + dump +
+                                     "' is not a valid value");
+    }
+
+    return dump;
 }
 
 auto OptionsParser::showVersion(std::ostream &out) -> void {

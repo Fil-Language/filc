@@ -21,50 +21,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_OPTIONSPARSER_H
-#define FILC_OPTIONSPARSER_H
+#ifndef FILC_LITERAL_H
+#define FILC_LITERAL_H
 
-#include <cxxopts.hpp>
-#include <exception>
-#include <string>
-#include <ostream>
+#include "filc/grammar/ast.h"
+#include "filc/grammar/expression/Expression.h"
 
 namespace filc {
-class OptionsParser final {
+template<typename T>
+class Literal: public Expression {
   public:
-    OptionsParser();
-
-    auto parse(int argc, char **argv) -> void;
-
-    [[nodiscard]] auto isHelp() -> bool;
-
-    auto showHelp(std::ostream &out) -> void;
-
-    [[nodiscard]] auto isVersion() -> bool;
-
-    static auto showVersion(std::ostream &out) -> void;
-
-    [[nodiscard]] auto getFile() -> std::string;
-
-    [[nodiscard]] auto getDump() -> std::string;
+    [[nodiscard]] auto getValue() const -> T {
+        return _value;
+    }
 
   private:
-    cxxopts::Options _options;
-    bool _parsed;
-    cxxopts::ParseResult _result;
+    T _value;
+
+  protected:
+    explicit Literal(T value): _value(value) {};
 };
 
-class OptionsParserException : public std::exception {
+class BooleanLiteral final: public Literal<bool> {
   public:
-    explicit OptionsParserException(std::string message);
+    explicit BooleanLiteral(bool value);
+};
 
-    ~OptionsParserException() _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override = default;
+class IntegerLiteral final: public Literal<int> {
+  public:
+    explicit IntegerLiteral(int value);
+};
 
-    [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
+class FloatLiteral final: public Literal<double> {
+  public:
+    explicit FloatLiteral(double value);
+};
 
-  private:
-    std::string _message;
+class CharacterLiteral final: public Literal<char> {
+  public:
+    explicit CharacterLiteral(char value);
+
+    static auto stringToChar(const std::string &snippet) -> char;
+};
+
+class StringLiteral final: public Literal<std::string> {
+  public:
+    explicit StringLiteral(const std::string &value);
 };
 }
 
-#endif // FILC_OPTIONSPARSER_H
+#endif // FILC_LITERAL_H

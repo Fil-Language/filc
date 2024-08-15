@@ -22,9 +22,14 @@
  * SOFTWARE.
  */
 #include "filc/filc.h"
+#include <filesystem>
 #include <iostream>
+#include <utility>
 
 using namespace filc;
+
+FilCompiler::FilCompiler(OptionsParser options_parser, ParserProxy parser_proxy)
+    : _options_parser(std::move(options_parser)), _parser_proxy(parser_proxy) {}
 
 auto FilCompiler::run(int argc, char **argv) -> int {
     _options_parser.parse(argc, argv);
@@ -36,6 +41,15 @@ auto FilCompiler::run(int argc, char **argv) -> int {
         OptionsParser::showVersion(std::cout);
         return 0;
     }
+
+    const auto filename = _options_parser.getFile();
+    if (!std::filesystem::exists(filename) ||
+        !std::filesystem::is_regular_file(filename)) {
+        std::cerr << "File " << filename << " not found";
+        return 1;
+    }
+
+    const auto program = ParserProxy::parse(filename);
 
     return 1;
 }
