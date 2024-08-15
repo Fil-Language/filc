@@ -44,3 +44,5 @@ FLOAT: SIGN? DIGIT* '.' DIGIT+;
 IDENTIFIER: (LETTER | '_') (LETTER | DIGIT | '_')*;
 
 SEPARATOR: (' ' | '\t' | '\r' | '\n' | EOF) -> skip;
+COMMENT: '//' (~('\n' | '\r'))* -> skip;
+COMMENT_BLOCK: '/*' .*? '*/' -> skip;
