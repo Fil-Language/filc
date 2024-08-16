@@ -9,6 +9,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   metadata:
     name: Get metadata
@@ -70,9 +74,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: |
-            ${{ github.workspace }}/build_deb_package/*.deb
-            ${{ github.workspace }}/build_deb_package/*.deb.sha512
+          file: "${{ github.workspace }}/build_deb_package/*.deb;${{ github.workspace }}/build_deb_package/*.deb.sha512"
           tags: true
 
   rpm:
@@ -100,7 +102,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: |
-            ${{ github.workspace }}/build_rpm_package/*.rpm
-            ${{ github.workspace }}/build_rpm_package/*.rpm.sha512
+          file: "${{ github.workspace }}/build_rpm_package/*.rpm;${{ github.workspace }}/build_rpm_package/*.rpm.sha512"
           tags: true
