@@ -23,6 +23,7 @@
  */
 #include "test_tools.h"
 #include <filc/grammar/DumpVisitor.h>
+#include <filc/grammar/literal/Literal.h>
 #include <fstream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -33,7 +34,7 @@ using namespace ::testing;
 auto dumpProgram(const std::string &content) -> std::vector<std::string> {
     const auto program = parseString(content);
     std::stringstream ss;
-    auto visitor = filc::DumpVisitor(ss);
+    filc::DumpVisitor visitor(ss);
     program->accept(&visitor);
     std::string dump(std::istreambuf_iterator<char>(ss), {});
 
@@ -101,4 +102,24 @@ TEST(DumpVisitor, Literal) {
         ASSERT_STREQ("[String:\"\"]", dump[0].c_str());
         ASSERT_STREQ("[String:\"Hello\"]", dump[1].c_str());
     }
+}
+
+TEST(DumpVisitor, visitCharacterLiteral) {
+    for (const auto c: {'\'', '\"', '\?', '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\'}) {
+        SCOPED_TRACE("Check for special " + std::string(c, 1));
+        std::stringstream ss;
+        filc::DumpVisitor visitor(ss);
+        filc::CharacterLiteral literal(c);
+        visitor.visitCharacterLiteral(&literal);
+        std::string dump(std::istreambuf_iterator<char>(ss), {});
+        ASSERT_THAT(dump, StartsWith("[Character:'\\"));
+    }
+
+    SCOPED_TRACE("Check for classic case");
+    std::stringstream ss;
+    filc::DumpVisitor visitor(ss);
+    filc::CharacterLiteral literal('a');
+    visitor.visitCharacterLiteral(&literal);
+    std::string dump(std::istreambuf_iterator<char>(ss), {});
+    ASSERT_STREQ("[Character:'a']", dump.c_str());
 }
