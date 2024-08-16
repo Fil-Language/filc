@@ -71,8 +71,7 @@ TEST(OptionsParser, getFile) {
     ASSERT_STREQ("", options_parser.getFile().c_str());
 
     SCOPED_TRACE("--file test.txt");
-    options_parser.parse(3,
-                         toStringArray({"filc", "--file", "test.txt"}).data());
+    options_parser.parse(3, toStringArray({"filc", "--file", "test.txt"}).data());
     ASSERT_STREQ("test.txt", options_parser.getFile().c_str());
 
     SCOPED_TRACE("--file=test2.txt");

@@ -25,6 +25,7 @@
 #include "filc/grammar/expression/Expression.h"
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
+#include "filc/grammar/variable/Variable.h"
 
 using namespace filc;
 
@@ -47,9 +48,7 @@ auto DumpVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
     _out << "[Integer:" << literal->getValue() << "]";
 }
 
-auto DumpVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
-    _out << "[Float:" << literal->getValue() << "]";
-}
+auto DumpVisitor::visitFloatLiteral(FloatLiteral *literal) -> void { _out << "[Float:" << literal->getValue() << "]"; }
 
 auto DumpVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void {
     auto value = literal->getValue();
@@ -97,4 +96,8 @@ auto DumpVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void {
 
 auto DumpVisitor::visitStringLiteral(StringLiteral *literal) -> void {
     _out << "[String:\"" << literal->getValue() << "\"]";
+}
+
+auto DumpVisitor::visitVariableDeclaration(VariableDeclaration *literal) -> void {
+    _out << "[Variable:" << (literal->isConstant() ? "val" : "var") << ":" << literal->getName() << "]";
 }

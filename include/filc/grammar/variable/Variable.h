@@ -21,18 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "test_tools.h"
-#include <filc/grammar/literal/Literal.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#ifndef FILC_VARIABLE_H
+#define FILC_VARIABLE_H
 
-using namespace ::testing;
+#include "filc/grammar/ast.h"
+#include "filc/grammar/expression/Expression.h"
+#include <string>
 
-TEST(IntegerLiteral, parsing) {
-    const auto program = parseString("73");
-    const auto expressions = program->getExpressions();
-    ASSERT_THAT(expressions, SizeIs(1));
-    auto literal = std::dynamic_pointer_cast<filc::IntegerLiteral>(expressions[0]);
-    ASSERT_NE(nullptr, literal);
-    ASSERT_EQ(73, literal->getValue());
+namespace filc {
+class VariableDeclaration: public Expression {
+  public:
+    VariableDeclaration(bool is_constant, std::string name);
+
+    [[nodiscard]] auto isConstant() const -> bool;
+
+    [[nodiscard]] auto getName() const -> std::string;
+
+    auto accept(Visitor *visitor) -> void override;
+
+  private:
+    bool _constant;
+    std::string _name;
+};
 }
+
+#endif // FILC_VARIABLE_H

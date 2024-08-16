@@ -41,6 +41,8 @@ class FloatLiteral;
 class CharacterLiteral;
 
 class StringLiteral;
+
+class VariableDeclaration;
 }
 
 #endif // FILC_AST_H

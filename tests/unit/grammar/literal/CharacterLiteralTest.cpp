@@ -35,24 +35,19 @@ TEST(CharacterLiteral, parsing) {
         const auto program = parseString("'a'");
         const auto expressions = program->getExpressions();
         ASSERT_THAT(expressions, SizeIs(1));
-        auto literal =
-            std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);
+        auto literal = std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);
         ASSERT_NE(nullptr, literal);
         ASSERT_EQ('a', literal->getValue());
     }
 
     SCOPED_TRACE("Escaped char");
     for (const std::string content :
-         {"'\\''", "'\\\"'", "'\\?'", "'\\a'", "'\\b'", "'\\f'", "'\\n'",
-          "'\\r'", "'\\t'", "'\\v'", "'\\\\'"}) {
+         {"'\\''", "'\\\"'", "'\\?'", "'\\a'", "'\\b'", "'\\f'", "'\\n'", "'\\r'", "'\\t'", "'\\v'", "'\\\\'"}) {
         const auto program = parseString(content);
         const auto expressions = program->getExpressions();
         ASSERT_THAT(expressions, SizeIs(1));
-        auto literal =
-            std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);
+        auto literal = std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);
         ASSERT_NE(nullptr, literal);
-        ASSERT_EQ(
-            filc::parseEscapedChar(content.substr(1, content.length() - 2)),
-            literal->getValue());
+        ASSERT_EQ(filc::parseEscapedChar(content.substr(1, content.length() - 2)), literal->getValue());
     }
 }

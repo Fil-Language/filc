@@ -31,6 +31,7 @@ options {
 #include "filc/grammar/expression/Expression.h"
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
+#include "filc/grammar/variable/Variable.h"
 #include <memory>
 #include <vector>
 }
@@ -49,6 +50,9 @@ program returns[std::shared_ptr<filc::Program> tree]
 expression returns[std::shared_ptr<filc::Expression> tree]
     : l=literal {
         $tree = $l.tree;
+    }
+    | v=variable_declaration {
+        $tree = $v.tree;
     };
 
 literal returns[std::shared_ptr<filc::Expression> tree]
@@ -80,3 +84,14 @@ number returns[std::shared_ptr<filc::Expression> tree]
     | f=FLOAT {
         $tree = std::make_shared<filc::FloatLiteral>(stod($f.text));
     };
+
+variable_declaration returns[std::shared_ptr<filc::VariableDeclaration> tree]
+@init {
+    bool is_constant = true;
+}
+@after {
+    $tree = std::make_shared<filc::VariableDeclaration>(is_constant, $name.text);
+}
+    : (VAL | VAR {
+        is_constant = false;
+    }) name=IDENTIFIER;

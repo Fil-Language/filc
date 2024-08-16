@@ -28,21 +28,16 @@ using namespace filc;
 
 #define NOT_PARSED_MESSAGE "You should call parse() before getting results"
 
-OptionsParser::OptionsParser()
-    : _options("filc", "Fil compiler"), _parsed(false) {
-    _options.add_options()("file", "Path of file to compile.",
-                           cxxopts::value<std::string>()->default_value(""));
+OptionsParser::OptionsParser() : _options("filc", "Fil compiler"), _parsed(false) {
+    _options.add_options()("file", "Path of file to compile.", cxxopts::value<std::string>()->default_value(""));
     _options.parse_positional("file");
     _options.positional_help("file");
 
-    _options.add_options("Troubleshooting")(
-        "help", "Show this help message and exit.")("version",
-                                                    "Show version and exit.");
+    _options.add_options("Troubleshooting")("help", "Show this help message and exit.")("version",
+                                                                                        "Show version and exit.");
 
-    _options.add_options("Debug")(
-        "dump", "Dump some data. One of these values: ast.",
-        cxxopts::value<std::string>()->implicit_value("all")->default_value(
-            "none"));
+    _options.add_options("Debug")("dump", "Dump some data. One of these values: ast.",
+                                  cxxopts::value<std::string>()->implicit_value("all")->default_value("none"));
 }
 
 auto OptionsParser::parse(int argc, char **argv) -> void {
@@ -62,9 +57,7 @@ auto OptionsParser::isHelp() -> bool {
     return _result.count("help") > 0 || _result.arguments().empty();
 }
 
-auto OptionsParser::showHelp(std::ostream &out) -> void {
-    out << _options.help() << "\n";
-}
+auto OptionsParser::showHelp(std::ostream &out) -> void { out << _options.help() << "\n"; }
 
 auto OptionsParser::isVersion() -> bool {
     if (!_parsed) {
@@ -90,20 +83,14 @@ auto OptionsParser::getDump() -> std::string {
     auto dump = _result["dump"].as<std::string>();
     auto valid = {"none", "all", "ast"};
     if (std::find(valid.begin(), valid.end(), dump) == valid.end()) {
-        throw OptionsParserException("Dump option value '" + dump +
-                                     "' is not a valid value");
+        throw OptionsParserException("Dump option value '" + dump + "' is not a valid value");
     }
 
     return dump;
 }
 
-auto OptionsParser::showVersion(std::ostream &out) -> void {
-    out << FILC_VERSION << "\n";
-}
+auto OptionsParser::showVersion(std::ostream &out) -> void { out << FILC_VERSION << "\n"; }
 
-OptionsParserException::OptionsParserException(std::string message)
-    : _message(std::move(message)) {}
+OptionsParserException::OptionsParserException(std::string message) : _message(std::move(message)) {}
 
-const char *OptionsParserException::what() const noexcept {
-    return _message.c_str();
-}
+const char *OptionsParserException::what() const noexcept { return _message.c_str(); }

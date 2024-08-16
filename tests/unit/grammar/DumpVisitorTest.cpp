@@ -50,8 +50,7 @@ auto dumpProgram(const std::string &content) -> std::vector<std::string> {
     }
 
     if (result.size() < 2) {
-        throw std::logic_error(
-            "Size of dump lines is lesser than 2, it's not normal!");
+        throw std::logic_error("Size of dump lines is lesser than 2, it's not normal!");
     }
 
     return {result.begin() + 1, result.end() - 1};
@@ -63,8 +62,7 @@ TEST(DumpVisitor, dump) {
     auto visitor = filc::DumpVisitor(ss);
     program->accept(&visitor);
     std::string result(std::istreambuf_iterator<char>(ss), {});
-    ASSERT_STREQ("=== Begin AST dump ===\n=== End AST dump ===\n",
-                 result.c_str());
+    ASSERT_STREQ("=== Begin AST dump ===\n=== End AST dump ===\n", result.c_str());
 }
 
 TEST(DumpVisitor, Literal) {
@@ -105,7 +103,7 @@ TEST(DumpVisitor, Literal) {
 }
 
 TEST(DumpVisitor, visitCharacterLiteral) {
-    for (const auto c: {'\'', '\"', '\?', '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\'}) {
+    for (const auto c : {'\'', '\"', '\?', '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\'}) {
         SCOPED_TRACE("Check for special " + std::string(c, 1));
         std::stringstream ss;
         filc::DumpVisitor visitor(ss);

@@ -6,3 +6,4 @@ Language: Cpp
 Standard: c++17
 UseTab: Never
 InsertNewlineAtEOF: true
+ColumnLimit: 120

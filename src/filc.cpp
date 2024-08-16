@@ -29,10 +29,8 @@
 
 using namespace filc;
 
-FilCompiler::FilCompiler(OptionsParser options_parser,
-                         DumpVisitor ast_dump_visitor)
-    : _options_parser(std::move(options_parser)),
-      _ast_dump_visitor(std::move(ast_dump_visitor)) {}
+FilCompiler::FilCompiler(OptionsParser options_parser, DumpVisitor ast_dump_visitor)
+    : _options_parser(std::move(options_parser)), _ast_dump_visitor(std::move(ast_dump_visitor)) {}
 
 auto FilCompiler::run(int argc, char **argv) -> int {
     _options_parser.parse(argc, argv);
@@ -46,8 +44,7 @@ auto FilCompiler::run(int argc, char **argv) -> int {
     }
 
     const auto filename = _options_parser.getFile();
-    if (!std::filesystem::exists(filename) ||
-        !std::filesystem::is_regular_file(filename)) {
+    if (!std::filesystem::exists(filename) || !std::filesystem::is_regular_file(filename)) {
         std::cerr << "File " << filename << " not found";
         return 1;
     }

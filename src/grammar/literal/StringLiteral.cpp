@@ -25,9 +25,6 @@
 
 using namespace filc;
 
-StringLiteral::StringLiteral(const std::string &value)
-    : Literal(value.substr(1, value.length() - 2)) {}
+StringLiteral::StringLiteral(const std::string &value) : Literal(value.substr(1, value.length() - 2)) {}
 
-auto StringLiteral::accept(Visitor *visitor) -> void {
-    visitor->visitStringLiteral(this);
-}
+auto StringLiteral::accept(Visitor *visitor) -> void { visitor->visitStringLiteral(this); }

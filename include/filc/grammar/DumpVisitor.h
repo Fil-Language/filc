@@ -44,6 +44,8 @@ class DumpVisitor final: public Visitor {
 
     auto visitStringLiteral(StringLiteral *literal) -> void override;
 
+    auto visitVariableDeclaration(VariableDeclaration *literal) -> void override;
+
   private:
     std::ostream &_out;
 };

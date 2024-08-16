@@ -34,8 +34,7 @@ TEST(StringLiteral, parsing) {
         const auto program = parseString("\"\"");
         const auto expressions = program->getExpressions();
         ASSERT_THAT(expressions, SizeIs(1));
-        auto literal =
-            std::dynamic_pointer_cast<filc::StringLiteral>(expressions[0]);
+        auto literal = std::dynamic_pointer_cast<filc::StringLiteral>(expressions[0]);
         ASSERT_NE(nullptr, literal);
         ASSERT_STREQ("", literal->getValue().c_str());
     }
@@ -45,8 +44,7 @@ TEST(StringLiteral, parsing) {
         const auto program = parseString("\"Hello World!\"");
         const auto expressions = program->getExpressions();
         ASSERT_THAT(expressions, SizeIs(1));
-        auto literal =
-            std::dynamic_pointer_cast<filc::StringLiteral>(expressions[0]);
+        auto literal = std::dynamic_pointer_cast<filc::StringLiteral>(expressions[0]);
         ASSERT_NE(nullptr, literal);
         ASSERT_STREQ("Hello World!", literal->getValue().c_str());
     }

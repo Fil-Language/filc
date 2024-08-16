@@ -27,8 +27,7 @@
 #include <sstream>
 
 TEST(FilCompiler, run) {
-    auto compiler =
-        filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout));
+    auto compiler = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout));
 
     SCOPED_TRACE("No argument");
     ASSERT_EQ(0, compiler.run(1, toStringArray({"filc"}).data()));
@@ -42,16 +41,15 @@ TEST(FilCompiler, run) {
 
 TEST(FilCompiler, dumpAST) {
     std::stringstream ss;
-    auto compiler =
-        filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(ss));
-    ASSERT_EQ(0, compiler.run(3, toStringArray({"filc", "--dump=ast",
-                                                FIXTURES_PATH "/sample.fil"})
-                                     .data()));
+    auto compiler = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(ss));
+    ASSERT_EQ(0, compiler.run(3, toStringArray({"filc", "--dump=ast", FIXTURES_PATH "/sample.fil"}).data()));
     std::string result(std::istreambuf_iterator<char>(ss), {});
     ASSERT_STREQ("=== Begin AST dump ===\n"
                  "[Boolean:true]\n"
                  "[Float:6.82]\n"
                  "[String:\"hEllO\"]\n"
+                 "[Variable:val:some_constant_73]\n"
+                 "[Variable:var:myAweSOMeVariable]\n"
                  "=== End AST dump ===\n",
                  result.c_str());
 }

@@ -34,8 +34,7 @@ TEST(BooleanLiteral, parsing) {
         const auto program = parseString("true");
         const auto expressions = program->getExpressions();
         ASSERT_THAT(expressions, SizeIs(1));
-        auto literal =
-            std::dynamic_pointer_cast<filc::BooleanLiteral>(expressions[0]);
+        auto literal = std::dynamic_pointer_cast<filc::BooleanLiteral>(expressions[0]);
         ASSERT_NE(nullptr, literal);
         ASSERT_TRUE(literal->getValue());
     }
@@ -45,8 +44,7 @@ TEST(BooleanLiteral, parsing) {
         const auto program = parseString("false");
         const auto expressions = program->getExpressions();
         ASSERT_THAT(expressions, SizeIs(1));
-        auto literal =
-            std::dynamic_pointer_cast<filc::BooleanLiteral>(expressions[0]);
+        auto literal = std::dynamic_pointer_cast<filc::BooleanLiteral>(expressions[0]);
         ASSERT_NE(nullptr, literal);
         ASSERT_FALSE(literal->getValue());
     }

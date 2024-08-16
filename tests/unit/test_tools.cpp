@@ -26,8 +26,7 @@
 #include "FilParser.h"
 #include "antlr4-runtime.h"
 
-auto toStringArray(const std::vector<std::string> &data)
-    -> std::vector<char *> {
+auto toStringArray(const std::vector<std::string> &data) -> std::vector<char *> {
     std::vector<char *> strings;
     strings.reserve(data.size());
     for (auto &item : data) {

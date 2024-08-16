@@ -28,8 +28,7 @@
 
 using namespace filc;
 
-auto ParserProxy::parse(const std::string &filename)
-    -> std::shared_ptr<Program> {
+auto ParserProxy::parse(const std::string &filename) -> std::shared_ptr<Program> {
     antlr4::ANTLRFileStream input;
     input.loadFromFile(filename);
     FilLexer lexer(&input);

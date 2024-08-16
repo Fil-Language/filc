@@ -22,17 +22,32 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
-#include <filc/grammar/literal/Literal.h>
+#include <filc/grammar/variable/Variable.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 using namespace ::testing;
 
-TEST(IntegerLiteral, parsing) {
-    const auto program = parseString("73");
-    const auto expressions = program->getExpressions();
-    ASSERT_THAT(expressions, SizeIs(1));
-    auto literal = std::dynamic_pointer_cast<filc::IntegerLiteral>(expressions[0]);
-    ASSERT_NE(nullptr, literal);
-    ASSERT_EQ(73, literal->getValue());
+TEST(VariableDeclaration, parsing) {
+    {
+        SCOPED_TRACE("Simple constant");
+        const auto program = parseString("val foo");
+        const auto expressions = program->getExpressions();
+        ASSERT_THAT(expressions, SizeIs(1));
+        auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);
+        ASSERT_NE(nullptr, variable);
+        ASSERT_TRUE(variable->isConstant());
+        ASSERT_STREQ("foo", variable->getName().c_str());
+    }
+
+    {
+        SCOPED_TRACE("Simple variable");
+        const auto program = parseString("var bar");
+        const auto expressions = program->getExpressions();
+        ASSERT_THAT(expressions, SizeIs(1));
+        auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);
+        ASSERT_NE(nullptr, variable);
+        ASSERT_FALSE(variable->isConstant());
+        ASSERT_STREQ("bar", variable->getName().c_str());
+    }
 }
