@@ -9,3 +9,4 @@ build_*
 coverage.info
 .idea
 FilLexer.tokens
+node_modules

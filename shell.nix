@@ -16,9 +16,11 @@ pkgs.mkShell {
     pkgs.dpkg
     pkgs.rpm
     pkgs.temurin-jre-bin-18
+    pkgs.nodePackages.pnpm
   ];
 
   shellHook = ''
+    pnpm install;
     echo -e "\n\033[34mWelcome to \033[1mfilc\033[0m\033[34m dev environment\033[0m\n"
   '';
 }

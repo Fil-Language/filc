@@ -1,0 +1,9 @@
+{
+	"devDependencies": {
+		"husky": "^9.1.4"
+	},
+	"scripts": {
+		"prepare": "husky",
+        "lint": "./bin/run_clang-format.sh"
+	}
+}
