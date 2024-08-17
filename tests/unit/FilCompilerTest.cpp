@@ -49,7 +49,11 @@ TEST(FilCompiler, dumpAST) {
                  "[Float:6.82]\n"
                  "[String:\"hEllO\"]\n"
                  "[Variable:val:some_constant_73]\n"
-                 "[Variable:var:myAweSOMeVariable]\n"
+                 "[Variable:var:myAweSOMeVariable:i32]\n"
+                 "[Variable:val:anotherConst]\n"
+                 "\t[Integer:73]\n"
+                 "[Variable:var:my_var:char]\n"
+                 "\t[Character:'c']\n"
                  "=== End AST dump ===\n",
                  result.c_str());
 }

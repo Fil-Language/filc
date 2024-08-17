@@ -10,4 +10,6 @@ It can hold multiple lines
 
 // === Variable declaration ===
 val some_constant_73
-var myAweSOMeVariable
+var myAweSOMeVariable: i32
+val anotherConst = 73
+var my_var: char = 'c'

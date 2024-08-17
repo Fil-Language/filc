@@ -28,6 +28,9 @@ VAL: 'val';
 TRUE: 'true';
 FALSE: 'false';
 
+EQ: '=';
+COLON: ':';
+
 fragment UPPERCASE: [A-Z];
 fragment LOWERCASE: [a-z];
 fragment LETTER: UPPERCASE | LOWERCASE;

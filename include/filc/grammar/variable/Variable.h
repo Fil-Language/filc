@@ -27,21 +27,28 @@
 #include "filc/grammar/ast.h"
 #include "filc/grammar/expression/Expression.h"
 #include <string>
+#include <memory>
 
 namespace filc {
 class VariableDeclaration: public Expression {
   public:
-    VariableDeclaration(bool is_constant, std::string name);
+    VariableDeclaration(bool is_constant, std::string name, std::string _type_name, std::shared_ptr<Expression> value);
 
     [[nodiscard]] auto isConstant() const -> bool;
 
     [[nodiscard]] auto getName() const -> std::string;
+
+    [[nodiscard]] auto getTypeName() const -> std::string;
+
+    [[nodiscard]] auto getValue() const -> std::shared_ptr<Expression>;
 
     auto accept(Visitor *visitor) -> void override;
 
   private:
     bool _constant;
     std::string _name;
+    std::string _type_name;
+    std::shared_ptr<Expression> _value;
 };
 }
 

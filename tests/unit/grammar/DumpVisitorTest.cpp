@@ -104,7 +104,7 @@ TEST(DumpVisitor, Literal) {
 
 TEST(DumpVisitor, visitCharacterLiteral) {
     for (const auto c : {'\'', '\"', '\?', '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\'}) {
-        SCOPED_TRACE("Check for special " + std::string(c, 1));
+        SCOPED_TRACE("Check for special " + std::string(1, c));
         std::stringstream ss;
         filc::DumpVisitor visitor(ss);
         filc::CharacterLiteral literal(c);
@@ -119,5 +119,44 @@ TEST(DumpVisitor, visitCharacterLiteral) {
     filc::CharacterLiteral literal('a');
     visitor.visitCharacterLiteral(&literal);
     std::string dump(std::istreambuf_iterator<char>(ss), {});
-    ASSERT_STREQ("[Character:'a']", dump.c_str());
+    ASSERT_STREQ("[Character:'a']\n", dump.c_str());
+}
+
+TEST(DumpVisitor, VariableDeclaration) {
+    {
+        SCOPED_TRACE("Simple constant");
+        const auto dump = dumpProgram("val foo");
+        ASSERT_THAT(dump, SizeIs(1));
+        ASSERT_STREQ("[Variable:val:foo]", dump[0].c_str());
+    }
+
+    {
+        SCOPED_TRACE("Simple variable");
+        const auto dump = dumpProgram("var bar");
+        ASSERT_THAT(dump, SizeIs(1));
+        ASSERT_STREQ("[Variable:var:bar]", dump[0].c_str());
+    }
+
+    {
+        SCOPED_TRACE("With type");
+        const auto dump = dumpProgram("var bar: i32");
+        ASSERT_THAT(dump, SizeIs(1));
+        ASSERT_STREQ("[Variable:var:bar:i32]", dump[0].c_str());
+    }
+
+    {
+        SCOPED_TRACE("With value");
+        const auto dump = dumpProgram("val foo = 'a'");
+        ASSERT_THAT(dump, SizeIs(2));
+        ASSERT_STREQ("[Variable:val:foo]", dump[0].c_str());
+        ASSERT_STREQ("\t[Character:'a']", dump[1].c_str());
+    }
+
+    {
+        SCOPED_TRACE("With type and value");
+        const auto dump = dumpProgram("val foo: f64 = 3.1415");
+        ASSERT_THAT(dump, SizeIs(2));
+        ASSERT_STREQ("[Variable:val:foo:f64]", dump[0].c_str());
+        ASSERT_STREQ("\t[Float:3.1415]", dump[1].c_str());
+    }
 }

@@ -32,42 +32,66 @@ using namespace ::testing;
 
 TEST(Parser, parseSample) {
     const auto program = filc::ParserProxy::parse(FIXTURES_PATH "/sample.fil");
-    ASSERT_THAT(program->getExpressions(), SizeIs(5));
+    ASSERT_THAT(program->getExpressions(), SizeIs(7));
 
     {
-        SCOPED_TRACE("Expression 1");
+        SCOPED_TRACE("true");
         const auto expression = std::dynamic_pointer_cast<filc::BooleanLiteral>(program->getExpressions()[0]);
         ASSERT_NE(nullptr, expression);
         ASSERT_TRUE(expression->getValue());
     }
 
     {
-        SCOPED_TRACE("Expression 2");
+        SCOPED_TRACE("6.82");
         const auto expression = std::dynamic_pointer_cast<filc::FloatLiteral>(program->getExpressions()[1]);
         ASSERT_NE(nullptr, expression);
         ASSERT_EQ(6.82, expression->getValue());
     }
 
     {
-        SCOPED_TRACE("Expression 3");
+        SCOPED_TRACE("\"hEllO\"");
         const auto expression = std::dynamic_pointer_cast<filc::StringLiteral>(program->getExpressions()[2]);
         ASSERT_NE(nullptr, expression);
         ASSERT_STREQ("hEllO", expression->getValue().c_str());
     }
 
     {
-        SCOPED_TRACE("Expression 4");
+        SCOPED_TRACE("val some_constant_73");
         const auto expression = std::dynamic_pointer_cast<filc::VariableDeclaration>(program->getExpressions()[3]);
         ASSERT_NE(nullptr, expression);
         ASSERT_TRUE(expression->isConstant());
         ASSERT_STREQ("some_constant_73", expression->getName().c_str());
+        ASSERT_STREQ("", expression->getTypeName().c_str());
+        ASSERT_EQ(nullptr, expression->getValue());
     }
 
     {
-        SCOPED_TRACE("Expression 5");
+        SCOPED_TRACE("var myAweSOMeVariable: i32");
         const auto expression = std::dynamic_pointer_cast<filc::VariableDeclaration>(program->getExpressions()[4]);
         ASSERT_NE(nullptr, expression);
         ASSERT_FALSE(expression->isConstant());
         ASSERT_STREQ("myAweSOMeVariable", expression->getName().c_str());
+        ASSERT_STREQ("i32", expression->getTypeName().c_str());
+        ASSERT_EQ(nullptr, expression->getValue());
+    }
+
+    {
+        SCOPED_TRACE("val anotherConst = 73");
+        const auto expression = std::dynamic_pointer_cast<filc::VariableDeclaration>(program->getExpressions()[5]);
+        ASSERT_NE(nullptr, expression);
+        ASSERT_TRUE(expression->isConstant());
+        ASSERT_STREQ("anotherConst", expression->getName().c_str());
+        ASSERT_STREQ("", expression->getTypeName().c_str());
+        ASSERT_EQ(73, std::dynamic_pointer_cast<filc::IntegerLiteral>(expression->getValue())->getValue());
+    }
+
+    {
+        SCOPED_TRACE("var my_var: char = 'c'");
+        const auto expression = std::dynamic_pointer_cast<filc::VariableDeclaration>(program->getExpressions()[6]);
+        ASSERT_NE(nullptr, expression);
+        ASSERT_FALSE(expression->isConstant());
+        ASSERT_STREQ("my_var", expression->getName().c_str());
+        ASSERT_STREQ("char", expression->getTypeName().c_str());
+        ASSERT_EQ('c', std::dynamic_pointer_cast<filc::CharacterLiteral>(expression->getValue())->getValue());
     }
 }

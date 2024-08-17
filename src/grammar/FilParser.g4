@@ -88,10 +88,16 @@ number returns[std::shared_ptr<filc::Expression> tree]
 variable_declaration returns[std::shared_ptr<filc::VariableDeclaration> tree]
 @init {
     bool is_constant = true;
+    std::string type;
+    std::shared_ptr<filc::Expression> value = nullptr;
 }
 @after {
-    $tree = std::make_shared<filc::VariableDeclaration>(is_constant, $name.text);
+    $tree = std::make_shared<filc::VariableDeclaration>(is_constant, $name.text, type, value);
 }
     : (VAL | VAR {
         is_constant = false;
-    }) name=IDENTIFIER;
+    }) name=IDENTIFIER (COLON type=IDENTIFIER {
+        type = $type.text;
+    })? (EQ value=expression {
+        value = $value.tree;
+    })?;

@@ -43,7 +43,7 @@ class Visitor {
 
     virtual auto visitStringLiteral(StringLiteral *literal) -> void = 0;
 
-    virtual auto visitVariableDeclaration(VariableDeclaration *literal) -> void = 0;
+    virtual auto visitVariableDeclaration(VariableDeclaration *variable) -> void = 0;
 
   protected:
     Visitor() = default;

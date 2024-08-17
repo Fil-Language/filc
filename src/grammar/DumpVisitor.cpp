@@ -29,26 +29,30 @@
 
 using namespace filc;
 
-DumpVisitor::DumpVisitor(std::ostream &out) : _out(out) {}
+DumpVisitor::DumpVisitor(std::ostream &out) : _out(out), _indent_level(0) {}
 
 auto DumpVisitor::visitProgram(Program *program) -> void {
     _out << "=== Begin AST dump ===\n";
     for (const auto &expression : program->getExpressions()) {
         expression->accept(this);
-        _out << "\n";
     }
     _out << "=== End AST dump ===\n";
 }
 
 auto DumpVisitor::visitBooleanLiteral(BooleanLiteral *literal) -> void {
-    _out << "[Boolean:" << (literal->getValue() ? "true" : "false") << "]";
+    printIdent();
+    _out << "[Boolean:" << (literal->getValue() ? "true" : "false") << "]\n";
 }
 
 auto DumpVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
-    _out << "[Integer:" << literal->getValue() << "]";
+    printIdent();
+    _out << "[Integer:" << literal->getValue() << "]\n";
 }
 
-auto DumpVisitor::visitFloatLiteral(FloatLiteral *literal) -> void { _out << "[Float:" << literal->getValue() << "]"; }
+auto DumpVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
+    printIdent();
+    _out << "[Float:" << literal->getValue() << "]\n";
+}
 
 auto DumpVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void {
     auto value = literal->getValue();
@@ -91,13 +95,30 @@ auto DumpVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void {
         to_print = value;
     }
 
-    _out << "[Character:'" << to_print << "']";
+    printIdent();
+    _out << "[Character:'" << to_print << "']\n";
 }
 
 auto DumpVisitor::visitStringLiteral(StringLiteral *literal) -> void {
-    _out << "[String:\"" << literal->getValue() << "\"]";
+    printIdent();
+    _out << "[String:\"" << literal->getValue() << "\"]\n";
 }
 
-auto DumpVisitor::visitVariableDeclaration(VariableDeclaration *literal) -> void {
-    _out << "[Variable:" << (literal->isConstant() ? "val" : "var") << ":" << literal->getName() << "]";
+auto DumpVisitor::visitVariableDeclaration(VariableDeclaration *variable) -> void {
+    printIdent();
+    _out << "[Variable:" << (variable->isConstant() ? "val" : "var") << ":" << variable->getName();
+    if (!variable->getTypeName().empty()) {
+        _out << ":" << variable->getTypeName();
+    }
+    _out << "]\n";
+
+    if (variable->getValue() != nullptr) {
+        _indent_level++;
+        variable->getValue()->accept(this);
+        _indent_level--;
+    }
+}
+
+auto DumpVisitor::printIdent() -> void {
+    _out << std::string(_indent_level, '\t');
 }

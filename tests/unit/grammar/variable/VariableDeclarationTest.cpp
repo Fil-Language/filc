@@ -23,6 +23,7 @@
  */
 #include "test_tools.h"
 #include <filc/grammar/variable/Variable.h>
+#include <filc/grammar/literal/Literal.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -38,6 +39,8 @@ TEST(VariableDeclaration, parsing) {
         ASSERT_NE(nullptr, variable);
         ASSERT_TRUE(variable->isConstant());
         ASSERT_STREQ("foo", variable->getName().c_str());
+        ASSERT_STREQ("", variable->getTypeName().c_str());
+        ASSERT_EQ(nullptr, variable->getValue());
     }
 
     {
@@ -49,5 +52,46 @@ TEST(VariableDeclaration, parsing) {
         ASSERT_NE(nullptr, variable);
         ASSERT_FALSE(variable->isConstant());
         ASSERT_STREQ("bar", variable->getName().c_str());
+        ASSERT_STREQ("", variable->getTypeName().c_str());
+        ASSERT_EQ(nullptr, variable->getValue());
+    }
+
+    {
+        SCOPED_TRACE("With type");
+        const auto program = parseString("var bar: i32");
+        const auto expressions = program->getExpressions();
+        ASSERT_THAT(expressions, SizeIs(1));
+        auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);
+        ASSERT_NE(nullptr, variable);
+        ASSERT_FALSE(variable->isConstant());
+        ASSERT_STREQ("bar", variable->getName().c_str());
+        ASSERT_STREQ("i32", variable->getTypeName().c_str());
+        ASSERT_EQ(nullptr, variable->getValue());
+    }
+
+    {
+        SCOPED_TRACE("With value");
+        const auto program = parseString("val foo = 'a'");
+        const auto expressions = program->getExpressions();
+        ASSERT_THAT(expressions, SizeIs(1));
+        auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);
+        ASSERT_NE(nullptr, variable);
+        ASSERT_TRUE(variable->isConstant());
+        ASSERT_STREQ("foo", variable->getName().c_str());
+        ASSERT_STREQ("", variable->getTypeName().c_str());
+        ASSERT_EQ('a', std::dynamic_pointer_cast<filc::CharacterLiteral>(variable->getValue())->getValue());
+    }
+
+    {
+        SCOPED_TRACE("With type and value");
+        const auto program = parseString("val foo: f64 = 3.1415");
+        const auto expressions = program->getExpressions();
+        ASSERT_THAT(expressions, SizeIs(1));
+        auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);
+        ASSERT_NE(nullptr, variable);
+        ASSERT_TRUE(variable->isConstant());
+        ASSERT_STREQ("foo", variable->getName().c_str());
+        ASSERT_STREQ("f64", variable->getTypeName().c_str());
+        ASSERT_EQ(3.1415, std::dynamic_pointer_cast<filc::FloatLiteral>(variable->getValue())->getValue());
     }
 }
