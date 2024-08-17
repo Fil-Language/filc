@@ -65,44 +65,41 @@ TEST(DumpVisitor, dump) {
     ASSERT_STREQ("=== Begin AST dump ===\n=== End AST dump ===\n", result.c_str());
 }
 
-TEST(DumpVisitor, Literal) {
-    {
-        SCOPED_TRACE("Boolean");
-        const auto dump = dumpProgram("true\nfalse");
-        ASSERT_THAT(dump, SizeIs(2));
-        ASSERT_STREQ("[Boolean:true]", dump[0].c_str());
-        ASSERT_STREQ("[Boolean:false]", dump[1].c_str());
-    }
-    {
-        SCOPED_TRACE("Integer");
-        const auto dump = dumpProgram("2");
-        ASSERT_THAT(dump, SizeIs(1));
-        ASSERT_STREQ("[Integer:2]", dump[0].c_str());
-    }
-    {
-        SCOPED_TRACE("Float");
-        const auto dump = dumpProgram("1.81\n.56");
-        ASSERT_THAT(dump, SizeIs(2));
-        ASSERT_STREQ("[Float:1.81]", dump[0].c_str());
-        ASSERT_STREQ("[Float:0.56]", dump[1].c_str());
-    }
-    {
-        SCOPED_TRACE("Character");
-        const auto dump = dumpProgram("'a'\n'\\n'");
-        ASSERT_THAT(dump, SizeIs(2));
-        ASSERT_STREQ("[Character:'a']", dump[0].c_str());
-        ASSERT_STREQ("[Character:'\\n']", dump[1].c_str());
-    }
-    {
-        SCOPED_TRACE("String");
-        const auto dump = dumpProgram("\"\"\n\"Hello\"");
-        ASSERT_THAT(dump, SizeIs(2));
-        ASSERT_STREQ("[String:\"\"]", dump[0].c_str());
-        ASSERT_STREQ("[String:\"Hello\"]", dump[1].c_str());
-    }
+TEST(DumpVisitor, BooleanLiteral) {
+    const auto dump = dumpProgram("true\nfalse");
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[Boolean:true]", dump[0].c_str());
+    ASSERT_STREQ("[Boolean:false]", dump[1].c_str());
 }
 
-TEST(DumpVisitor, visitCharacterLiteral) {
+TEST(DumpVisitor, IntegerLiteral) {
+    const auto dump = dumpProgram("2");
+    ASSERT_THAT(dump, SizeIs(1));
+    ASSERT_STREQ("[Integer:2]", dump[0].c_str());
+}
+
+TEST(DumpVisitor, FloatLiteral) {
+    const auto dump = dumpProgram("1.81\n.56");
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[Float:1.81]", dump[0].c_str());
+    ASSERT_STREQ("[Float:0.56]", dump[1].c_str());
+}
+
+TEST(DumpVisitor, CharacterLiteral) {
+    const auto dump = dumpProgram("'a'\n'\\n'");
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[Character:'a']", dump[0].c_str());
+    ASSERT_STREQ("[Character:'\\n']", dump[1].c_str());
+}
+
+TEST(DumpVisitor, StringLiteral) {
+    const auto dump = dumpProgram("\"\"\n\"Hello\"");
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[String:\"\"]", dump[0].c_str());
+    ASSERT_STREQ("[String:\"Hello\"]", dump[1].c_str());
+}
+
+TEST(DumpVisitor, visitCharacterLiteral_Special) {
     for (const auto c : {'\'', '\"', '\?', '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\'}) {
         SCOPED_TRACE("Check for special " + std::string(1, c));
         std::stringstream ss;
@@ -112,8 +109,9 @@ TEST(DumpVisitor, visitCharacterLiteral) {
         std::string dump(std::istreambuf_iterator<char>(ss), {});
         ASSERT_THAT(dump, StartsWith("[Character:'\\"));
     }
+}
 
-    SCOPED_TRACE("Check for classic case");
+TEST(DumpVisitor, visitCharacterLiteral_Classic) {
     std::stringstream ss;
     filc::DumpVisitor visitor(ss);
     filc::CharacterLiteral literal('a');
@@ -122,41 +120,34 @@ TEST(DumpVisitor, visitCharacterLiteral) {
     ASSERT_STREQ("[Character:'a']\n", dump.c_str());
 }
 
-TEST(DumpVisitor, VariableDeclaration) {
-    {
-        SCOPED_TRACE("Simple constant");
-        const auto dump = dumpProgram("val foo");
-        ASSERT_THAT(dump, SizeIs(1));
-        ASSERT_STREQ("[Variable:val:foo]", dump[0].c_str());
-    }
+TEST(DumpVisitor, VariableDeclaration_SimpleConstant) {
+    const auto dump = dumpProgram("val foo");
+    ASSERT_THAT(dump, SizeIs(1));
+    ASSERT_STREQ("[Variable:val:foo]", dump[0].c_str());
+}
 
-    {
-        SCOPED_TRACE("Simple variable");
-        const auto dump = dumpProgram("var bar");
-        ASSERT_THAT(dump, SizeIs(1));
-        ASSERT_STREQ("[Variable:var:bar]", dump[0].c_str());
-    }
+TEST(DumpVisitor, VariableDeclaration_SimpleVariable) {
+    const auto dump = dumpProgram("var bar");
+    ASSERT_THAT(dump, SizeIs(1));
+    ASSERT_STREQ("[Variable:var:bar]", dump[0].c_str());
+}
 
-    {
-        SCOPED_TRACE("With type");
-        const auto dump = dumpProgram("var bar: i32");
-        ASSERT_THAT(dump, SizeIs(1));
-        ASSERT_STREQ("[Variable:var:bar:i32]", dump[0].c_str());
-    }
+TEST(DumpVisitor, VariableDeclaration_WithType) {
+    const auto dump = dumpProgram("var bar: i32");
+    ASSERT_THAT(dump, SizeIs(1));
+    ASSERT_STREQ("[Variable:var:bar:i32]", dump[0].c_str());
+}
 
-    {
-        SCOPED_TRACE("With value");
-        const auto dump = dumpProgram("val foo = 'a'");
-        ASSERT_THAT(dump, SizeIs(2));
-        ASSERT_STREQ("[Variable:val:foo]", dump[0].c_str());
-        ASSERT_STREQ("\t[Character:'a']", dump[1].c_str());
-    }
+TEST(DumpVisitor, VariableDeclaration_WithValue) {
+    const auto dump = dumpProgram("val foo = 'a'");
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[Variable:val:foo]", dump[0].c_str());
+    ASSERT_STREQ("\t[Character:'a']", dump[1].c_str());
+}
 
-    {
-        SCOPED_TRACE("With type and value");
-        const auto dump = dumpProgram("val foo: f64 = 3.1415");
-        ASSERT_THAT(dump, SizeIs(2));
-        ASSERT_STREQ("[Variable:val:foo:f64]", dump[0].c_str());
-        ASSERT_STREQ("\t[Float:3.1415]", dump[1].c_str());
-    }
+TEST(DumpVisitor, VariableDeclaration_WithTypeAndValue) {
+    const auto dump = dumpProgram("val foo: f64 = 3.1415");
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[Variable:val:foo:f64]", dump[0].c_str());
+    ASSERT_STREQ("\t[Float:3.1415]", dump[1].c_str());
 }

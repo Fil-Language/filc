@@ -28,24 +28,20 @@
 
 using namespace ::testing;
 
-TEST(StringLiteral, parsing) {
-    SCOPED_TRACE("Empty string");
-    {
-        const auto program = parseString("\"\"");
-        const auto expressions = program->getExpressions();
-        ASSERT_THAT(expressions, SizeIs(1));
-        auto literal = std::dynamic_pointer_cast<filc::StringLiteral>(expressions[0]);
-        ASSERT_NE(nullptr, literal);
-        ASSERT_STREQ("", literal->getValue().c_str());
-    }
+TEST(StringLiteral, parsingEmptyString) {
+    const auto program = parseString("\"\"");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    auto literal = std::dynamic_pointer_cast<filc::StringLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal);
+    ASSERT_STREQ("", literal->getValue().c_str());
+}
 
-    SCOPED_TRACE("Some string");
-    {
-        const auto program = parseString("\"Hello World!\"");
-        const auto expressions = program->getExpressions();
-        ASSERT_THAT(expressions, SizeIs(1));
-        auto literal = std::dynamic_pointer_cast<filc::StringLiteral>(expressions[0]);
-        ASSERT_NE(nullptr, literal);
-        ASSERT_STREQ("Hello World!", literal->getValue().c_str());
-    }
+TEST(StringLiteral, parsingSomeString) {
+    const auto program = parseString("\"Hello World!\"");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    auto literal = std::dynamic_pointer_cast<filc::StringLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal);
+    ASSERT_STREQ("Hello World!", literal->getValue().c_str());
 }

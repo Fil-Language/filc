@@ -119,6 +119,4 @@ auto DumpVisitor::visitVariableDeclaration(VariableDeclaration *variable) -> voi
     }
 }
 
-auto DumpVisitor::printIdent() -> void {
-    _out << std::string(_indent_level, '\t');
-}
+auto DumpVisitor::printIdent() -> void { _out << std::string(_indent_level, '\t'); }

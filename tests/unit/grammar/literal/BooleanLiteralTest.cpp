@@ -28,24 +28,20 @@
 
 using namespace ::testing;
 
-TEST(BooleanLiteral, parsing) {
-    SCOPED_TRACE("true");
-    {
-        const auto program = parseString("true");
-        const auto expressions = program->getExpressions();
-        ASSERT_THAT(expressions, SizeIs(1));
-        auto literal = std::dynamic_pointer_cast<filc::BooleanLiteral>(expressions[0]);
-        ASSERT_NE(nullptr, literal);
-        ASSERT_TRUE(literal->getValue());
-    }
+TEST(BooleanLiteral, parsingTrue) {
+    const auto program = parseString("true");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    auto literal = std::dynamic_pointer_cast<filc::BooleanLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal);
+    ASSERT_TRUE(literal->getValue());
+}
 
-    SCOPED_TRACE("false");
-    {
-        const auto program = parseString("false");
-        const auto expressions = program->getExpressions();
-        ASSERT_THAT(expressions, SizeIs(1));
-        auto literal = std::dynamic_pointer_cast<filc::BooleanLiteral>(expressions[0]);
-        ASSERT_NE(nullptr, literal);
-        ASSERT_FALSE(literal->getValue());
-    }
+TEST(BooleanLiteral, parsingFalse) {
+    const auto program = parseString("false");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    auto literal = std::dynamic_pointer_cast<filc::BooleanLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal);
+    ASSERT_FALSE(literal->getValue());
 }

@@ -26,7 +26,8 @@
 
 using namespace filc;
 
-VariableDeclaration::VariableDeclaration(bool is_constant, std::string name, std::string type_name, std::shared_ptr<Expression> value)
+VariableDeclaration::VariableDeclaration(bool is_constant, std::string name, std::string type_name,
+                                         std::shared_ptr<Expression> value)
     : _constant(is_constant), _name(std::move(name)), _type_name(std::move(type_name)), _value(std::move(value)) {}
 
 auto VariableDeclaration::isConstant() const -> bool { return _constant; }

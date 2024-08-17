@@ -28,24 +28,20 @@
 
 using namespace ::testing;
 
-TEST(FloatLiteral, parsing) {
-    SCOPED_TRACE("Full float: 3.14");
-    {
-        const auto program = parseString("3.14");
-        const auto expressions = program->getExpressions();
-        ASSERT_THAT(expressions, SizeIs(1));
-        auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
-        ASSERT_NE(nullptr, literal);
-        ASSERT_EQ(3.14, literal->getValue());
-    }
+TEST(FloatLiteral, parsingFullFloat) {
+    const auto program = parseString("3.14");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal);
+    ASSERT_EQ(3.14, literal->getValue());
+}
 
-    SCOPED_TRACE("Semi float: .2");
-    {
-        const auto program = parseString(".2");
-        const auto expressions = program->getExpressions();
-        ASSERT_THAT(expressions, SizeIs(1));
-        auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
-        ASSERT_NE(nullptr, literal);
-        ASSERT_EQ(.2, literal->getValue());
-    }
+TEST(FloatLiteral, parsingSemiFloat) {
+    const auto program = parseString(".2");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal);
+    ASSERT_EQ(.2, literal->getValue());
 }

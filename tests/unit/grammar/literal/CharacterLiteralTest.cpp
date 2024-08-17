@@ -29,20 +29,19 @@
 
 using namespace ::testing;
 
-TEST(CharacterLiteral, parsing) {
-    SCOPED_TRACE("Simple char");
-    {
-        const auto program = parseString("'a'");
-        const auto expressions = program->getExpressions();
-        ASSERT_THAT(expressions, SizeIs(1));
-        auto literal = std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);
-        ASSERT_NE(nullptr, literal);
-        ASSERT_EQ('a', literal->getValue());
-    }
+TEST(CharacterLiteral, parsingSimpleChar) {
+    const auto program = parseString("'a'");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    auto literal = std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal);
+    ASSERT_EQ('a', literal->getValue());
+}
 
-    SCOPED_TRACE("Escaped char");
+TEST(CharacterLiteral, parsingEscapedChar) {
     for (const std::string content :
          {"'\\''", "'\\\"'", "'\\?'", "'\\a'", "'\\b'", "'\\f'", "'\\n'", "'\\r'", "'\\t'", "'\\v'", "'\\\\'"}) {
+        SCOPED_TRACE(content);
         const auto program = parseString(content);
         const auto expressions = program->getExpressions();
         ASSERT_THAT(expressions, SizeIs(1));
