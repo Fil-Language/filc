@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "test_tools.h"
 #include <filc/grammar/Parser.h>
+#include <filc/grammar/calcul/Calcul.h>
 #include <filc/grammar/literal/Literal.h>
 #include <filc/grammar/program/Program.h>
 #include <filc/grammar/variable/Variable.h>
@@ -32,7 +34,7 @@ using namespace ::testing;
 
 TEST(Parser, parseSample) {
     const auto program = filc::ParserProxy::parse(FIXTURES_PATH "/sample.fil");
-    ASSERT_THAT(program->getExpressions(), SizeIs(7));
+    ASSERT_THAT(program->getExpressions(), SizeIs(8));
 
     {
         SCOPED_TRACE("true");
@@ -93,5 +95,13 @@ TEST(Parser, parseSample) {
         ASSERT_STREQ("my_var", expression->getName().c_str());
         ASSERT_STREQ("char", expression->getTypeName().c_str());
         ASSERT_EQ('c', std::dynamic_pointer_cast<filc::CharacterLiteral>(expression->getValue())->getValue());
+    }
+
+    {
+        SCOPED_TRACE("2 + 4 <= 3 * 2");
+        const auto expression = std::dynamic_pointer_cast<filc::BinaryCalcul>(program->getExpressions()[7]);
+        PrinterVisitor visitor;
+        expression->accept(&visitor);
+        ASSERT_STREQ("((2 + 4) <= (3 * 2))", visitor.getResult().c_str());
     }
 }

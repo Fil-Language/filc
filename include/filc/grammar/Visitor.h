@@ -45,6 +45,8 @@ class Visitor {
 
     virtual auto visitVariableDeclaration(VariableDeclaration *variable) -> void = 0;
 
+    virtual auto visitBinaryCalcul(BinaryCalcul *calcul) -> void = 0;
+
   protected:
     Visitor() = default;
 };

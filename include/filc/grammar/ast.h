@@ -43,6 +43,8 @@ class CharacterLiteral;
 class StringLiteral;
 
 class VariableDeclaration;
+
+class BinaryCalcul;
 }
 
 #endif // FILC_AST_H

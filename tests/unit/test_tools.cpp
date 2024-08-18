@@ -46,3 +46,52 @@ auto parseString(const std::string &content) -> std::shared_ptr<filc::Program> {
 
     return parser.program()->tree;
 }
+
+PrinterVisitor::PrinterVisitor() : _out(std::stringstream()) {}
+
+auto PrinterVisitor::getResult() -> std::string {
+    std::string result(std::istreambuf_iterator<char>(_out), {});
+    return result;
+}
+
+auto PrinterVisitor::visitProgram(filc::Program *program) -> void {
+    for (const auto &expression : program->getExpressions()) {
+        expression->accept(this);
+        _out << "\n";
+    }
+}
+
+auto PrinterVisitor::visitBooleanLiteral(filc::BooleanLiteral *literal) -> void {
+    _out << (literal->getValue() ? "true" : "false");
+}
+
+auto PrinterVisitor::visitIntegerLiteral(filc::IntegerLiteral *literal) -> void { _out << literal->getValue(); }
+
+auto PrinterVisitor::visitFloatLiteral(filc::FloatLiteral *literal) -> void { _out << literal->getValue(); }
+
+auto PrinterVisitor::visitCharacterLiteral(filc::CharacterLiteral *literal) -> void {
+    _out << "'" << literal->getValue() << "'";
+}
+
+auto PrinterVisitor::visitStringLiteral(filc::StringLiteral *literal) -> void {
+    _out << "\"" << literal->getValue() << "\"";
+}
+
+auto PrinterVisitor::visitVariableDeclaration(filc::VariableDeclaration *variable) -> void {
+    _out << (variable->isConstant() ? "val " : "var ") << variable->getName();
+    if (!variable->getTypeName().empty()) {
+        _out << ": " << variable->getTypeName();
+    }
+    if (variable->getValue() != nullptr) {
+        _out << " = ";
+        variable->getValue()->accept(this);
+    }
+}
+
+auto PrinterVisitor::visitBinaryCalcul(filc::BinaryCalcul *calcul) -> void {
+    _out << "(";
+    calcul->getLeftExpression()->accept(this);
+    _out << " " << calcul->getOperator() << " ";
+    calcul->getRightExpression()->accept(this);
+    _out << ")";
+}

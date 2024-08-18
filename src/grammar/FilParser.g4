@@ -32,6 +32,7 @@ options {
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
+#include "filc/grammar/calcul/Calcul.h"
 #include <memory>
 #include <vector>
 }
@@ -53,6 +54,28 @@ expression returns[std::shared_ptr<filc::Expression> tree]
     }
     | v=variable_declaration {
         $tree = $v.tree;
+    }
+
+    // === Binary calcul ===
+    | el3=expression op3=MOD er3=expression {
+        $tree = std::make_shared<filc::BinaryCalcul>($el3.tree, $op3.text, $er3.tree);
+    }
+    | el4=expression op4=(DIV | STAR) er4=expression {
+        $tree = std::make_shared<filc::BinaryCalcul>($el4.tree, $op4.text, $er4.tree);
+    }
+    | el5=expression op5=(PLUS | MINUS) er5=expression {
+        $tree = std::make_shared<filc::BinaryCalcul>($el5.tree, $op5.text, $er5.tree);
+    }
+    | el2=expression op2=(LT | GT | LTE | GTE | EQEQ | NEQ) er2=expression {
+        $tree = std::make_shared<filc::BinaryCalcul>($el2.tree, $op2.text, $er2.tree);
+    }
+    | el1=expression op1=(AND | OR) er1=expression {
+        $tree = std::make_shared<filc::BinaryCalcul>($el1.tree, $op1.text, $er1.tree);
+    }
+    // === Binary calcul ===
+
+    | LPAREN e=expression RPAREN {
+        $tree = $e.tree;
     };
 
 literal returns[std::shared_ptr<filc::Expression> tree]

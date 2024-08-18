@@ -30,6 +30,21 @@ FALSE: 'false';
 
 EQ: '=';
 COLON: ':';
+PLUS: '+';
+MINUS: '-';
+STAR: '*';
+DIV: '/';
+MOD: '%';
+AND: '&&';
+OR: '||';
+EQEQ: '==';
+NEQ: '!=';
+LT: '<';
+LTE: '<=';
+GT: '>';
+GTE: '>=';
+LPAREN: '(';
+RPAREN: ')';
 
 fragment UPPERCASE: [A-Z];
 fragment LOWERCASE: [a-z];

@@ -151,3 +151,23 @@ TEST(DumpVisitor, VariableDeclaration_WithTypeAndValue) {
     ASSERT_STREQ("[Variable:val:foo:f64]", dump[0].c_str());
     ASSERT_STREQ("\t[Float:3.1415]", dump[1].c_str());
 }
+
+TEST(DumpVisitor, BinaryCalcul_SimpleDivision) {
+    const auto dump = dumpProgram("6 / 3");
+    ASSERT_THAT(dump, SizeIs(3));
+    ASSERT_STREQ("[BinaryCalcul:/]", dump[0].c_str());
+    ASSERT_STREQ("\t[Integer:6]", dump[1].c_str());
+    ASSERT_STREQ("\t[Integer:3]", dump[2].c_str());
+}
+
+TEST(DumpVisitor, BinaryCalcul_MultiplicationOfAddition) {
+    const auto dump = dumpProgram("(1 + 2) * (3 + 4)");
+    ASSERT_THAT(dump, SizeIs(7));
+    ASSERT_STREQ("[BinaryCalcul:*]", dump[0].c_str());
+    ASSERT_STREQ("\t[BinaryCalcul:+]", dump[1].c_str());
+    ASSERT_STREQ("\t\t[Integer:1]", dump[2].c_str());
+    ASSERT_STREQ("\t\t[Integer:2]", dump[3].c_str());
+    ASSERT_STREQ("\t[BinaryCalcul:+]", dump[4].c_str());
+    ASSERT_STREQ("\t\t[Integer:3]", dump[5].c_str());
+    ASSERT_STREQ("\t\t[Integer:4]", dump[6].c_str());
+}

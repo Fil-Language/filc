@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "filc/grammar/DumpVisitor.h"
+#include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/expression/Expression.h"
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
@@ -117,6 +118,15 @@ auto DumpVisitor::visitVariableDeclaration(VariableDeclaration *variable) -> voi
         variable->getValue()->accept(this);
         _indent_level--;
     }
+}
+
+auto DumpVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
+    printIdent();
+    _out << "[BinaryCalcul:" << calcul->getOperator() << "]\n";
+    _indent_level++;
+    calcul->getLeftExpression()->accept(this);
+    calcul->getRightExpression()->accept(this);
+    _indent_level--;
 }
 
 auto DumpVisitor::printIdent() -> void { _out << std::string(_indent_level, '\t'); }

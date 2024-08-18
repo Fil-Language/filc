@@ -21,39 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_DUMPVISITOR_H
-#define FILC_DUMPVISITOR_H
+#ifndef FILC_CALCUL_H
+#define FILC_CALCUL_H
 
-#include "filc/grammar/Visitor.h"
-#include <iostream>
+#include "filc/grammar/ast.h"
+#include "filc/grammar/expression/Expression.h"
+#include <memory>
+#include <string>
 
 namespace filc {
-class DumpVisitor final: public Visitor {
+class BinaryCalcul final: public Expression {
   public:
-    explicit DumpVisitor(std::ostream &out);
+    BinaryCalcul(std::shared_ptr<Expression> left_expression, std::string op, std::shared_ptr<Expression> right_expression);
 
-    auto visitProgram(Program *program) -> void override;
+    [[nodiscard]] auto getLeftExpression() const -> std::shared_ptr<Expression>;
 
-    auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
+    [[nodiscard]] auto getOperator() const -> std::string;
 
-    auto visitIntegerLiteral(IntegerLiteral *literal) -> void override;
+    [[nodiscard]] auto getRightExpression() const -> std::shared_ptr<Expression>;
 
-    auto visitFloatLiteral(FloatLiteral *literal) -> void override;
-
-    auto visitCharacterLiteral(CharacterLiteral *literal) -> void override;
-
-    auto visitStringLiteral(StringLiteral *literal) -> void override;
-
-    auto visitVariableDeclaration(VariableDeclaration *variable) -> void override;
-
-    auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
+    auto accept(Visitor *visitor) -> void override;
 
   private:
-    std::ostream &_out;
-    int _indent_level;
-
-    auto printIdent() -> void;
+    std::shared_ptr<Expression> _left_expression;
+    std::string _operator;
+    std::shared_ptr<Expression> _right_expression;
 };
 }
 
-#endif // FILC_DUMPVISITOR_H
+#endif // FILC_CALCUL_H

@@ -54,6 +54,13 @@ TEST(FilCompiler, dumpAST) {
                  "\t[Integer:73]\n"
                  "[Variable:var:my_var:char]\n"
                  "\t[Character:'c']\n"
+                 "[BinaryCalcul:<=]\n"
+                 "\t[BinaryCalcul:+]\n"
+                 "\t\t[Integer:2]\n"
+                 "\t\t[Integer:4]\n"
+                 "\t[BinaryCalcul:*]\n"
+                 "\t\t[Integer:3]\n"
+                 "\t\t[Integer:2]\n"
                  "=== End AST dump ===\n",
                  result.c_str());
 }
