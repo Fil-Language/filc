@@ -63,3 +63,41 @@ TEST(OptionsParser, showVersion) {
     stream >> result;
     ASSERT_STREQ(FILC_VERSION, result.c_str());
 }
+
+TEST(OptionsParser, getFile) {
+    auto options_parser = filc::OptionsParser();
+    SCOPED_TRACE("No file");
+    options_parser.parse(1, toStringArray({"filc"}).data());
+    ASSERT_STREQ("", options_parser.getFile().c_str());
+
+    SCOPED_TRACE("--file test.txt");
+    options_parser.parse(3, toStringArray({"filc", "--file", "test.txt"}).data());
+    ASSERT_STREQ("test.txt", options_parser.getFile().c_str());
+
+    SCOPED_TRACE("--file=test2.txt");
+    options_parser.parse(2, toStringArray({"filc", "--file=test2.txt"}).data());
+    ASSERT_STREQ("test2.txt", options_parser.getFile().c_str());
+
+    SCOPED_TRACE("Positional argument");
+    options_parser.parse(2, toStringArray({"filc", "test3.txt"}).data());
+    ASSERT_STREQ("test3.txt", options_parser.getFile().c_str());
+}
+
+TEST(OptionsParser, getDump) {
+    auto options_parser = filc::OptionsParser();
+    SCOPED_TRACE("Default value");
+    options_parser.parse(1, toStringArray({"filc"}).data());
+    ASSERT_STREQ("none", options_parser.getDump().c_str());
+
+    SCOPED_TRACE("Implicit value");
+    options_parser.parse(2, toStringArray({"filc", "--dump"}).data());
+    ASSERT_STREQ("all", options_parser.getDump().c_str());
+
+    SCOPED_TRACE("Invalid value");
+    options_parser.parse(2, toStringArray({"filc", "--dump=invalid"}).data());
+    ASSERT_THROW(options_parser.getDump(), filc::OptionsParserException);
+
+    SCOPED_TRACE("--dump=ast");
+    options_parser.parse(2, toStringArray({"filc", "--dump=ast"}).data());
+    ASSERT_STREQ("ast", options_parser.getDump().c_str());
+}

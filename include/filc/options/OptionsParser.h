@@ -44,6 +44,10 @@ class OptionsParser final {
 
     static auto showVersion(std::ostream &out) -> void;
 
+    [[nodiscard]] auto getFile() -> std::string;
+
+    [[nodiscard]] auto getDump() -> std::string;
+
   private:
     cxxopts::Options _options;
     bool _parsed;

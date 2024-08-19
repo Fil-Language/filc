@@ -24,9 +24,45 @@
 #ifndef FILC_TEST_TOOLS_H
 #define FILC_TEST_TOOLS_H
 
+#include <filc/grammar/program/Program.h>
+#include <filc/grammar/Visitor.h>
 #include <string>
 #include <vector>
+#include <memory>
+#include <sstream>
 
 auto toStringArray(const std::vector<std::string> &data) -> std::vector<char *>;
+
+auto parseString(const std::string &content) -> std::shared_ptr<filc::Program>;
+
+class PrinterVisitor final: public filc::Visitor {
+  public:
+    PrinterVisitor();
+
+    auto getResult() -> std::string;
+
+    auto visitProgram(filc::Program *program) -> void override;
+
+    auto visitBooleanLiteral(filc::BooleanLiteral *literal) -> void override;
+
+    auto visitIntegerLiteral(filc::IntegerLiteral *literal) -> void override;
+
+    auto visitFloatLiteral(filc::FloatLiteral *literal) -> void override;
+
+    auto visitCharacterLiteral(filc::CharacterLiteral *literal) -> void override;
+
+    auto visitStringLiteral(filc::StringLiteral *literal) -> void override;
+
+    auto visitVariableDeclaration(filc::VariableDeclaration *variable) -> void override;
+
+    auto visitIdentifier(filc::Identifier *identifier) -> void override;
+
+    auto visitBinaryCalcul(filc::BinaryCalcul *calcul) -> void override;
+
+    auto visitAssignation(filc::Assignation *assignation) -> void override;
+
+  private:
+    std::stringstream _out;
+};
 
 #endif // FILC_TEST_TOOLS_H

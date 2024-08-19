@@ -35,7 +35,7 @@
 
 #define VALGRIND_OUTPUT_ZERO "in use at exit: 0 bytes in 0 blocks"
 
-#define valgrind_run(args) exec_output("valgrind " FILC_BIN " " args " 2>&1");
+#define valgrind_run(args) exec_output("valgrind " FILC_BIN " " args " 2>&1")
 
 TEST(Memory, filc) {
     const auto result = valgrind_run();
@@ -49,6 +49,11 @@ TEST(Memory, filc_help) {
 
 TEST(Memory, filc_version) {
     const auto result = valgrind_run("--version");
+    ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
+}
+
+TEST(Memory, filc_dump_all) {
+    const auto result = valgrind_run("--dump " FIXTURES_PATH "/sample.fil");
     ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
 }
 
