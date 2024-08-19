@@ -14,5 +14,8 @@ var myAweSOMeVariable: i32
 val anotherConst = 73
 var my_var: char = 'c'
 
+// === Identifier ===
+_some_varWhichUses_Some_CHARACTERS
+
 // === Binary calcul ===
 2 + 4 <= 3 * 2

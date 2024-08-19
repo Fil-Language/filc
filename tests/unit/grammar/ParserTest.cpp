@@ -24,8 +24,8 @@
 #include "test_tools.h"
 #include <filc/grammar/Parser.h>
 #include <filc/grammar/calcul/Calcul.h>
+#include <filc/grammar/identifier/Identifier.h>
 #include <filc/grammar/literal/Literal.h>
-#include <filc/grammar/program/Program.h>
 #include <filc/grammar/variable/Variable.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -34,7 +34,7 @@ using namespace ::testing;
 
 TEST(Parser, parseSample) {
     const auto program = filc::ParserProxy::parse(FIXTURES_PATH "/sample.fil");
-    ASSERT_THAT(program->getExpressions(), SizeIs(8));
+    ASSERT_THAT(program->getExpressions(), SizeIs(9));
 
     {
         SCOPED_TRACE("true");
@@ -98,8 +98,15 @@ TEST(Parser, parseSample) {
     }
 
     {
+        SCOPED_TRACE("_some_varWhichUses_Some_CHARACTERS");
+        const auto expression = std::dynamic_pointer_cast<filc::Identifier>(program->getExpressions()[7]);
+        ASSERT_NE(nullptr, expression);
+        ASSERT_STREQ("_some_varWhichUses_Some_CHARACTERS", expression->getName().c_str());
+    }
+
+    {
         SCOPED_TRACE("2 + 4 <= 3 * 2");
-        const auto expression = std::dynamic_pointer_cast<filc::BinaryCalcul>(program->getExpressions()[7]);
+        const auto expression = std::dynamic_pointer_cast<filc::BinaryCalcul>(program->getExpressions()[8]);
         PrinterVisitor visitor;
         expression->accept(&visitor);
         ASSERT_STREQ("((2 + 4) <= (3 * 2))", visitor.getResult().c_str());

@@ -21,41 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_DUMPVISITOR_H
-#define FILC_DUMPVISITOR_H
+#include "test_tools.h"
+#include <filc/grammar/identifier/Identifier.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include "filc/grammar/Visitor.h"
-#include <iostream>
+using namespace ::testing;
 
-namespace filc {
-class DumpVisitor final: public Visitor {
-  public:
-    explicit DumpVisitor(std::ostream &out);
-
-    auto visitProgram(Program *program) -> void override;
-
-    auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
-
-    auto visitIntegerLiteral(IntegerLiteral *literal) -> void override;
-
-    auto visitFloatLiteral(FloatLiteral *literal) -> void override;
-
-    auto visitCharacterLiteral(CharacterLiteral *literal) -> void override;
-
-    auto visitStringLiteral(StringLiteral *literal) -> void override;
-
-    auto visitVariableDeclaration(VariableDeclaration *variable) -> void override;
-
-    auto visitIdentifier(Identifier *identifier) -> void override;
-
-    auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
-
-  private:
-    std::ostream &_out;
-    int _indent_level;
-
-    auto printIdent() -> void;
-};
+TEST(Identifier, parsing) {
+    const auto program = parseString("myAwesome_var3");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    const auto identifier = std::dynamic_pointer_cast<filc::Identifier>(expressions[0]);
+    ASSERT_NE(nullptr, identifier);
+    ASSERT_STREQ("myAwesome_var3", identifier->getName().c_str());
 }
-
-#endif // FILC_DUMPVISITOR_H

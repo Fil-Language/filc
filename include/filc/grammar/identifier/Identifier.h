@@ -21,41 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_DUMPVISITOR_H
-#define FILC_DUMPVISITOR_H
+#ifndef FILC_IDENTIFIER_H
+#define FILC_IDENTIFIER_H
 
-#include "filc/grammar/Visitor.h"
-#include <iostream>
+#include "filc/grammar/ast.h"
+#include "filc/grammar/expression/Expression.h"
+#include <string>
 
 namespace filc {
-class DumpVisitor final: public Visitor {
+class Identifier final: public Expression {
   public:
-    explicit DumpVisitor(std::ostream &out);
+    explicit Identifier(std::string name);
 
-    auto visitProgram(Program *program) -> void override;
+    [[nodiscard]] auto getName() const -> std::string;
 
-    auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
-
-    auto visitIntegerLiteral(IntegerLiteral *literal) -> void override;
-
-    auto visitFloatLiteral(FloatLiteral *literal) -> void override;
-
-    auto visitCharacterLiteral(CharacterLiteral *literal) -> void override;
-
-    auto visitStringLiteral(StringLiteral *literal) -> void override;
-
-    auto visitVariableDeclaration(VariableDeclaration *variable) -> void override;
-
-    auto visitIdentifier(Identifier *identifier) -> void override;
-
-    auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
+    auto accept(Visitor *visitor) -> void override;
 
   private:
-    std::ostream &_out;
-    int _indent_level;
-
-    auto printIdent() -> void;
+    std::string _name;
 };
 }
 
-#endif // FILC_DUMPVISITOR_H
+#endif // FILC_IDENTIFIER_H

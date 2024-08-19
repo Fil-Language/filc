@@ -171,3 +171,9 @@ TEST(DumpVisitor, BinaryCalcul_MultiplicationOfAddition) {
     ASSERT_STREQ("\t\t[Integer:3]", dump[5].c_str());
     ASSERT_STREQ("\t\t[Integer:4]", dump[6].c_str());
 }
+
+TEST(DumpVisitor, Identifier) {
+    const auto dump = dumpProgram("hello");
+    ASSERT_THAT(dump, SizeIs(1));
+    ASSERT_STREQ("[Identifier:hello]", dump[0].c_str());
+}

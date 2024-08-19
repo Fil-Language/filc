@@ -44,6 +44,8 @@ class StringLiteral;
 
 class VariableDeclaration;
 
+class Identifier;
+
 class BinaryCalcul;
 }
 

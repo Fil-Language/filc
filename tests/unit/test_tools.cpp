@@ -88,6 +88,8 @@ auto PrinterVisitor::visitVariableDeclaration(filc::VariableDeclaration *variabl
     }
 }
 
+auto PrinterVisitor::visitIdentifier(filc::Identifier *identifier) -> void { _out << identifier->getName(); }
+
 auto PrinterVisitor::visitBinaryCalcul(filc::BinaryCalcul *calcul) -> void {
     _out << "(";
     calcul->getLeftExpression()->accept(this);

@@ -33,6 +33,7 @@ options {
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 #include "filc/grammar/calcul/Calcul.h"
+#include "filc/grammar/identifier/Identifier.h"
 #include <memory>
 #include <vector>
 }
@@ -54,6 +55,9 @@ expression returns[std::shared_ptr<filc::Expression> tree]
     }
     | v=variable_declaration {
         $tree = $v.tree;
+    }
+    | i=IDENTIFIER {
+        $tree = std::make_shared<filc::Identifier>($i.text);
     }
 
     // === Binary calcul ===

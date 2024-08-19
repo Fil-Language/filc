@@ -55,6 +55,8 @@ class PrinterVisitor final: public filc::Visitor {
 
     auto visitVariableDeclaration(filc::VariableDeclaration *variable) -> void override;
 
+    auto visitIdentifier(filc::Identifier *identifier) -> void override;
+
     auto visitBinaryCalcul(filc::BinaryCalcul *calcul) -> void override;
 
   private:

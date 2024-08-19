@@ -54,6 +54,7 @@ TEST(FilCompiler, dumpAST) {
                  "\t[Integer:73]\n"
                  "[Variable:var:my_var:char]\n"
                  "\t[Character:'c']\n"
+                 "[Identifier:_some_varWhichUses_Some_CHARACTERS]\n"
                  "[BinaryCalcul:<=]\n"
                  "\t[BinaryCalcul:+]\n"
                  "\t\t[Integer:2]\n"

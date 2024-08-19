@@ -21,41 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_DUMPVISITOR_H
-#define FILC_DUMPVISITOR_H
+#include "filc/grammar/identifier/Identifier.h"
+#include <utility>
 
-#include "filc/grammar/Visitor.h"
-#include <iostream>
+using namespace filc;
 
-namespace filc {
-class DumpVisitor final: public Visitor {
-  public:
-    explicit DumpVisitor(std::ostream &out);
+Identifier::Identifier(std::string name) : _name(std::move(name)) {}
 
-    auto visitProgram(Program *program) -> void override;
+auto Identifier::getName() const -> std::string { return _name; }
 
-    auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
-
-    auto visitIntegerLiteral(IntegerLiteral *literal) -> void override;
-
-    auto visitFloatLiteral(FloatLiteral *literal) -> void override;
-
-    auto visitCharacterLiteral(CharacterLiteral *literal) -> void override;
-
-    auto visitStringLiteral(StringLiteral *literal) -> void override;
-
-    auto visitVariableDeclaration(VariableDeclaration *variable) -> void override;
-
-    auto visitIdentifier(Identifier *identifier) -> void override;
-
-    auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
-
-  private:
-    std::ostream &_out;
-    int _indent_level;
-
-    auto printIdent() -> void;
-};
-}
-
-#endif // FILC_DUMPVISITOR_H
+auto Identifier::accept(Visitor *visitor) -> void { visitor->visitIdentifier(this); }
