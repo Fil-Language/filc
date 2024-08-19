@@ -34,6 +34,7 @@ options {
 #include "filc/grammar/variable/Variable.h"
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
+#include "filc/grammar/assignation/Assignation.h"
 #include <memory>
 #include <vector>
 }
@@ -80,6 +81,9 @@ expression returns[std::shared_ptr<filc::Expression> tree]
 
     | LPAREN e=expression RPAREN {
         $tree = $e.tree;
+    }
+    | a=assignation {
+       $tree = $a.tree;
     };
 
 literal returns[std::shared_ptr<filc::Expression> tree]
@@ -128,3 +132,14 @@ variable_declaration returns[std::shared_ptr<filc::VariableDeclaration> tree]
     })? (EQ value=expression {
         value = $value.tree;
     })?;
+
+assignation returns[std::shared_ptr<filc::Assignation> tree]
+    : i1=IDENTIFIER EQ e1=expression {
+        $tree = std::make_shared<filc::Assignation>($i1.text, $e1.tree);
+    }
+    | i2=IDENTIFIER op=(PLUS_EQ | MINUS_EQ | STAR_EQ | DIV_EQ | MOD_EQ | AND_EQ | OR_EQ) e2=expression {
+        $tree = std::make_shared<filc::Assignation>(
+            $i2.text,
+            std::make_shared<filc::BinaryCalcul>(std::make_shared<filc::Identifier>($i2.text), $op.text.substr(0, $op.text.size() - 1), $e2.tree)
+        );
+    };

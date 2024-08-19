@@ -46,7 +46,11 @@ message(DEBUG E2E_TEST_FILES=${E2E_TEST_FILES})
 add_executable(e2e-tests ${E2E_TEST_FILES})
 add_dependencies(e2e-tests filc)
 target_include_directories(e2e-tests PUBLIC e2e)
-target_compile_definitions(e2e-tests PUBLIC FILC_BIN="$<TARGET_FILE:filc>" FILC_VERSION="${FILC_VERSION}")
+target_compile_definitions(e2e-tests PUBLIC
+        FILC_BIN="$<TARGET_FILE:filc>"
+        FILC_VERSION="${FILC_VERSION}"
+        FIXTURES_PATH="${PROJECT_SOURCE_DIR}/tests/unit/Fixtures"
+)
 
 target_link_libraries(e2e-tests PRIVATE gtest_main gtest gmock)
 

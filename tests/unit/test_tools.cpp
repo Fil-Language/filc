@@ -97,3 +97,8 @@ auto PrinterVisitor::visitBinaryCalcul(filc::BinaryCalcul *calcul) -> void {
     calcul->getRightExpression()->accept(this);
     _out << ")";
 }
+
+auto PrinterVisitor::visitAssignation(filc::Assignation *assignation) -> void {
+    _out << assignation->getIdentifier() << " = ";
+    assignation->getValue()->accept(this);
+}

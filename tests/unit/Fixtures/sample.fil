@@ -19,3 +19,7 @@ _some_varWhichUses_Some_CHARACTERS
 
 // === Binary calcul ===
 2 + 4 <= 3 * 2
+
+// === Assignation ===
+my_var = 2
+my_var += 2

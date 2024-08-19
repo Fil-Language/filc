@@ -177,3 +177,10 @@ TEST(DumpVisitor, Identifier) {
     ASSERT_THAT(dump, SizeIs(1));
     ASSERT_STREQ("[Identifier:hello]", dump[0].c_str());
 }
+
+TEST(DumpVisitor, Assignation) {
+    const auto dump = dumpProgram("foo = 'a'");
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[Assignation:foo]", dump[0].c_str());
+    ASSERT_STREQ("\t[Character:'a']", dump[1].c_str());
+}

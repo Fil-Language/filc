@@ -23,11 +23,13 @@
  */
 lexer grammar FilLexer;
 
+// Reserved words
 VAR: 'var';
 VAL: 'val';
 TRUE: 'true';
 FALSE: 'false';
 
+// Operators
 EQ: '=';
 COLON: ':';
 PLUS: '+';
@@ -46,6 +48,16 @@ GTE: '>=';
 LPAREN: '(';
 RPAREN: ')';
 
+// Assignation operators
+PLUS_EQ: '+=';
+MINUS_EQ: '-=';
+STAR_EQ: '*=';
+DIV_EQ: '/=';
+MOD_EQ: '%=';
+AND_EQ: '&&=';
+OR_EQ: '||=';
+
+// String and chars
 fragment UPPERCASE: [A-Z];
 fragment LOWERCASE: [a-z];
 fragment LETTER: UPPERCASE | LOWERCASE;
@@ -54,6 +66,7 @@ fragment STRING_CHAR: ~('"' | '\\' | '\n') | ESCAPE_CHAR;
 STRING: '"' (STRING_CHAR | '\\"' | '\\\\')* '"';
 CHARACTER: '\'' (~('\'' | '\\' | '\n') | ESCAPE_CHAR) '\'';
 
+// Numbers
 fragment DIGIT: [0-9];
 fragment SIGN: '+'|'-';
 INTEGER: SIGN? DIGIT+;
@@ -61,6 +74,7 @@ FLOAT: SIGN? DIGIT* '.' DIGIT+;
 
 IDENTIFIER: (LETTER | '_') (LETTER | DIGIT | '_')*;
 
+// All ignored
 SEPARATOR: (' ' | '\t' | '\r' | '\n' | EOF) -> skip;
 COMMENT: '//' (~('\n' | '\r'))* -> skip;
 COMMENT_BLOCK: '/*' .*? '*/' -> skip;

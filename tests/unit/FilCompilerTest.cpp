@@ -62,6 +62,12 @@ TEST(FilCompiler, dumpAST) {
                  "\t[BinaryCalcul:*]\n"
                  "\t\t[Integer:3]\n"
                  "\t\t[Integer:2]\n"
+                 "[Assignation:my_var]\n"
+                 "\t[Integer:2]\n"
+                 "[Assignation:my_var]\n"
+                 "\t[BinaryCalcul:+]\n"
+                 "\t\t[Identifier:my_var]\n"
+                 "\t\t[Integer:2]\n"
                  "=== End AST dump ===\n",
                  result.c_str());
 }

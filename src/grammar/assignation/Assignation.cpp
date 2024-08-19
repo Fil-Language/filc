@@ -21,40 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "test_tools.h"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "filc/grammar/assignation/Assignation.h"
+#include <utility>
 
-/**
- * This test file aims to check memory usage of filc
- * We should try to reduce memory leak to the minimum (all memory used must be
- * freed)
- */
+using namespace filc;
 
-#ifdef __linux__
+Assignation::Assignation(std::string identifier, std::shared_ptr<Expression> value)
+    : _identifier(std::move(identifier)), _value(std::move(value)) {}
 
-#define VALGRIND_OUTPUT_ZERO "in use at exit: 0 bytes in 0 blocks"
+auto Assignation::getIdentifier() const -> std::string { return _identifier; }
 
-#define valgrind_run(args) exec_output("valgrind " FILC_BIN " " args " 2>&1")
+auto Assignation::getValue() const -> std::shared_ptr<Expression> { return _value; }
 
-TEST(Memory, filc) {
-    const auto result = valgrind_run();
-    ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
-}
-
-TEST(Memory, filc_help) {
-    const auto result = valgrind_run("--help");
-    ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
-}
-
-TEST(Memory, filc_version) {
-    const auto result = valgrind_run("--version");
-    ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
-}
-
-TEST(Memory, filc_dump_all) {
-    const auto result = valgrind_run("--dump " FIXTURES_PATH "/sample.fil");
-    ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
-}
-
-#endif
+auto Assignation::accept(Visitor *visitor) -> void { visitor->visitAssignation(this); }

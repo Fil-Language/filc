@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "filc/grammar/DumpVisitor.h"
+#include "filc/grammar/assignation/Assignation.h"
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/expression/Expression.h"
 #include "filc/grammar/identifier/Identifier.h"
@@ -133,6 +134,14 @@ auto DumpVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
 auto DumpVisitor::visitIdentifier(Identifier *identifier) -> void {
     printIdent();
     _out << "[Identifier:" << identifier->getName() << "]\n";
+}
+
+auto DumpVisitor::visitAssignation(Assignation *assignation) -> void {
+    printIdent();
+    _out << "[Assignation:" << assignation->getIdentifier() << "]\n";
+    _indent_level++;
+    assignation->getValue()->accept(this);
+    _indent_level--;
 }
 
 auto DumpVisitor::printIdent() -> void { _out << std::string(_indent_level, '\t'); }

@@ -50,6 +50,8 @@ class DumpVisitor final: public Visitor {
 
     auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
 
+    auto visitAssignation(Assignation *assignation) -> void override;
+
   private:
     std::ostream &_out;
     int _indent_level;

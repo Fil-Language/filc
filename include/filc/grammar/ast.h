@@ -47,6 +47,8 @@ class VariableDeclaration;
 class Identifier;
 
 class BinaryCalcul;
+
+class Assignation;
 }
 
 #endif // FILC_AST_H

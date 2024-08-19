@@ -59,6 +59,8 @@ class PrinterVisitor final: public filc::Visitor {
 
     auto visitBinaryCalcul(filc::BinaryCalcul *calcul) -> void override;
 
+    auto visitAssignation(filc::Assignation *assignation) -> void override;
+
   private:
     std::stringstream _out;
 };

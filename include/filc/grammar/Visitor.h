@@ -49,6 +49,8 @@ class Visitor {
 
     virtual auto visitBinaryCalcul(BinaryCalcul *calcul) -> void = 0;
 
+    virtual auto visitAssignation(Assignation *assignation) -> void = 0;
+
   protected:
     Visitor() = default;
 };
