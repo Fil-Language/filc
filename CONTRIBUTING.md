@@ -23,18 +23,18 @@ template. Please ensure your description is clear and has sufficient details to 
 
 ## Contribute
 
-Here is a small checklist:
+Here is a small workflow to follow for contributing to filc:
 
-- Open an issue to discuss the changes you want to make first
-- Create a fork of this repository
-- Make your changes
-- Submit a pull request on top of `master` branch
+### Open an issue
 
-### Submitting pull requests
+Before any contribution you should open a [new issue](https://github.com/Fil-Language/filc/issues/new/choose). An 
+integrator will then discuss with you about your question. 
 
-Before we can merge your pull request, here are some guidelines you need to follow.
+### Made changes
 
-These guidelines help keeping the code clean, stable and easier to review.
+You can then [fork the repository](https://github.com/Fil-Language/filc/fork) and made your changes.
+
+There is some guidelines to follow.
 
 **Principles**
 
@@ -48,6 +48,8 @@ C++ conventions and rules are all listed in `.clang-tidy` and `.clang-format` fi
 formatting from these files. If you not use an IDE, please call `clang-tidy` as often as possible to keep your code
 clear.
 
+A husky pre-commit hook is available to run `clang-format` before each commit. 
+
 **Commits**
 
 Please follow [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) guidelines for your commit message.
@@ -55,6 +57,8 @@ A [template](commit-template) is available, you can use by running `git config c
 
 All your commit *MUST* work. If your feature is too big to be in one commit, add exceptions, early returns to keep the
 code working.
+
+In your commit message, reference the id of your issue. It helps us to track which commit concern what and why.
 
 **Tests**
 
@@ -69,12 +73,16 @@ Testing code paths is not just the happy path, tests as many case as possible. T
 By contributing to filc, you agree that your contributions will be licensed under the [LICENSE](LICENSE.md) file in the
 root directory of this source tree.
 
-Each file *MUST* begin with the license text.
+Each code file *MUST* begin with the license text.
 
-**Pull request**
+To help you to contribute, we recommend you to use [`nix-shell`](https://nixos.org/download/). It will help you to have 
+the same tools at the same version as all others filc developers. Then you can use scripts present in `bin` directory to
+build and test filc.
 
-When submitting your pull request please follow the provided template. Our team will review your code as soon as
-possible.
+### Open a pull request
+
+Once all your changes are done, you can open a pull request on top of `master` branch. An integrator will review your 
+code. When it's all good, the integrator will merge your pull request. Congratulations 🎉 you've contributed to filc! 
 
 ## Security
 
