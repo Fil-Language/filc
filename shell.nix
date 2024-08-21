@@ -16,7 +16,8 @@ pkgs.mkShell {
     pkgs.dpkg
     pkgs.rpm
     pkgs.temurin-jre-bin-18
-    pkgs.nodePackages.pnpm
+    pkgs.nodejs_20
+    pkgs.corepack
   ];
 
   shellHook = ''
