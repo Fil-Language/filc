@@ -52,8 +52,8 @@ TEST(Memory, filc_version) {
     ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
 }
 
-TEST(Memory, filc_dump_all) {
-    const auto result = valgrind_run("--dump " FIXTURES_PATH "/sample.fil");
+TEST(Memory, filc_dump_ast) {
+    const auto result = valgrind_run("--dump=ast " FIXTURES_PATH "/sample.fil");
     ASSERT_THAT(result, ::testing::HasSubstr(VALGRIND_OUTPUT_ZERO));
 }
 

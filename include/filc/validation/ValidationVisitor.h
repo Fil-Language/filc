@@ -21,26 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_FILC_H
-#define FILC_FILC_H
+#ifndef FILC_VALIDATIONVISITOR_H
+#define FILC_VALIDATIONVISITOR_H
 
-#include "filc/grammar/Parser.h"
-#include "filc/options/OptionsParser.h"
-#include "filc/grammar/DumpVisitor.h"
-#include "filc/validation/ValidationVisitor.h"
+#include "filc/grammar/Visitor.h"
 
 namespace filc {
-class FilCompiler final {
+class ValidationVisitor final : public Visitor {
   public:
-    FilCompiler(OptionsParser options_parser, DumpVisitor ast_dump_visitor, ValidationVisitor validation_visitor);
+    auto visitProgram(Program *program) -> void override;
 
-    auto run(int argc, char **argv) -> int;
+    auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
 
-  private:
-    OptionsParser _options_parser;
-    DumpVisitor _ast_dump_visitor;
-    ValidationVisitor _validation_visitor;
+    auto visitIntegerLiteral(IntegerLiteral *literal) -> void override;
+
+    auto visitFloatLiteral(FloatLiteral *literal) -> void override;
+
+    auto visitCharacterLiteral(CharacterLiteral *literal) -> void override;
+
+    auto visitStringLiteral(StringLiteral *literal) -> void override;
+
+    auto visitVariableDeclaration(VariableDeclaration *variable) -> void override;
+
+    auto visitIdentifier(Identifier *identifier) -> void override;
+
+    auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
+
+    auto visitAssignation(Assignation *assignation) -> void override;
 };
-} // namespace filc
+}
 
-#endif // FILC_FILC_H
+#endif // FILC_VALIDATIONVISITOR_H

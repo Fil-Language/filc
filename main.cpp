@@ -24,6 +24,6 @@
 #include <filc/filc.h>
 
 auto main(int argc, char **argv) -> int {
-    auto compiler = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout));
+    auto compiler = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout), filc::ValidationVisitor());
     return compiler.run(argc, argv);
 }
