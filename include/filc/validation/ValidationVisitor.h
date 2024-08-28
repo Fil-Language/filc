@@ -25,8 +25,37 @@
 #define FILC_VALIDATIONVISITOR_H
 
 #include "filc/grammar/Visitor.h"
+#include <memory>
+#include <map>
+#include <any>
+#include <string>
+#include <stdexcept>
 
 namespace filc {
+class ValidationContext final {
+  public:
+    explicit ValidationContext(ValidationContext* parent = nullptr);
+
+    [[nodiscard]] auto stack() -> ValidationContext*;
+
+    [[nodiscard]] auto unstack() const -> ValidationContext*;
+
+    auto set(const std::string &key, const std::any &value) -> void;
+
+    template<typename T>
+    auto get(const std::string &key) const -> T {
+        if (_values.find(key) == _values.end()) {
+            throw std::logic_error("There is not value for key: " + key);
+        }
+
+        return std::any_cast<T>(_values.at(key));
+    }
+
+  private:
+    ValidationContext* _parent;
+    std::map<std::string, std::any> _values;
+};
+
 class ValidationVisitor final : public Visitor {
   public:
     auto visitProgram(Program *program) -> void override;
