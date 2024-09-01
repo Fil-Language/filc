@@ -51,6 +51,9 @@ program returns[std::shared_ptr<filc::Program> tree]
     })* EOF;
 
 expression returns[std::shared_ptr<filc::Expression> tree]
+@after {
+    $tree->setPosition(filc::Position($ctx->start, $ctx->stop));
+}
     : l=literal {
         $tree = $l.tree;
     }

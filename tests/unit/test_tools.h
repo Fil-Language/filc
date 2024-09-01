@@ -26,6 +26,7 @@
 
 #include <filc/grammar/program/Program.h>
 #include <filc/grammar/Visitor.h>
+#include <antlr4-runtime.h>
 #include <string>
 #include <vector>
 #include <memory>
@@ -63,6 +64,59 @@ class PrinterVisitor final: public filc::Visitor {
 
   private:
     std::stringstream _out;
+};
+
+class TokenSourceStub final: public antlr4::TokenSource {
+  public:
+    explicit TokenSourceStub(std::string filename);
+
+    auto nextToken() -> std::unique_ptr<antlr4::Token> override;
+
+    [[nodiscard]] auto getLine() const -> size_t override;
+
+    auto getCharPositionInLine() -> size_t override;
+
+    auto getInputStream() -> antlr4::CharStream * override;
+
+    auto getSourceName() -> std::string override;
+
+    auto getTokenFactory() -> antlr4::TokenFactory<antlr4::CommonToken> * override;
+
+  private:
+    std::string _filename;
+};
+
+class TokenStub final: public antlr4::Token {
+  public:
+    TokenStub(const std::string& filename, const std::pair<unsigned int, unsigned int> &position);
+
+    ~TokenStub() override = default;
+
+    [[nodiscard]] auto getText() const -> std::string override;
+
+    [[nodiscard]] auto getType() const -> size_t override;
+
+    [[nodiscard]] auto getLine() const -> size_t override;
+
+    [[nodiscard]] auto getCharPositionInLine() const -> size_t override;
+
+    [[nodiscard]] auto getChannel() const -> size_t override;
+
+    [[nodiscard]] auto getTokenIndex() const -> size_t override;
+
+    [[nodiscard]] auto getStartIndex() const -> size_t override;
+
+    [[nodiscard]] auto getStopIndex() const -> size_t override;
+
+    [[nodiscard]] auto getTokenSource() const -> antlr4::TokenSource * override;
+
+    [[nodiscard]] auto getInputStream() const -> antlr4::CharStream * override;
+
+    [[nodiscard]] auto toString() const -> std::string override;
+
+  private:
+    antlr4::TokenSource* _source;
+    std::pair<unsigned int, unsigned int> _position;
 };
 
 #endif // FILC_TEST_TOOLS_H

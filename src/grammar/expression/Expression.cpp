@@ -26,3 +26,7 @@
 using namespace filc;
 
 Expression::Expression() = default;
+
+auto Expression::setPosition(const Position &position) -> void { _position = position; }
+
+auto Expression::getPosition() const -> const Position & { return _position; }

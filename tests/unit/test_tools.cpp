@@ -102,3 +102,42 @@ auto PrinterVisitor::visitAssignation(filc::Assignation *assignation) -> void {
     _out << assignation->getIdentifier() << " = ";
     assignation->getValue()->accept(this);
 }
+
+TokenSourceStub::TokenSourceStub(std::string filename) : _filename(std::move(filename)) {}
+
+auto TokenSourceStub::nextToken() -> std::unique_ptr<antlr4::Token> { return nullptr; }
+
+auto TokenSourceStub::getLine() const -> size_t { return 0; }
+
+auto TokenSourceStub::getCharPositionInLine() -> size_t { return 0; }
+
+auto TokenSourceStub::getInputStream() -> antlr4::CharStream * { return nullptr; }
+
+auto TokenSourceStub::getSourceName() -> std::string { return _filename; }
+
+auto TokenSourceStub::getTokenFactory() -> antlr4::TokenFactory<antlr4::CommonToken> * { return nullptr; }
+
+TokenStub::TokenStub(const std::string &filename, const std::pair<unsigned int, unsigned int> &position)
+    : _source(new TokenSourceStub(filename)), _position(position) {}
+
+auto TokenStub::getText() const -> std::string { return ""; }
+
+auto TokenStub::getType() const -> size_t { return 0; }
+
+auto TokenStub::getLine() const -> size_t { return _position.first; }
+
+auto TokenStub::getCharPositionInLine() const -> size_t { return _position.second; }
+
+auto TokenStub::getChannel() const -> size_t { return 0; }
+
+auto TokenStub::getTokenIndex() const -> size_t { return 0; }
+
+auto TokenStub::getStartIndex() const -> size_t { return 0; }
+
+auto TokenStub::getStopIndex() const -> size_t { return 0; }
+
+auto TokenStub::getTokenSource() const -> antlr4::TokenSource * { return _source; }
+
+auto TokenStub::getInputStream() const -> antlr4::CharStream * { return nullptr; }
+
+auto TokenStub::toString() const -> std::string { return ""; }
