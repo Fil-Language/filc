@@ -27,7 +27,8 @@
 #include <sstream>
 
 TEST(FilCompiler, run) {
-    auto compiler = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout), filc::ValidationVisitor());
+    auto compiler =
+        filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout), filc::ValidationVisitor(std::cout));
 
     SCOPED_TRACE("No argument");
     ASSERT_EQ(0, compiler.run(1, toStringArray({"filc"}).data()));
@@ -41,7 +42,7 @@ TEST(FilCompiler, run) {
 
 TEST(FilCompiler, dumpAST) {
     std::stringstream ss;
-    auto compiler = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(ss), filc::ValidationVisitor());
+    auto compiler = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(ss), filc::ValidationVisitor(std::cout));
     ASSERT_EQ(0, compiler.run(3, toStringArray({"filc", "--dump=ast", FIXTURES_PATH "/sample.fil"}).data()));
     std::string result(std::istreambuf_iterator<char>(ss), {});
     ASSERT_STREQ("=== Begin AST dump ===\n"

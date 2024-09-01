@@ -32,6 +32,8 @@
 
 using namespace ::testing;
 
+TEST(Parser, nonExistingFile) { ASSERT_THROW(filc::ParserProxy::parse("non-existing-file"), std::logic_error); }
+
 TEST(Parser, parseSample) {
     const auto program = filc::ParserProxy::parse(FIXTURES_PATH "/sample.fil");
     ASSERT_THAT(program->getExpressions(), SizeIs(11));

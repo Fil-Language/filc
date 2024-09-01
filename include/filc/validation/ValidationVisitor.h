@@ -42,6 +42,8 @@ class ValidationContext final {
 
     auto set(const std::string &key, const std::any &value) -> void;
 
+    [[nodiscard]] auto has(const std::string &key) const -> bool;
+
     template<typename T>
     auto get(const std::string &key) const -> T {
         if (_values.find(key) == _values.end()) {
@@ -58,6 +60,8 @@ class ValidationContext final {
 
 class ValidationVisitor final : public Visitor {
   public:
+    explicit ValidationVisitor(std::ostream &out);
+
     auto visitProgram(Program *program) -> void override;
 
     auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
@@ -77,6 +81,10 @@ class ValidationVisitor final : public Visitor {
     auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
 
     auto visitAssignation(Assignation *assignation) -> void override;
+
+  private:
+    std::unique_ptr<ValidationContext> _context;
+    std::ostream &_out;
 };
 }
 

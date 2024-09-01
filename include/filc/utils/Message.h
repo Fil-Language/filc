@@ -27,6 +27,9 @@
 #include "filc/grammar/Position.h"
 #include <string>
 
+#define WARNING "WARNING"
+#define WARNING_COLOR "\033[33m"
+
 namespace filc {
 class Message final {
   public:

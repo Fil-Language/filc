@@ -36,18 +36,21 @@ TEST(ValidationContext, stack_unstack) {
 
 TEST(ValidationContext, get_non_existing) {
     filc::ValidationContext context;
+    ASSERT_FALSE(context.has("non-existing"));
     ASSERT_THROW(context.get<int>("non-existing"), std::logic_error);
 }
 
 TEST(ValidationContext, get_set_scalar) {
     filc::ValidationContext context;
     context.set("int_value", 2);
+    ASSERT_TRUE(context.has("int_value"));
     ASSERT_EQ(2, context.get<int>("int_value"));
 }
 
 TEST(ValidationContext, get_set_string) {
     filc::ValidationContext context;
     context.set("string_value", std::string("Hello"));
+    ASSERT_TRUE(context.has("string_value"));
     ASSERT_STREQ("Hello", context.get<std::string>("string_value").c_str());
 }
 
@@ -61,6 +64,7 @@ TEST(ValidationContext, get_set_structure) {
     filc::ValidationContext context;
     SomeStructure value = {2, "Hello World", {'a', 'b', 'c', 'd', 'e'}};
     context.set("struct_value", value);
+    ASSERT_TRUE(context.has("struct_value"));
     auto found = context.get<SomeStructure>("struct_value");
     ASSERT_EQ(2, found._a);
     ASSERT_STREQ("Hello World", found._b.c_str());
@@ -82,5 +86,6 @@ TEST(ValidationContext, get_set_object) {
     filc::ValidationContext context;
     SomeClass value;
     context.set("object_value", value);
+    ASSERT_TRUE(context.has("object_value"));
     ASSERT_TRUE(value.equals(context.get<SomeClass>("object_value")));
 }

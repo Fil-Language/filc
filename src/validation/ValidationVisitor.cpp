@@ -22,36 +22,50 @@
  * SOFTWARE.
  */
 #include "filc/validation/ValidationVisitor.h"
-#include "filc/grammar/expression/Expression.h"
+#include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
+#include "filc/utils/Message.h"
 #include <stdexcept>
 
 using namespace filc;
 
+ValidationVisitor::ValidationVisitor(std::ostream &out) : _context(new ValidationContext()), _out(out) {}
+
 auto ValidationVisitor::visitProgram(Program *program) -> void {
     for (const auto &expression : program->getExpressions()) {
+        _context->set("return", true);
         expression->accept(this);
     }
 }
 
 auto ValidationVisitor::visitBooleanLiteral(BooleanLiteral *literal) -> void {
-    throw std::logic_error("Not implemented yet");
+    if (_context->has("return") && _context->get<bool>("return")) {
+        _out << Message(WARNING, "Boolean value not used", literal->getPosition(), WARNING_COLOR);
+    }
 }
 
 auto ValidationVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
-    throw std::logic_error("Not implemented yet");
+    if (_context->has("return") && _context->get<bool>("return")) {
+        _out << Message(WARNING, "Integer value not used", literal->getPosition(), WARNING_COLOR);
+    }
 }
 
 auto ValidationVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
-    throw std::logic_error("Not implemented yet");
+    if (_context->has("return") && _context->get<bool>("return")) {
+        _out << Message(WARNING, "Float value not used", literal->getPosition(), WARNING_COLOR);
+    }
 }
 
 auto ValidationVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void {
-    throw std::logic_error("Not implemented yet");
+    if (_context->has("return") && _context->get<bool>("return")) {
+        _out << Message(WARNING, "Character value not used", literal->getPosition(), WARNING_COLOR);
+    }
 }
 
 auto ValidationVisitor::visitStringLiteral(StringLiteral *literal) -> void {
-    throw std::logic_error("Not implemented yet");
+    if (_context->has("return") && _context->get<bool>("return")) {
+        _out << Message(WARNING, "String value not used", literal->getPosition(), WARNING_COLOR);
+    }
 }
 
 auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) -> void {

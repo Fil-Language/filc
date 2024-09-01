@@ -32,3 +32,5 @@ auto ValidationContext::stack() -> ValidationContext * { return new ValidationCo
 auto ValidationContext::unstack() const -> ValidationContext * { return _parent; }
 
 auto ValidationContext::set(const std::string &key, const std::any &value) -> void { _values[key] = value; }
+
+auto ValidationContext::has(const std::string &key) const -> bool { return _values.find(key) != _values.end(); }

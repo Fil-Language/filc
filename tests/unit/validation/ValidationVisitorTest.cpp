@@ -21,68 +21,76 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <filc/grammar/assignation/Assignation.h>
-#include <filc/grammar/calcul/Calcul.h>
-#include <filc/grammar/identifier/Identifier.h>
-#include <filc/grammar/literal/Literal.h>
+#include <filc/grammar/Parser.h>
 #include <filc/grammar/program/Program.h>
-#include <filc/grammar/variable/Variable.h>
 #include <filc/validation/ValidationVisitor.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
 
+using namespace ::testing;
+
+#define VISITOR                                                                                                        \
+    std::stringstream ss;                                                                                              \
+    filc::ValidationVisitor visitor(ss)
+
+#define VALIDATION_FIXTURES FIXTURES_PATH "/validation"
+
 TEST(ValidationVisitor, visitBooleanLiteral) {
-    filc::ValidationVisitor visitor;
-    filc::Program program({std::make_shared<filc::BooleanLiteral>(true)});
-    ASSERT_THROW(program.accept(&visitor), std::logic_error);
+    VISITOR;
+    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/boolean.fil");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Boolean value not used"));
 }
 
 TEST(ValidationVisitor, visitIntegerLiteral) {
-    filc::ValidationVisitor visitor;
-    filc::Program program({std::make_shared<filc::IntegerLiteral>(12)});
-    ASSERT_THROW(program.accept(&visitor), std::logic_error);
+    VISITOR;
+    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/integer.fil");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Integer value not used"));
 }
 
 TEST(ValidationVisitor, visitFloatLiteral) {
-    filc::ValidationVisitor visitor;
-    filc::Program program({std::make_shared<filc::FloatLiteral>(4.6)});
-    ASSERT_THROW(program.accept(&visitor), std::logic_error);
+    VISITOR;
+    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/float.fil");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Float value not used"));
 }
 
 TEST(ValidationVisitor, visitCharacterLiteral) {
-    filc::ValidationVisitor visitor;
-    filc::Program program({std::make_shared<filc::CharacterLiteral>('g')});
-    ASSERT_THROW(program.accept(&visitor), std::logic_error);
+    VISITOR;
+    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/character.fil");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Character value not used"));
 }
 
 TEST(ValidationVisitor, visitStringLiteral) {
-    filc::ValidationVisitor visitor;
-    filc::Program program({std::make_shared<filc::StringLiteral>("hello")});
-    ASSERT_THROW(program.accept(&visitor), std::logic_error);
+    VISITOR;
+    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/string.fil");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("String value not used"));
 }
 
 TEST(ValidationVisitor, visitVariableDeclaration) {
-    filc::ValidationVisitor visitor;
-    filc::Program program(
-        {std::make_shared<filc::VariableDeclaration>(true, "name", "i32", std::make_shared<filc::IntegerLiteral>(45))});
-    ASSERT_THROW(program.accept(&visitor), std::logic_error);
+    VISITOR;
+    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/variable.fil");
+    ASSERT_THROW(program->accept(&visitor), std::logic_error);
 }
 
 TEST(ValidationVisitor, visitIdentifier) {
-    filc::ValidationVisitor visitor;
-    filc::Program program({std::make_shared<filc::Identifier>("foo")});
-    ASSERT_THROW(program.accept(&visitor), std::logic_error);
+    VISITOR;
+    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/identifier.fil");
+    ASSERT_THROW(program->accept(&visitor), std::logic_error);
 }
 
 TEST(ValidationVisitor, visitBinaryCalcul) {
-    filc::ValidationVisitor visitor;
-    filc::Program program({std::make_shared<filc::BinaryCalcul>(std::make_shared<filc::IntegerLiteral>(2), "+",
-                                                                std::make_shared<filc::IntegerLiteral>(3))});
-    ASSERT_THROW(program.accept(&visitor), std::logic_error);
+    VISITOR;
+    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/binary.fil");
+    ASSERT_THROW(program->accept(&visitor), std::logic_error);
 }
 
 TEST(ValidationVisitor, visitAssignation) {
-    filc::ValidationVisitor visitor;
-    filc::Program program({std::make_shared<filc::Assignation>("id", std::make_shared<filc::IntegerLiteral>(478))});
-    ASSERT_THROW(program.accept(&visitor), std::logic_error);
+    VISITOR;
+    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/assignation.fil");
+    ASSERT_THROW(program->accept(&visitor), std::logic_error);
 }

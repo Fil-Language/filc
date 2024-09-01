@@ -28,8 +28,9 @@
 #define FILENAME FIXTURES_PATH "/ipsum.txt"
 
 TEST(Message, write) {
-    filc::Message message("WARNING", "This is a warning message",
-                          filc::Position(new TokenStub(FILENAME, {1, 7}), new TokenStub(FILENAME, {1, 7})), "\033[33m");
+    filc::Message message(WARNING, "This is a warning message",
+                          filc::Position(new TokenStub(FILENAME, {1, 7}), new TokenStub(FILENAME, {1, 7})),
+                          WARNING_COLOR);
     std::stringstream ss;
     ss << message;
     std::string dump(std::istreambuf_iterator<char>(ss), {});
