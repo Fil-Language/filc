@@ -26,6 +26,7 @@
 
 #include "filc/grammar/Visitor.h"
 #include <memory>
+#include <stack>
 #include <map>
 #include <any>
 #include <string>
@@ -34,11 +35,11 @@
 namespace filc {
 class ValidationContext final {
   public:
-    explicit ValidationContext(ValidationContext* parent = nullptr);
+    ValidationContext();
 
-    [[nodiscard]] auto stack() -> ValidationContext*;
+    auto stack() -> void;
 
-    [[nodiscard]] auto unstack() const -> ValidationContext*;
+    auto unstack() -> void;
 
     auto set(const std::string &key, const std::any &value) -> void;
 
@@ -46,16 +47,15 @@ class ValidationContext final {
 
     template<typename T>
     auto get(const std::string &key) const -> T {
-        if (_values.find(key) == _values.end()) {
+        if (_values.top().find(key) == _values.top().end()) {
             throw std::logic_error("There is not value for key: " + key);
         }
 
-        return std::any_cast<T>(_values.at(key));
+        return std::any_cast<T>(_values.top().at(key));
     }
 
   private:
-    ValidationContext* _parent;
-    std::map<std::string, std::any> _values;
+    std::stack<std::map<std::string, std::any>> _values;
 };
 
 class ValidationVisitor final : public Visitor {

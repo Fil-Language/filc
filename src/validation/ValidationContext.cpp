@@ -25,12 +25,18 @@
 
 using namespace filc;
 
-ValidationContext::ValidationContext(ValidationContext *parent) : _parent(parent) {}
+ValidationContext::ValidationContext() { stack(); }
 
-auto ValidationContext::stack() -> ValidationContext * { return new ValidationContext(this); }
+auto ValidationContext::stack() -> void { _values.emplace(); }
 
-auto ValidationContext::unstack() const -> ValidationContext * { return _parent; }
+auto ValidationContext::unstack() -> void {
+    if (_values.size() > 1) {
+        _values.pop();
+    }
+}
 
-auto ValidationContext::set(const std::string &key, const std::any &value) -> void { _values[key] = value; }
+auto ValidationContext::set(const std::string &key, const std::any &value) -> void { _values.top()[key] = value; }
 
-auto ValidationContext::has(const std::string &key) const -> bool { return _values.find(key) != _values.end(); }
+auto ValidationContext::has(const std::string &key) const -> bool {
+    return _values.top().find(key) != _values.top().end();
+}

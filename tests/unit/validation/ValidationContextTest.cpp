@@ -29,9 +29,13 @@ using namespace ::testing;
 
 TEST(ValidationContext, stack_unstack) {
     filc::ValidationContext context;
-    auto new_context = context.stack();
-    ASSERT_NE(&context, new_context);
-    ASSERT_EQ(&context, new_context->unstack());
+    context.set("key", 3);
+    ASSERT_TRUE(context.has("key"));
+    context.stack();
+    ASSERT_FALSE(context.has("key"));
+    context.unstack();
+    ASSERT_TRUE(context.has("key"));
+    ASSERT_EQ(3, context.get<int>("key"));
 }
 
 TEST(ValidationContext, get_non_existing) {
