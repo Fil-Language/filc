@@ -26,7 +26,6 @@
 
 using namespace filc;
 
-#define BOLD "\033[1m"
 #define RESET "\033[0m"
 
 Position::Position() : _start_position(0, 0), _end_position(0, 0) {}
