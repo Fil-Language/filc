@@ -25,6 +25,7 @@
 #define FILC_VALIDATIONVISITOR_H
 
 #include "filc/grammar/Visitor.h"
+#include "filc/validation/Environment.h"
 #include <memory>
 #include <stack>
 #include <map>
@@ -53,6 +54,8 @@ class ValidationContext final {
 
         return std::any_cast<T>(_values.top().at(key));
     }
+
+    auto clear() -> void;
 
   private:
     std::stack<std::map<std::string, std::any>> _values;
@@ -84,6 +87,7 @@ class ValidationVisitor final : public Visitor {
 
   private:
     std::unique_ptr<ValidationContext> _context;
+    std::unique_ptr<Environment> _environment;
     std::ostream &_out;
 };
 }

@@ -93,3 +93,11 @@ TEST(ValidationContext, get_set_object) {
     ASSERT_TRUE(context.has("object_value"));
     ASSERT_TRUE(value.equals(context.get<SomeClass>("object_value")));
 }
+
+TEST(ValidationContext, clear) {
+    filc::ValidationContext context;
+    context.set("key", "value");
+    ASSERT_TRUE(context.has("key"));
+    context.clear();
+    ASSERT_FALSE(context.has("key"));
+}

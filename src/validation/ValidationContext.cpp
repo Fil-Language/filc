@@ -40,3 +40,5 @@ auto ValidationContext::set(const std::string &key, const std::any &value) -> vo
 auto ValidationContext::has(const std::string &key) const -> bool {
     return _values.top().find(key) != _values.top().end();
 }
+
+auto ValidationContext::clear() -> void { _values.top().clear(); }

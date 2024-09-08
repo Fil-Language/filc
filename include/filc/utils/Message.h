@@ -29,6 +29,8 @@
 
 #define WARNING "WARNING"
 #define WARNING_COLOR "\033[33m"
+#define ERROR "ERROR"
+#define ERROR_COLOR "\033[31m"
 
 namespace filc {
 class Message final {

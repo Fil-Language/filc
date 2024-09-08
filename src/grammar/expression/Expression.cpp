@@ -30,3 +30,7 @@ Expression::Expression() = default;
 auto Expression::setPosition(const Position &position) -> void { _position = position; }
 
 auto Expression::getPosition() const -> const Position & { return _position; }
+
+auto Expression::setType(const std::shared_ptr<AbstractType> &type) -> void { _type = type; }
+
+auto Expression::getType() const -> const std::shared_ptr<AbstractType> & { return _type; }

@@ -29,41 +29,72 @@
 
 using namespace filc;
 
-ValidationVisitor::ValidationVisitor(std::ostream &out) : _context(new ValidationContext()), _out(out) {}
+ValidationVisitor::ValidationVisitor(std::ostream &out)
+    : _context(new ValidationContext()), _environment(new Environment()), _out(out) {}
 
 auto ValidationVisitor::visitProgram(Program *program) -> void {
-    for (const auto &expression : program->getExpressions()) {
-        _context->set("return", true);
-        expression->accept(this);
+    auto expressions = program->getExpressions();
+    for (auto it = expressions.begin(); it != expressions.end(); it++) {
+        if (it + 1 != expressions.end()) {
+            _context->set("alone", true);
+        }
+
+        (*it)->accept(this);
+
+        if (it + 1 == expressions.end()) {
+            const auto expected = _environment->getType("int");
+            const auto found_type = (*it)->getType();
+            if (found_type != expected) {
+                auto found_type_name = found_type->getDisplayName() != found_type->getName()
+                                           ? found_type->getDisplayName() + " aka " + found_type->getName()
+                                           : found_type->getDisplayName();
+                _out << Message(ERROR,
+                                "Expected type " + expected->getDisplayName() + " aka " + expected->getName() +
+                                    " but got " + found_type_name,
+                                (*it)->getPosition(), ERROR_COLOR);
+            }
+        }
+
+        _context->clear();
     }
 }
 
 auto ValidationVisitor::visitBooleanLiteral(BooleanLiteral *literal) -> void {
-    if (_context->has("return") && _context->get<bool>("return")) {
+    literal->setType(_environment->getType("bool"));
+
+    if (_context->has("alone") && _context->get<bool>("alone")) {
         _out << Message(WARNING, "Boolean value not used", literal->getPosition(), WARNING_COLOR);
     }
 }
 
 auto ValidationVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
-    if (_context->has("return") && _context->get<bool>("return")) {
+    literal->setType(_environment->getType("int"));
+
+    if (_context->has("alone") && _context->get<bool>("alone")) {
         _out << Message(WARNING, "Integer value not used", literal->getPosition(), WARNING_COLOR);
     }
 }
 
 auto ValidationVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
-    if (_context->has("return") && _context->get<bool>("return")) {
+    literal->setType(_environment->getType("f64"));
+
+    if (_context->has("alone") && _context->get<bool>("alone")) {
         _out << Message(WARNING, "Float value not used", literal->getPosition(), WARNING_COLOR);
     }
 }
 
 auto ValidationVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void {
-    if (_context->has("return") && _context->get<bool>("return")) {
+    literal->setType(_environment->getType("char"));
+
+    if (_context->has("alone") && _context->get<bool>("alone")) {
         _out << Message(WARNING, "Character value not used", literal->getPosition(), WARNING_COLOR);
     }
 }
 
 auto ValidationVisitor::visitStringLiteral(StringLiteral *literal) -> void {
-    if (_context->has("return") && _context->get<bool>("return")) {
+    literal->setType(_environment->getType("char*"));
+
+    if (_context->has("alone") && _context->get<bool>("alone")) {
         _out << Message(WARNING, "String value not used", literal->getPosition(), WARNING_COLOR);
     }
 }

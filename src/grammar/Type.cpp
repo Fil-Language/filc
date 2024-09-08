@@ -21,35 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
-
-#include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
-#include "filc/grammar/Position.h"
 #include "filc/grammar/Type.h"
-#include <string>
+#include <utility>
 
-namespace filc {
-class Expression: public Visitable {
-  public:
-    virtual ~Expression() = default;
+using namespace filc;
 
-    auto setPosition(const Position& position) -> void;
+Type::Type(std::string name) : _name(std::move(name)) {}
 
-    [[nodiscard]] auto getPosition() const -> const Position&;
+std::string Type::getName() const noexcept { return _name; }
 
-    auto setType(const std::shared_ptr<AbstractType> &type) -> void;
+std::string Type::getDisplayName() const noexcept { return getName(); }
 
-    [[nodiscard]] auto getType() const -> const std::shared_ptr<AbstractType>&;
+PointerType::PointerType(std::shared_ptr<AbstractType> pointed_type) : _pointed_type(std::move(pointed_type)) {}
 
-  protected:
-    Expression();
+auto PointerType::getName() const noexcept -> std::string { return _pointed_type->getName() + "*"; }
 
-  private:
-    Position _position;
-    std::shared_ptr<AbstractType> _type;
-};
+auto PointerType::getDisplayName() const noexcept -> std::string { return _pointed_type->getDisplayName() + "*"; }
+
+AliasType::AliasType(std::string name, std::shared_ptr<AbstractType> aliased_type)
+    : _name(std::move(name)), _aliased_type(std::move(aliased_type)) {}
+
+auto AliasType::getName() const noexcept -> std::string { return _aliased_type->getName(); }
+
+auto AliasType::getDisplayName() const noexcept -> std::string { return _name; }
+
+auto operator==(const std::shared_ptr<AbstractType> &a, const std::shared_ptr<AbstractType> &b) -> bool {
+    return a->getName() == b->getName();
 }
 
-#endif // FILC_EXPRESSION_H
+auto operator!=(const std::shared_ptr<AbstractType> &a, const std::shared_ptr<AbstractType> &b) -> bool {
+    return !(a == b);
+}
