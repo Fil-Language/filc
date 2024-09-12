@@ -24,6 +24,7 @@
 #include "filc/validation/ValidationVisitor.h"
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
+#include "filc/grammar/variable/Variable.h"
 #include "filc/utils/Message.h"
 #include <stdexcept>
 
@@ -35,8 +36,8 @@ ValidationVisitor::ValidationVisitor(std::ostream &out)
 auto ValidationVisitor::visitProgram(Program *program) -> void {
     auto expressions = program->getExpressions();
     for (auto it = expressions.begin(); it != expressions.end(); it++) {
-        if (it + 1 != expressions.end()) {
-            _context->set("alone", true);
+        if (it + 1 == expressions.end()) {
+            _context->set("return", true);
         }
 
         (*it)->accept(this);
@@ -62,7 +63,7 @@ auto ValidationVisitor::visitProgram(Program *program) -> void {
 auto ValidationVisitor::visitBooleanLiteral(BooleanLiteral *literal) -> void {
     literal->setType(_environment->getType("bool"));
 
-    if (_context->has("alone") && _context->get<bool>("alone")) {
+    if (!_context->has("return") || !_context->get<bool>("return")) {
         _out << Message(WARNING, "Boolean value not used", literal->getPosition(), WARNING_COLOR);
     }
 }
@@ -70,7 +71,7 @@ auto ValidationVisitor::visitBooleanLiteral(BooleanLiteral *literal) -> void {
 auto ValidationVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
     literal->setType(_environment->getType("int"));
 
-    if (_context->has("alone") && _context->get<bool>("alone")) {
+    if (!_context->has("return") || !_context->get<bool>("return")) {
         _out << Message(WARNING, "Integer value not used", literal->getPosition(), WARNING_COLOR);
     }
 }
@@ -78,7 +79,7 @@ auto ValidationVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
 auto ValidationVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
     literal->setType(_environment->getType("f64"));
 
-    if (_context->has("alone") && _context->get<bool>("alone")) {
+    if (!_context->has("return") || !_context->get<bool>("return")) {
         _out << Message(WARNING, "Float value not used", literal->getPosition(), WARNING_COLOR);
     }
 }
@@ -86,7 +87,7 @@ auto ValidationVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
 auto ValidationVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void {
     literal->setType(_environment->getType("char"));
 
-    if (_context->has("alone") && _context->get<bool>("alone")) {
+    if (!_context->has("return") || !_context->get<bool>("return")) {
         _out << Message(WARNING, "Character value not used", literal->getPosition(), WARNING_COLOR);
     }
 }
@@ -94,13 +95,59 @@ auto ValidationVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void
 auto ValidationVisitor::visitStringLiteral(StringLiteral *literal) -> void {
     literal->setType(_environment->getType("char*"));
 
-    if (_context->has("alone") && _context->get<bool>("alone")) {
+    if (!_context->has("return") || !_context->get<bool>("return")) {
         _out << Message(WARNING, "String value not used", literal->getPosition(), WARNING_COLOR);
     }
 }
 
 auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) -> void {
-    throw std::logic_error("Not implemented yet");
+    if (variable->isConstant() && variable->getValue() == nullptr) {
+        _out << Message(ERROR, "When declaring a constant, you must provide it a value", variable->getPosition(),
+                        ERROR_COLOR);
+        return;
+    }
+
+    std::shared_ptr<AbstractType> variable_type = nullptr;
+    if (!variable->getTypeName().empty()) {
+        if (!_environment->hasType(variable->getTypeName())) {
+            _out << Message(ERROR, "Unknown type: " + variable->getTypeName(), variable->getPosition(), ERROR_COLOR);
+            return;
+        }
+        variable_type = _environment->getType(variable->getTypeName());
+    }
+
+    if (variable->getValue() != nullptr) {
+        _context->stack();
+        _context->set("return", true);
+        variable->getValue()->accept(this);
+        const auto value_type = variable->getValue()->getType();
+        if (value_type == nullptr) {
+            throw std::logic_error("Variable value has no type");
+        }
+        if (variable_type != nullptr && variable_type->getName() != value_type->getName()) {
+            const auto variable_type_dump = variable_type->getDisplayName() != variable_type->getName()
+                                                ? variable_type->getDisplayName() + " aka " + variable_type->getName()
+                                                : variable_type->getDisplayName();
+            const auto value_type_dump = value_type->getDisplayName() != value_type->getName()
+                                             ? value_type->getDisplayName() + " aka " + value_type->getName()
+                                             : value_type->getDisplayName();
+            _out << Message(ERROR,
+                            "Cannot assign value of type " + value_type_dump + " to a variable of type " +
+                                variable_type_dump,
+                            variable->getPosition(), ERROR_COLOR);
+            return;
+        } else if (variable_type == nullptr) {
+            variable_type = value_type;
+        }
+    }
+
+    if (variable_type == nullptr) {
+        _out << Message(ERROR, "When declaring a variable, you must provide at least a type or a value",
+                        variable->getPosition(), ERROR_COLOR);
+        return;
+    }
+
+    variable->setType(variable_type);
 }
 
 auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {

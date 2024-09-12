@@ -94,7 +94,9 @@ TEST(ValidationVisitor, visitStringLiteral) {
 TEST(ValidationVisitor, visitVariableDeclaration) {
     VISITOR;
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/variable.fil");
-    ASSERT_THROW(program->accept(&visitor), std::logic_error);
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_STREQ("i32", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
 TEST(ValidationVisitor, visitIdentifier) {
