@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "filc/validation/ValidationVisitor.h"
+#include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
@@ -101,6 +102,11 @@ auto ValidationVisitor::visitStringLiteral(StringLiteral *literal) -> void {
 }
 
 auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) -> void {
+    if (_environment->hasName(variable->getName())) {
+        _out << Message(ERROR, variable->getName() + " is already defined", variable->getPosition(), ERROR_COLOR);
+        return;
+    }
+
     if (variable->isConstant() && variable->getValue() == nullptr) {
         _out << Message(ERROR, "When declaring a constant, you must provide it a value", variable->getPosition(),
                         ERROR_COLOR);
@@ -148,10 +154,22 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
     }
 
     variable->setType(variable_type);
+    _environment->addName(Name(variable->getName(), variable_type));
 }
 
 auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
-    throw std::logic_error("Not implemented yet");
+    if (!_environment->hasName(identifier->getName())) {
+        _out << Message(ERROR, "Unknown name, don't what it refers to: " + identifier->getName(),
+                        identifier->getPosition(), ERROR_COLOR);
+        return;
+    }
+
+    const auto name = _environment->getName(identifier->getName());
+    identifier->setType(name.getType());
+
+    if (!_context->has("return") || !_context->get<bool>("return")) {
+        _out << Message(WARNING, "Value not used", identifier->getPosition(), WARNING_COLOR);
+    }
 }
 
 auto ValidationVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {

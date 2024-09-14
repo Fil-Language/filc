@@ -21,35 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_ENVIRONMENT_H
-#define FILC_ENVIRONMENT_H
+#include <filc/validation/Name.h>
+#include <gtest/gtest.h>
 
-#include "filc/grammar/Type.h"
-#include "filc/validation/Name.h"
-#include <map>
-#include <string>
-
-namespace filc {
-class Environment {
-  public:
-    Environment();
-
-    [[nodiscard]] auto hasType(const std::string &name) const -> bool;
-
-    [[nodiscard]] auto getType(const std::string &name) const -> const std::shared_ptr<AbstractType> &;
-
-    auto addType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto hasName(const std::string &name) const -> bool;
-
-    [[nodiscard]] auto getName(const std::string &name) const -> const Name&;
-
-    auto addName(const Name &name) -> void;
-
-  private:
-    std::map<std::string, std::shared_ptr<AbstractType>> _types;
-    std::map<std::string, Name> _names;
-};
+TEST(Name, defaultConstructor) {
+    filc::Name name;
+    ASSERT_STREQ("", name.getName().c_str());
+    ASSERT_EQ(nullptr, name.getType());
 }
 
-#endif // FILC_ENVIRONMENT_H
+TEST(Name, constructor) {
+    filc::Name name("my_var", std::make_shared<filc::Type>("i32"));
+    ASSERT_STREQ("my_var", name.getName().c_str());
+    ASSERT_STREQ("i32", name.getType()->getName().c_str());
+}

@@ -21,35 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_ENVIRONMENT_H
-#define FILC_ENVIRONMENT_H
-
-#include "filc/grammar/Type.h"
 #include "filc/validation/Name.h"
-#include <map>
-#include <string>
+#include <utility>
 
-namespace filc {
-class Environment {
-  public:
-    Environment();
+using namespace filc;
 
-    [[nodiscard]] auto hasType(const std::string &name) const -> bool;
+Name::Name() = default;
 
-    [[nodiscard]] auto getType(const std::string &name) const -> const std::shared_ptr<AbstractType> &;
+Name::Name(std::string name, std::shared_ptr<AbstractType> type) : _name(std::move(name)), _type(std::move(type)) {}
 
-    auto addType(const std::shared_ptr<AbstractType> &type) -> void;
+auto Name::getName() const -> const std::string & { return _name; }
 
-    [[nodiscard]] auto hasName(const std::string &name) const -> bool;
-
-    [[nodiscard]] auto getName(const std::string &name) const -> const Name&;
-
-    auto addName(const Name &name) -> void;
-
-  private:
-    std::map<std::string, std::shared_ptr<AbstractType>> _types;
-    std::map<std::string, Name> _names;
-};
-}
-
-#endif // FILC_ENVIRONMENT_H
+auto Name::getType() const -> std::shared_ptr<AbstractType> { return _type; }

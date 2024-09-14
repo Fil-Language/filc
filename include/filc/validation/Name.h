@@ -21,35 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_ENVIRONMENT_H
-#define FILC_ENVIRONMENT_H
+#ifndef FILC_NAME_H
+#define FILC_NAME_H
 
 #include "filc/grammar/Type.h"
-#include "filc/validation/Name.h"
-#include <map>
 #include <string>
+#include <memory>
 
 namespace filc {
-class Environment {
+class Name {
   public:
-    Environment();
+    Name();
 
-    [[nodiscard]] auto hasType(const std::string &name) const -> bool;
+    Name(std::string name, std::shared_ptr<AbstractType> type);
 
-    [[nodiscard]] auto getType(const std::string &name) const -> const std::shared_ptr<AbstractType> &;
+    [[nodiscard]] auto getName() const -> const std::string&;
 
-    auto addType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto hasName(const std::string &name) const -> bool;
-
-    [[nodiscard]] auto getName(const std::string &name) const -> const Name&;
-
-    auto addName(const Name &name) -> void;
+    [[nodiscard]] auto getType() const -> std::shared_ptr<AbstractType>;
 
   private:
-    std::map<std::string, std::shared_ptr<AbstractType>> _types;
-    std::map<std::string, Name> _names;
+    std::string _name;
+    std::shared_ptr<AbstractType> _type;
 };
 }
 
-#endif // FILC_ENVIRONMENT_H
+#endif // FILC_NAME_H

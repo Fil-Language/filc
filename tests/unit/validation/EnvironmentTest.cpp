@@ -55,3 +55,14 @@ TEST(Environment, Type) {
     ASSERT_TRUE(env.hasType("custom"));
     ASSERT_STREQ("custom", env.getType("custom")->getName().c_str());
 }
+
+TEST(Environment, Name) {
+    filc::Environment env;
+    ASSERT_FALSE(env.hasName("my_name"));
+    ASSERT_THROW(env.getName("my_name"), std::logic_error);
+    env.addName(filc::Name("my_name", env.getType("i32")));
+    ASSERT_THROW(env.addName(filc::Name("my_name", env.getType("i64"))), std::logic_error);
+    ASSERT_TRUE(env.hasName("my_name"));
+    ASSERT_STREQ("my_name", env.getName("my_name").getName().c_str());
+    ASSERT_STREQ("i32", env.getName("my_name").getType()->getName().c_str());
+}

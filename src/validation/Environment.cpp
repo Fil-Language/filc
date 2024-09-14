@@ -65,3 +65,19 @@ auto Environment::addType(const std::shared_ptr<AbstractType> &type) -> void {
     }
     _types[type->getDisplayName()] = type;
 }
+
+auto Environment::hasName(const std::string &name) const -> bool { return _names.find(name) != _names.end(); }
+
+auto Environment::getName(const std::string &name) const -> const Name & {
+    if (!hasName(name)) {
+        throw std::logic_error("Environment doesn't have name " + name);
+    }
+    return _names.at(name);
+}
+
+auto Environment::addName(const filc::Name &name) -> void {
+    if (hasName(name.getName())) {
+        throw std::logic_error("Environment already have name " + name.getName());
+    }
+    _names[name.getName()] = name;
+}
