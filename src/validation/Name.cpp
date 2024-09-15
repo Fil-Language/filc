@@ -26,9 +26,12 @@
 
 using namespace filc;
 
-Name::Name() = default;
+Name::Name() : _constant(true) {}
 
-Name::Name(std::string name, std::shared_ptr<AbstractType> type) : _name(std::move(name)), _type(std::move(type)) {}
+Name::Name(bool constant, std::string name, std::shared_ptr<AbstractType> type)
+    : _constant(constant), _name(std::move(name)), _type(std::move(type)) {}
+
+auto Name::isConstant() const -> bool { return _constant; }
 
 auto Name::getName() const -> const std::string & { return _name; }
 

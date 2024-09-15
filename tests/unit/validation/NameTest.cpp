@@ -26,12 +26,14 @@
 
 TEST(Name, defaultConstructor) {
     filc::Name name;
+    ASSERT_TRUE(name.isConstant());
     ASSERT_STREQ("", name.getName().c_str());
     ASSERT_EQ(nullptr, name.getType());
 }
 
 TEST(Name, constructor) {
-    filc::Name name("my_var", std::make_shared<filc::Type>("i32"));
+    filc::Name name(false, "my_var", std::make_shared<filc::Type>("i32"));
+    ASSERT_FALSE(name.isConstant());
     ASSERT_STREQ("my_var", name.getName().c_str());
     ASSERT_STREQ("i32", name.getType()->getName().c_str());
 }

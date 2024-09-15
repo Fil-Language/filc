@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "filc/validation/ValidationVisitor.h"
+#include "filc/grammar/assignation/Assignation.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
@@ -126,6 +127,7 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
         _context->stack();
         _context->set("return", true);
         variable->getValue()->accept(this);
+        _context->unstack();
         const auto value_type = variable->getValue()->getType();
         if (value_type == nullptr) {
             throw std::logic_error("Variable value has no type");
@@ -154,12 +156,12 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
     }
 
     variable->setType(variable_type);
-    _environment->addName(Name(variable->getName(), variable_type));
+    _environment->addName(Name(variable->isConstant(), variable->getName(), variable_type));
 }
 
 auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
     if (!_environment->hasName(identifier->getName())) {
-        _out << Message(ERROR, "Unknown name, don't what it refers to: " + identifier->getName(),
+        _out << Message(ERROR, "Unknown name, don't know what it refers to: " + identifier->getName(),
                         identifier->getPosition(), ERROR_COLOR);
         return;
     }
@@ -177,5 +179,34 @@ auto ValidationVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
 }
 
 auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
-    throw std::logic_error("Not implemented yet");
+    if (!_environment->hasName(assignation->getIdentifier())) {
+        _out << Message(ERROR, "Unknown name, don't know what it refers to: " + assignation->getIdentifier(),
+                        assignation->getPosition(), ERROR_COLOR);
+        return;
+    }
+    const auto name = _environment->getName(assignation->getIdentifier());
+    if (name.isConstant()) {
+        _out << Message(ERROR, "Cannot modify a constant", assignation->getPosition(), ERROR_COLOR);
+        return;
+    }
+
+    _context->stack();
+    _context->set("return", true);
+    assignation->getValue()->accept(this);
+    _context->unstack();
+    const auto value_type = assignation->getValue()->getType();
+    if (value_type->getName() != name.getType()->getName()) {
+        const auto variable_type_dump = name.getType()->getDisplayName() != name.getType()->getName()
+                                            ? name.getType()->getDisplayName() + " aka " + name.getType()->getName()
+                                            : name.getType()->getDisplayName();
+        const auto value_type_dump = value_type->getDisplayName() != value_type->getName()
+                                         ? value_type->getDisplayName() + " aka " + value_type->getName()
+                                         : value_type->getDisplayName();
+        _out << Message(
+            ERROR, "Cannot assign value of type " + value_type_dump + " to a variable of type " + variable_type_dump,
+            assignation->getPosition(), ERROR_COLOR);
+        return;
+    }
+
+    assignation->setType(name.getType());
 }

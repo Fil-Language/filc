@@ -60,9 +60,10 @@ TEST(Environment, Name) {
     filc::Environment env;
     ASSERT_FALSE(env.hasName("my_name"));
     ASSERT_THROW(env.getName("my_name"), std::logic_error);
-    env.addName(filc::Name("my_name", env.getType("i32")));
-    ASSERT_THROW(env.addName(filc::Name("my_name", env.getType("i64"))), std::logic_error);
+    env.addName(filc::Name(false, "my_name", env.getType("i32")));
+    ASSERT_THROW(env.addName(filc::Name(true, "my_name", env.getType("i64"))), std::logic_error);
     ASSERT_TRUE(env.hasName("my_name"));
+    ASSERT_FALSE(env.getName("my_name").isConstant());
     ASSERT_STREQ("my_name", env.getName("my_name").getName().c_str());
     ASSERT_STREQ("i32", env.getName("my_name").getType()->getName().c_str());
 }

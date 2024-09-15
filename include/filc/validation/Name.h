@@ -33,13 +33,16 @@ class Name {
   public:
     Name();
 
-    Name(std::string name, std::shared_ptr<AbstractType> type);
+    Name(bool constant, std::string name, std::shared_ptr<AbstractType> type);
+
+    [[nodiscard]] auto isConstant() const -> bool;
 
     [[nodiscard]] auto getName() const -> const std::string&;
 
     [[nodiscard]] auto getType() const -> std::shared_ptr<AbstractType>;
 
   private:
+    bool _constant;
     std::string _name;
     std::shared_ptr<AbstractType> _type;
 };
