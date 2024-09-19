@@ -54,12 +54,7 @@ auto ValidationVisitor::visitProgram(Program *program) -> void {
             }
 
             if (found_type != expected) {
-                auto found_type_name = found_type->getDisplayName() != found_type->getName()
-                                           ? found_type->getDisplayName() + " aka " + found_type->getName()
-                                           : found_type->getDisplayName();
-                _out << Message(ERROR,
-                                "Expected type " + expected->getDisplayName() + " aka " + expected->getName() +
-                                    " but got " + found_type_name,
+                _out << Message(ERROR, "Expected type " + expected->toDisplay() + " but got " + found_type->toDisplay(),
                                 (*it)->getPosition(), ERROR_COLOR);
             }
         }
@@ -142,15 +137,9 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
             throw std::logic_error("Variable value has no type");
         }
         if (variable_type != nullptr && variable_type->getName() != value_type->getName()) {
-            const auto variable_type_dump = variable_type->getDisplayName() != variable_type->getName()
-                                                ? variable_type->getDisplayName() + " aka " + variable_type->getName()
-                                                : variable_type->getDisplayName();
-            const auto value_type_dump = value_type->getDisplayName() != value_type->getName()
-                                             ? value_type->getDisplayName() + " aka " + value_type->getName()
-                                             : value_type->getDisplayName();
             _out << Message(ERROR,
-                            "Cannot assign value of type " + value_type_dump + " to a variable of type " +
-                                variable_type_dump,
+                            "Cannot assign value of type " + value_type->toDisplay() + " to a variable of type " +
+                                variable_type->toDisplay(),
                             variable->getPosition(), ERROR_COLOR);
             return;
         } else if (variable_type == nullptr) {
@@ -202,8 +191,8 @@ auto ValidationVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
 
     if (!CalculValidator::isCalculValid(left_type, calcul->getOperator(), right_type)) {
         _out << Message(ERROR,
-                        "You cannot use operator " + calcul->getOperator() + " with " + left_type->getDisplayName() +
-                            " and " + right_type->getDisplayName(),
+                        "You cannot use operator " + calcul->getOperator() + " with " + left_type->toDisplay() +
+                            " and " + right_type->toDisplay(),
                         calcul->getPosition(), ERROR_COLOR);
         return;
     }
@@ -236,15 +225,10 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
         return;
     }
     if (value_type->getName() != name.getType()->getName()) {
-        const auto variable_type_dump = name.getType()->getDisplayName() != name.getType()->getName()
-                                            ? name.getType()->getDisplayName() + " aka " + name.getType()->getName()
-                                            : name.getType()->getDisplayName();
-        const auto value_type_dump = value_type->getDisplayName() != value_type->getName()
-                                         ? value_type->getDisplayName() + " aka " + value_type->getName()
-                                         : value_type->getDisplayName();
-        _out << Message(
-            ERROR, "Cannot assign value of type " + value_type_dump + " to a variable of type " + variable_type_dump,
-            assignation->getPosition(), ERROR_COLOR);
+        _out << Message(ERROR,
+                        "Cannot assign value of type " + value_type->toDisplay() + " to a variable of type " +
+                            name.getType()->toDisplay(),
+                        assignation->getPosition(), ERROR_COLOR);
         return;
     }
 

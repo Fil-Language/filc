@@ -34,6 +34,8 @@ class AbstractType {
 
     [[nodiscard]] virtual auto getDisplayName() const noexcept -> std::string = 0;
 
+    [[nodiscard]] virtual auto toDisplay() const noexcept -> std::string = 0;
+
   protected:
     AbstractType() = default;
 };
@@ -45,6 +47,8 @@ class Type final: public AbstractType {
     [[nodiscard]] auto getName() const noexcept -> std::string override;
 
     [[nodiscard]] auto getDisplayName() const noexcept -> std::string override;
+
+    [[nodiscard]] auto toDisplay() const noexcept -> std::string override;
 
   private:
     std::string _name;
@@ -58,6 +62,8 @@ class PointerType final: public AbstractType {
 
     [[nodiscard]] auto getDisplayName() const noexcept -> std::string override;
 
+    [[nodiscard]] auto toDisplay() const noexcept -> std::string override;
+
   private:
     std::shared_ptr<AbstractType> _pointed_type;
 };
@@ -69,6 +75,8 @@ class AliasType final: public AbstractType {
     [[nodiscard]] auto getName() const noexcept -> std::string override;
 
     [[nodiscard]] auto getDisplayName() const noexcept -> std::string override;
+
+    [[nodiscard]] auto toDisplay() const noexcept -> std::string override;
 
   private:
     std::string _name;
