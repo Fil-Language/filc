@@ -110,7 +110,9 @@ TEST(ValidationVisitor, visitIdentifier) {
 TEST(ValidationVisitor, visitBinaryCalcul) {
     VISITOR;
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/binary.fil");
-    ASSERT_THROW(program->accept(&visitor), std::logic_error);
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_STREQ("int", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
 TEST(ValidationVisitor, visitAssignation) {

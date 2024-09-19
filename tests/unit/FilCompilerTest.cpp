@@ -72,3 +72,9 @@ TEST(FilCompiler, dumpAST) {
                  "=== End AST dump ===\n",
                  result.c_str());
 }
+
+TEST(FilCompiler, fullRun) {
+    std::stringstream ss;
+    auto compiler = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(ss), filc::ValidationVisitor(std::cout));
+    ASSERT_EQ(1, compiler.run(2, toStringArray({"filc", FIXTURES_PATH "/sample.fil"}).data()));
+}

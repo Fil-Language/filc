@@ -23,11 +23,13 @@
  */
 #include "filc/validation/ValidationVisitor.h"
 #include "filc/grammar/assignation/Assignation.h"
+#include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 #include "filc/utils/Message.h"
+#include "filc/validation/CalculValidator.h"
 #include <stdexcept>
 
 using namespace filc;
@@ -47,6 +49,10 @@ auto ValidationVisitor::visitProgram(Program *program) -> void {
         if (it + 1 == expressions.end()) {
             const auto expected = _environment->getType("int");
             const auto found_type = (*it)->getType();
+            if (found_type == nullptr) {
+                return;
+            }
+
             if (found_type != expected) {
                 auto found_type_name = found_type->getDisplayName() != found_type->getName()
                                            ? found_type->getDisplayName() + " aka " + found_type->getName()
@@ -121,6 +127,9 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
             return;
         }
         variable_type = _environment->getType(variable->getTypeName());
+        if (variable_type == nullptr) {
+            return;
+        }
     }
 
     if (variable->getValue() != nullptr) {
@@ -175,7 +184,35 @@ auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
 }
 
 auto ValidationVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
-    throw std::logic_error("Not implemented yet");
+    _context->stack();
+    _context->set("return", true);
+    calcul->getLeftExpression()->accept(this);
+    const auto left_type = calcul->getLeftExpression()->getType();
+    _context->unstack();
+
+    _context->stack();
+    _context->set("return", true);
+    calcul->getRightExpression()->accept(this);
+    const auto right_type = calcul->getRightExpression()->getType();
+    _context->unstack();
+
+    if (left_type == nullptr || right_type == nullptr) {
+        return;
+    }
+
+    if (!CalculValidator::isCalculValid(left_type, calcul->getOperator(), right_type)) {
+        _out << Message(ERROR,
+                        "You cannot use operator " + calcul->getOperator() + " with " + left_type->getDisplayName() +
+                            " and " + right_type->getDisplayName(),
+                        calcul->getPosition(), ERROR_COLOR);
+        return;
+    }
+
+    calcul->setType(left_type);
+
+    if (!_context->has("return") || !_context->get<bool>("return")) {
+        _out << Message(WARNING, "Value not used", calcul->getPosition(), WARNING_COLOR);
+    }
 }
 
 auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
@@ -195,6 +232,9 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
     assignation->getValue()->accept(this);
     _context->unstack();
     const auto value_type = assignation->getValue()->getType();
+    if (value_type == nullptr) {
+        return;
+    }
     if (value_type->getName() != name.getType()->getName()) {
         const auto variable_type_dump = name.getType()->getDisplayName() != name.getType()->getName()
                                             ? name.getType()->getDisplayName() + " aka " + name.getType()->getName()
