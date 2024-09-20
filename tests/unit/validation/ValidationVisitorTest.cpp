@@ -42,6 +42,7 @@ TEST(ValidationVisitor, visitProgram_valid) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/valid_program.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
 }
 
 TEST(ValidationVisitor, visitProgram_invalid) {
@@ -50,6 +51,7 @@ TEST(ValidationVisitor, visitProgram_invalid) {
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
                 HasSubstr("Expected type int aka i32 but got char* aka u8*"));
+    ASSERT_TRUE(visitor.hasError());
 }
 
 TEST(ValidationVisitor, visitBooleanLiteral) {
@@ -57,6 +59,7 @@ TEST(ValidationVisitor, visitBooleanLiteral) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/boolean.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Boolean value not used"));
+    ASSERT_FALSE(visitor.hasError());
 }
 
 TEST(ValidationVisitor, visitIntegerLiteral) {
@@ -64,6 +67,7 @@ TEST(ValidationVisitor, visitIntegerLiteral) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/integer.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Integer value not used"));
+    ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("int", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
@@ -72,6 +76,7 @@ TEST(ValidationVisitor, visitFloatLiteral) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/float.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Float value not used"));
+    ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("f64", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
@@ -80,6 +85,7 @@ TEST(ValidationVisitor, visitCharacterLiteral) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/character.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Character value not used"));
+    ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("char", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
@@ -88,6 +94,7 @@ TEST(ValidationVisitor, visitStringLiteral) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/string.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("String value not used"));
+    ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("char*", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
@@ -96,6 +103,7 @@ TEST(ValidationVisitor, visitVariableDeclaration) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/variable.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("i32", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
@@ -104,6 +112,7 @@ TEST(ValidationVisitor, visitIdentifier) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/identifier.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("int", program->getExpressions()[1]->getType()->getDisplayName().c_str());
 }
 
@@ -112,6 +121,7 @@ TEST(ValidationVisitor, visitBinaryCalcul) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/binary.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("int", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
@@ -120,5 +130,6 @@ TEST(ValidationVisitor, visitAssignation) {
     const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/assignation.fil");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("int", program->getExpressions()[1]->getType()->getDisplayName().c_str());
 }

@@ -35,7 +35,18 @@
 using namespace filc;
 
 ValidationVisitor::ValidationVisitor(std::ostream &out)
-    : _context(new ValidationContext()), _environment(new Environment()), _out(out) {}
+    : _context(new ValidationContext()), _environment(new Environment()), _out(out), _error(false) {}
+
+auto ValidationVisitor::hasError() const -> bool { return _error; }
+
+auto ValidationVisitor::displayError(const std::string &message, const Position &position) -> void {
+    _error = true;
+    _out << Message(ERROR, message, position, ERROR_COLOR);
+}
+
+auto ValidationVisitor::displayWarning(const std::string &message, const Position &position) const -> void {
+    _out << Message(WARNING, message, position, WARNING_COLOR);
+}
 
 auto ValidationVisitor::visitProgram(Program *program) -> void {
     auto expressions = program->getExpressions();
@@ -54,8 +65,8 @@ auto ValidationVisitor::visitProgram(Program *program) -> void {
             }
 
             if (found_type != expected) {
-                _out << Message(ERROR, "Expected type " + expected->toDisplay() + " but got " + found_type->toDisplay(),
-                                (*it)->getPosition(), ERROR_COLOR);
+                displayError("Expected type " + expected->toDisplay() + " but got " + found_type->toDisplay(),
+                             (*it)->getPosition());
             }
         }
 
@@ -67,7 +78,7 @@ auto ValidationVisitor::visitBooleanLiteral(BooleanLiteral *literal) -> void {
     literal->setType(_environment->getType("bool"));
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
-        _out << Message(WARNING, "Boolean value not used", literal->getPosition(), WARNING_COLOR);
+        displayWarning("Boolean value not used", literal->getPosition());
     }
 }
 
@@ -75,7 +86,7 @@ auto ValidationVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
     literal->setType(_environment->getType("int"));
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
-        _out << Message(WARNING, "Integer value not used", literal->getPosition(), WARNING_COLOR);
+        displayWarning("Integer value not used", literal->getPosition());
     }
 }
 
@@ -83,7 +94,7 @@ auto ValidationVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
     literal->setType(_environment->getType("f64"));
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
-        _out << Message(WARNING, "Float value not used", literal->getPosition(), WARNING_COLOR);
+        displayWarning("Float value not used", literal->getPosition());
     }
 }
 
@@ -91,7 +102,7 @@ auto ValidationVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void
     literal->setType(_environment->getType("char"));
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
-        _out << Message(WARNING, "Character value not used", literal->getPosition(), WARNING_COLOR);
+        displayWarning("Character value not used", literal->getPosition());
     }
 }
 
@@ -99,26 +110,25 @@ auto ValidationVisitor::visitStringLiteral(StringLiteral *literal) -> void {
     literal->setType(_environment->getType("char*"));
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
-        _out << Message(WARNING, "String value not used", literal->getPosition(), WARNING_COLOR);
+        displayWarning("String value not used", literal->getPosition());
     }
 }
 
 auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) -> void {
     if (_environment->hasName(variable->getName())) {
-        _out << Message(ERROR, variable->getName() + " is already defined", variable->getPosition(), ERROR_COLOR);
+        displayError(variable->getName() + " is already defined", variable->getPosition());
         return;
     }
 
     if (variable->isConstant() && variable->getValue() == nullptr) {
-        _out << Message(ERROR, "When declaring a constant, you must provide it a value", variable->getPosition(),
-                        ERROR_COLOR);
+        displayError("When declaring a constant, you must provide it a value", variable->getPosition());
         return;
     }
 
     std::shared_ptr<AbstractType> variable_type = nullptr;
     if (!variable->getTypeName().empty()) {
         if (!_environment->hasType(variable->getTypeName())) {
-            _out << Message(ERROR, "Unknown type: " + variable->getTypeName(), variable->getPosition(), ERROR_COLOR);
+            displayError("Unknown type: " + variable->getTypeName(), variable->getPosition());
             return;
         }
         variable_type = _environment->getType(variable->getTypeName());
@@ -137,10 +147,9 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
             throw std::logic_error("Variable value has no type");
         }
         if (variable_type != nullptr && variable_type->getName() != value_type->getName()) {
-            _out << Message(ERROR,
-                            "Cannot assign value of type " + value_type->toDisplay() + " to a variable of type " +
-                                variable_type->toDisplay(),
-                            variable->getPosition(), ERROR_COLOR);
+            displayError("Cannot assign value of type " + value_type->toDisplay() + " to a variable of type " +
+                             variable_type->toDisplay(),
+                         variable->getPosition());
             return;
         } else if (variable_type == nullptr) {
             variable_type = value_type;
@@ -148,8 +157,7 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
     }
 
     if (variable_type == nullptr) {
-        _out << Message(ERROR, "When declaring a variable, you must provide at least a type or a value",
-                        variable->getPosition(), ERROR_COLOR);
+        displayError("When declaring a variable, you must provide at least a type or a value", variable->getPosition());
         return;
     }
 
@@ -159,8 +167,7 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
 
 auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
     if (!_environment->hasName(identifier->getName())) {
-        _out << Message(ERROR, "Unknown name, don't know what it refers to: " + identifier->getName(),
-                        identifier->getPosition(), ERROR_COLOR);
+        displayError("Unknown name, don't know what it refers to: " + identifier->getName(), identifier->getPosition());
         return;
     }
 
@@ -168,7 +175,7 @@ auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
     identifier->setType(name.getType());
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
-        _out << Message(WARNING, "Value not used", identifier->getPosition(), WARNING_COLOR);
+        displayWarning("Value not used", identifier->getPosition());
     }
 }
 
@@ -190,29 +197,28 @@ auto ValidationVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
     }
 
     if (!CalculValidator::isCalculValid(left_type, calcul->getOperator(), right_type)) {
-        _out << Message(ERROR,
-                        "You cannot use operator " + calcul->getOperator() + " with " + left_type->toDisplay() +
-                            " and " + right_type->toDisplay(),
-                        calcul->getPosition(), ERROR_COLOR);
+        displayError("You cannot use operator " + calcul->getOperator() + " with " + left_type->toDisplay() + " and " +
+                         right_type->toDisplay(),
+                     calcul->getPosition());
         return;
     }
 
     calcul->setType(left_type);
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
-        _out << Message(WARNING, "Value not used", calcul->getPosition(), WARNING_COLOR);
+        displayWarning("Value not used", calcul->getPosition());
     }
 }
 
 auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
     if (!_environment->hasName(assignation->getIdentifier())) {
-        _out << Message(ERROR, "Unknown name, don't know what it refers to: " + assignation->getIdentifier(),
-                        assignation->getPosition(), ERROR_COLOR);
+        displayError("Unknown name, don't know what it refers to: " + assignation->getIdentifier(),
+                     assignation->getPosition());
         return;
     }
     const auto name = _environment->getName(assignation->getIdentifier());
     if (name.isConstant()) {
-        _out << Message(ERROR, "Cannot modify a constant", assignation->getPosition(), ERROR_COLOR);
+        displayError("Cannot modify a constant", assignation->getPosition());
         return;
     }
 
@@ -225,10 +231,9 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
         return;
     }
     if (value_type->getName() != name.getType()->getName()) {
-        _out << Message(ERROR,
-                        "Cannot assign value of type " + value_type->toDisplay() + " to a variable of type " +
-                            name.getType()->toDisplay(),
-                        assignation->getPosition(), ERROR_COLOR);
+        displayError("Cannot assign value of type " + value_type->toDisplay() + " to a variable of type " +
+                         name.getType()->toDisplay(),
+                     assignation->getPosition());
         return;
     }
 

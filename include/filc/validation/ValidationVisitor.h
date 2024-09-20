@@ -25,6 +25,7 @@
 #define FILC_VALIDATIONVISITOR_H
 
 #include "filc/grammar/Visitor.h"
+#include "filc/grammar/Position.h"
 #include "filc/validation/Environment.h"
 #include <memory>
 #include <stack>
@@ -65,6 +66,8 @@ class ValidationVisitor final : public Visitor {
   public:
     explicit ValidationVisitor(std::ostream &out);
 
+    [[nodiscard]] auto hasError() const -> bool;
+
     auto visitProgram(Program *program) -> void override;
 
     auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
@@ -89,6 +92,11 @@ class ValidationVisitor final : public Visitor {
     std::unique_ptr<ValidationContext> _context;
     std::unique_ptr<Environment> _environment;
     std::ostream &_out;
+    bool _error;
+
+    auto displayError(const std::string &message, const Position &position) -> void;
+
+    auto displayWarning(const std::string &message, const Position &position) const -> void;
 };
 }
 

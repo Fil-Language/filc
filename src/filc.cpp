@@ -61,6 +61,9 @@ auto FilCompiler::run(int argc, char **argv) -> int {
     }
 
     program->accept(&_validation_visitor);
+    if (_validation_visitor.hasError()) {
+        return 1;
+    }
 
-    return 1;
+    return 0;
 }
