@@ -47,8 +47,8 @@ auto Position::getStartPosition() const -> std::pair<unsigned int, unsigned int>
 auto Position::getEndPosition() const -> std::pair<unsigned int, unsigned int> { return _end_position; }
 
 auto Position::getContent() const -> std::vector<std::string> {
-    if (_filename.empty()) {
-        throw std::logic_error("Filename is empty");
+    if (_filename.empty() || _filename == "<unknown>") {
+        return {};
     }
 
     std::ifstream file(_filename);
@@ -85,6 +85,9 @@ auto Position::dump(const std::string &color) const -> std::string {
     const auto end_line = _end_position.first;
     const auto end_column = _end_position.second;
     const auto content = getContent();
+    if (content.empty()) {
+        return "";
+    }
 
     if (content.size() == 1) { // Single line
         const auto nth = " " + std::to_string(start_line) + " ";

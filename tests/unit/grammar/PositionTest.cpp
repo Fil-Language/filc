@@ -35,8 +35,8 @@ TEST(Position, defaultConstructor) {
     ASSERT_THAT(position.getStartPosition(), Pair(0, 0));
     ASSERT_THAT(position.getEndPosition(), Pair(0, 0));
     ASSERT_STREQ("", position.getFilename().c_str());
-    ASSERT_THROW(position.getContent(), std::logic_error);
-    ASSERT_THROW(position.dump(""), std::logic_error);
+    ASSERT_THAT(position.getContent(), IsEmpty());
+    ASSERT_STREQ("", position.dump("").c_str());
 }
 
 TEST(Position, tokenConstructor) {

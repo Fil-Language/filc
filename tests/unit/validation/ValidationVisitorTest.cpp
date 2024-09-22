@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "test_tools.h"
 #include <filc/grammar/Parser.h>
 #include <filc/grammar/expression/Expression.h>
-#include <filc/grammar/program/Program.h>
 #include <filc/validation/ValidationVisitor.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -37,97 +37,224 @@ using namespace ::testing;
 
 #define VALIDATION_FIXTURES FIXTURES_PATH "/validation"
 
-TEST(ValidationVisitor, visitProgram_valid) {
+TEST(ValidationVisitor, program_valid) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/valid_program.fil");
+    const auto program = parseString("0");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
     ASSERT_FALSE(visitor.hasError());
 }
 
-TEST(ValidationVisitor, visitProgram_invalid) {
+TEST(ValidationVisitor, program_invalid) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/invalid_program.fil");
+    const auto program = parseString("'a'");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
-                HasSubstr("Expected type int aka i32 but got char* aka u8*"));
+                HasSubstr("Expected type int aka i32 but got char"));
     ASSERT_TRUE(visitor.hasError());
 }
 
-TEST(ValidationVisitor, visitBooleanLiteral) {
+TEST(ValidationVisitor, boolean) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/boolean.fil");
+    const auto program = parseString("true\n0");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Boolean value not used"));
     ASSERT_FALSE(visitor.hasError());
 }
 
-TEST(ValidationVisitor, visitIntegerLiteral) {
+TEST(ValidationVisitor, integer) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/integer.fil");
+    const auto program = parseString("2\n0");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Integer value not used"));
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("int", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
-TEST(ValidationVisitor, visitFloatLiteral) {
+TEST(ValidationVisitor, float) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/float.fil");
+    const auto program = parseString("3.14\n0");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Float value not used"));
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("f64", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
-TEST(ValidationVisitor, visitCharacterLiteral) {
+TEST(ValidationVisitor, character) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/character.fil");
+    const auto program = parseString("'a'\n0");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Character value not used"));
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("char", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
-TEST(ValidationVisitor, visitStringLiteral) {
+TEST(ValidationVisitor, string) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/string.fil");
+    const auto program = parseString("\"hello\"\n0");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("String value not used"));
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("char*", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
-TEST(ValidationVisitor, visitVariableDeclaration) {
+TEST(ValidationVisitor, variable_alreadyDefined) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/variable.fil");
+    const auto program = parseString("val my_constant = 2\nval my_constant = 3");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("my_constant is already defined"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_STREQ("int", program->getExpressions()[0]->getType()->getDisplayName().c_str());
+    ASSERT_EQ(nullptr, program->getExpressions()[1]->getType());
+}
+
+TEST(ValidationVisitor, variable_constantWithoutValue) {
+    VISITOR;
+    const auto program = parseString("val my_constant");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
+                HasSubstr("When declaring a constant, you must provide it a value"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, variable_unknowType) {
+    VISITOR;
+    const auto program = parseString("var my_var: foo");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Unknown type: foo"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, variable_differentValueType) {
+    VISITOR;
+    const auto program = parseString("var my_var: i32 = 'a'");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
+                HasSubstr("Cannot assign value of type char aka u8 to a variable of type i32"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, variable_assignAliasType) {
+    VISITOR;
+    const auto program = parseString("var my_var: u8 = 'a'\n0");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("u8", program->getExpressions()[0]->getType()->getDisplayName().c_str());
+}
+
+TEST(ValidationVisitor, variable_withoutTypeAndValue) {
+    VISITOR;
+    const auto program = parseString("var my_var");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
+                HasSubstr("When declaring a variable, you must provide at least a type or a value"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, variable_valid) {
+    VISITOR;
+    const auto program = parseString("val foo: i32 = 45");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("i32", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
-TEST(ValidationVisitor, visitIdentifier) {
+TEST(ValidationVisitor, identifier_nonExisting) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/identifier.fil");
+    const auto program = parseString("bar");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
+                HasSubstr("Unknown name, don't know what it refers to: bar"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, identifier_valid) {
+    VISITOR;
+    const auto program = parseString("val foo = 1\nfoo");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("int", program->getExpressions()[1]->getType()->getDisplayName().c_str());
 }
 
-TEST(ValidationVisitor, visitBinaryCalcul) {
+TEST(ValidationVisitor, calcul_invalidLeft) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/binary.fil");
+    const auto program = parseString("(val foo) + 2");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
+                HasSubstr("When declaring a constant, you must provide it a value"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, calcul_invalidRight) {
+    VISITOR;
+    const auto program = parseString("2 + (val foo)");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
+                HasSubstr("When declaring a constant, you must provide it a value"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, calcul_invalid) {
+    VISITOR;
+    const auto program = parseString("'a' && 3");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
+                HasSubstr("You cannot use operator && with char aka u8 and int aka i32"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, calcul_valid) {
+    VISITOR;
+    const auto program = parseString("2 + 2");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("int", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
-TEST(ValidationVisitor, visitAssignation) {
+TEST(ValidationVisitor, assignation_nonExisting) {
     VISITOR;
-    const auto program = filc::ParserProxy::parse(VALIDATION_FIXTURES "/assignation.fil");
+    const auto program = parseString("foo = 3");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
+                HasSubstr("Unknown name, don't know what it refers to: foo"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, assignation_constant) {
+    VISITOR;
+    const auto program = parseString("val foo = 3\nfoo = 4");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), HasSubstr("Cannot modify a constant"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[1]->getType());
+}
+
+TEST(ValidationVisitor, assignation_differentType) {
+    VISITOR;
+    const auto program = parseString("var foo = 3\nfoo = false");
+    program->accept(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
+                HasSubstr("Cannot assign value of type bool to a variable of type int aka i32"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[1]->getType());
+}
+
+TEST(ValidationVisitor, assignation_valid) {
+    VISITOR;
+    const auto program = parseString("var foo = 3\nfoo = 2");
     program->accept(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
     ASSERT_FALSE(visitor.hasError());

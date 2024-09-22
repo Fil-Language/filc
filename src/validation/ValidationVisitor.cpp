@@ -132,9 +132,6 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
             return;
         }
         variable_type = _environment->getType(variable->getTypeName());
-        if (variable_type == nullptr) {
-            return;
-        }
     }
 
     if (variable->getValue() != nullptr) {
@@ -144,7 +141,7 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
         _context->unstack();
         const auto value_type = variable->getValue()->getType();
         if (value_type == nullptr) {
-            throw std::logic_error("Variable value has no type");
+            return;
         }
         if (variable_type != nullptr && variable_type->getName() != value_type->getName()) {
             displayError("Cannot assign value of type " + value_type->toDisplay() + " to a variable of type " +
