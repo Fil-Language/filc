@@ -21,35 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#include <filc/validation/Name.h>
+#include <gtest/gtest.h>
 
-#include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
-#include "filc/grammar/Position.h"
-#include "filc/grammar/Type.h"
-#include <string>
-
-namespace filc {
-class Expression: public Visitable {
-  public:
-    virtual ~Expression() = default;
-
-    auto setPosition(const Position& position) -> void;
-
-    [[nodiscard]] auto getPosition() const -> const Position&;
-
-    auto setType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto getType() const -> const std::shared_ptr<AbstractType>&;
-
-  protected:
-    Expression();
-
-  private:
-    Position _position;
-    std::shared_ptr<AbstractType> _type;
-};
+TEST(Name, defaultConstructor) {
+    filc::Name name;
+    ASSERT_TRUE(name.isConstant());
+    ASSERT_STREQ("", name.getName().c_str());
+    ASSERT_EQ(nullptr, name.getType());
 }
 
-#endif // FILC_EXPRESSION_H
+TEST(Name, constructor) {
+    filc::Name name(false, "my_var", std::make_shared<filc::Type>("i32"));
+    ASSERT_FALSE(name.isConstant());
+    ASSERT_STREQ("my_var", name.getName().c_str());
+    ASSERT_STREQ("i32", name.getType()->getName().c_str());
+}

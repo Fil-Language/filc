@@ -21,35 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#ifndef FILC_MESSAGE_H
+#define FILC_MESSAGE_H
 
-#include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
 #include "filc/grammar/Position.h"
-#include "filc/grammar/Type.h"
 #include <string>
 
+#define WARNING "WARNING"
+#define WARNING_COLOR "\033[33m"
+#define ERROR "ERROR"
+#define ERROR_COLOR "\033[31m"
+
 namespace filc {
-class Expression: public Visitable {
+class Message final {
   public:
-    virtual ~Expression() = default;
+    Message(std::string tag, std::string message, Position position, std::string color);
 
-    auto setPosition(const Position& position) -> void;
-
-    [[nodiscard]] auto getPosition() const -> const Position&;
-
-    auto setType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto getType() const -> const std::shared_ptr<AbstractType>&;
-
-  protected:
-    Expression();
+    auto write(std::ostream &out) const -> std::ostream &;
 
   private:
+    std::string _tag;
+    std::string _message;
     Position _position;
-    std::shared_ptr<AbstractType> _type;
+    std::string _color;
 };
 }
 
-#endif // FILC_EXPRESSION_H
+auto operator<<(std::ostream &out, const filc::Message &message) -> std::ostream&;
+
+#endif // FILC_MESSAGE_H

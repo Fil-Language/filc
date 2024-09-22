@@ -29,8 +29,10 @@
 
 using namespace filc;
 
-FilCompiler::FilCompiler(OptionsParser options_parser, DumpVisitor ast_dump_visitor)
-    : _options_parser(std::move(options_parser)), _ast_dump_visitor(std::move(ast_dump_visitor)) {}
+FilCompiler::FilCompiler(OptionsParser options_parser, DumpVisitor ast_dump_visitor,
+                         ValidationVisitor validation_visitor)
+    : _options_parser(std::move(options_parser)), _ast_dump_visitor(std::move(ast_dump_visitor)),
+      _validation_visitor(std::move(validation_visitor)) {}
 
 auto FilCompiler::run(int argc, char **argv) -> int {
     _options_parser.parse(argc, argv);
@@ -58,5 +60,10 @@ auto FilCompiler::run(int argc, char **argv) -> int {
         }
     }
 
-    return 1;
+    program->accept(&_validation_visitor);
+    if (_validation_visitor.hasError()) {
+        return 1;
+    }
+
+    return 0;
 }

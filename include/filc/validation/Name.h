@@ -21,35 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#ifndef FILC_NAME_H
+#define FILC_NAME_H
 
-#include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
-#include "filc/grammar/Position.h"
 #include "filc/grammar/Type.h"
 #include <string>
+#include <memory>
 
 namespace filc {
-class Expression: public Visitable {
+class Name {
   public:
-    virtual ~Expression() = default;
+    Name();
 
-    auto setPosition(const Position& position) -> void;
+    Name(bool constant, std::string name, std::shared_ptr<AbstractType> type);
 
-    [[nodiscard]] auto getPosition() const -> const Position&;
+    [[nodiscard]] auto isConstant() const -> bool;
 
-    auto setType(const std::shared_ptr<AbstractType> &type) -> void;
+    [[nodiscard]] auto getName() const -> const std::string&;
 
-    [[nodiscard]] auto getType() const -> const std::shared_ptr<AbstractType>&;
-
-  protected:
-    Expression();
+    [[nodiscard]] auto getType() const -> std::shared_ptr<AbstractType>;
 
   private:
-    Position _position;
+    bool _constant;
+    std::string _name;
     std::shared_ptr<AbstractType> _type;
 };
 }
 
-#endif // FILC_EXPRESSION_H
+#endif // FILC_NAME_H

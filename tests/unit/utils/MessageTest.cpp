@@ -21,35 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#include "test_tools.h"
+#include <filc/utils/Message.h>
+#include <gtest/gtest.h>
 
-#include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
-#include "filc/grammar/Position.h"
-#include "filc/grammar/Type.h"
-#include <string>
+#define FILENAME FIXTURES_PATH "/ipsum.txt"
 
-namespace filc {
-class Expression: public Visitable {
-  public:
-    virtual ~Expression() = default;
-
-    auto setPosition(const Position& position) -> void;
-
-    [[nodiscard]] auto getPosition() const -> const Position&;
-
-    auto setType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto getType() const -> const std::shared_ptr<AbstractType>&;
-
-  protected:
-    Expression();
-
-  private:
-    Position _position;
-    std::shared_ptr<AbstractType> _type;
-};
+TEST(Message, write) {
+    filc::Message message(WARNING, "This is a warning message",
+                          filc::Position(new TokenStub(FILENAME, {1, 7}), new TokenStub(FILENAME, {1, 7})),
+                          WARNING_COLOR);
+    std::stringstream ss;
+    ss << message;
+    std::string dump(std::istreambuf_iterator<char>(ss), {});
+    ASSERT_STREQ("\x1B[1m\x1B[33m[WARNING] \x1B[0mThis is a warning message\n"
+                 "  --> " FILENAME ":1:7\n"
+                 " 1 | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut pharetra volutpat fermentum.\n"
+                 "   |        \x1B[33m^\x1B[0m\n",
+                 dump.c_str());
 }
-
-#endif // FILC_EXPRESSION_H

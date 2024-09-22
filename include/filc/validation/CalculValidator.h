@@ -21,35 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#ifndef FILC_CALCULVALIDATOR_H
+#define FILC_CALCULVALIDATOR_H
 
-#include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
-#include "filc/grammar/Position.h"
 #include "filc/grammar/Type.h"
+#include <memory>
 #include <string>
 
 namespace filc {
-class Expression: public Visitable {
+class CalculValidator {
   public:
-    virtual ~Expression() = default;
-
-    auto setPosition(const Position& position) -> void;
-
-    [[nodiscard]] auto getPosition() const -> const Position&;
-
-    auto setType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto getType() const -> const std::shared_ptr<AbstractType>&;
-
-  protected:
-    Expression();
+    [[nodiscard]] static auto isCalculValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op,
+                                     const std::shared_ptr<AbstractType> &right_type) -> bool;
 
   private:
-    Position _position;
-    std::shared_ptr<AbstractType> _type;
+    [[nodiscard]] static auto isNumericOperatorValid(const std::string &op) -> bool;
+
+    [[nodiscard]] static auto isBoolOperatorValid(const std::string &op) -> bool;
+
+    [[nodiscard]] static auto isPointerOperatorValid(const std::string &op) -> bool;
 };
 }
 
-#endif // FILC_EXPRESSION_H
+#endif // FILC_CALCULVALIDATOR_H

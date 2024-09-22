@@ -51,6 +51,9 @@ program returns[std::shared_ptr<filc::Program> tree]
     })* EOF;
 
 expression returns[std::shared_ptr<filc::Expression> tree]
+@after {
+    $tree->setPosition(filc::Position($ctx->start, $ctx->stop));
+}
     : l=literal {
         $tree = $l.tree;
     }
@@ -138,8 +141,7 @@ assignation returns[std::shared_ptr<filc::Assignation> tree]
         $tree = std::make_shared<filc::Assignation>($i1.text, $e1.tree);
     }
     | i2=IDENTIFIER op=(PLUS_EQ | MINUS_EQ | STAR_EQ | DIV_EQ | MOD_EQ | AND_EQ | OR_EQ) e2=expression {
-        $tree = std::make_shared<filc::Assignation>(
-            $i2.text,
-            std::make_shared<filc::BinaryCalcul>(std::make_shared<filc::Identifier>($i2.text), $op.text.substr(0, $op.text.size() - 1), $e2.tree)
-        );
+        const auto calcul = std::make_shared<filc::BinaryCalcul>(std::make_shared<filc::Identifier>($i2.text), $op.text.substr(0, $op.text.size() - 1), $e2.tree);
+        calcul->setPosition(filc::Position($op, $e2.stop));
+        $tree = std::make_shared<filc::Assignation>($i2.text, calcul);
     };

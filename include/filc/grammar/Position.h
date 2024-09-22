@@ -21,35 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#ifndef FILC_POSITION_H
+#define FILC_POSITION_H
 
-#include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
-#include "filc/grammar/Position.h"
-#include "filc/grammar/Type.h"
-#include <string>
+#include "antlr4-runtime.h"
+#include <utility>
+#include <vector>
 
 namespace filc {
-class Expression: public Visitable {
+class Position {
   public:
-    virtual ~Expression() = default;
+    Position();
 
-    auto setPosition(const Position& position) -> void;
+    Position(const antlr4::Token* start_token, const antlr4::Token* end_token);
 
-    [[nodiscard]] auto getPosition() const -> const Position&;
+    [[nodiscard]] auto getFilename() const -> std::string;
 
-    auto setType(const std::shared_ptr<AbstractType> &type) -> void;
+    [[nodiscard]] auto getStartPosition() const -> std::pair<unsigned int, unsigned int>;
 
-    [[nodiscard]] auto getType() const -> const std::shared_ptr<AbstractType>&;
+    [[nodiscard]] auto getEndPosition() const -> std::pair<unsigned int, unsigned int>;
 
-  protected:
-    Expression();
+    [[nodiscard]] auto getContent() const -> std::vector<std::string>;
+
+    [[nodiscard]] auto dump(const std::string &color) const -> std::string;
 
   private:
-    Position _position;
-    std::shared_ptr<AbstractType> _type;
+    std::string _filename;
+    std::pair<unsigned int, unsigned int> _start_position;
+    std::pair<unsigned int, unsigned int> _end_position;
 };
 }
 
-#endif // FILC_EXPRESSION_H
+#endif // FILC_POSITION_H

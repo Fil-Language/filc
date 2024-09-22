@@ -21,35 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#include "filc/validation/ValidationVisitor.h"
 
-#include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
-#include "filc/grammar/Position.h"
-#include "filc/grammar/Type.h"
-#include <string>
+using namespace filc;
 
-namespace filc {
-class Expression: public Visitable {
-  public:
-    virtual ~Expression() = default;
+ValidationContext::ValidationContext() { stack(); }
 
-    auto setPosition(const Position& position) -> void;
+auto ValidationContext::stack() -> void { _values.emplace(); }
 
-    [[nodiscard]] auto getPosition() const -> const Position&;
-
-    auto setType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto getType() const -> const std::shared_ptr<AbstractType>&;
-
-  protected:
-    Expression();
-
-  private:
-    Position _position;
-    std::shared_ptr<AbstractType> _type;
-};
+auto ValidationContext::unstack() -> void {
+    if (_values.size() > 1) {
+        _values.pop();
+    }
 }
 
-#endif // FILC_EXPRESSION_H
+auto ValidationContext::set(const std::string &key, const std::any &value) -> void { _values.top()[key] = value; }
+
+auto ValidationContext::has(const std::string &key) const -> bool {
+    return _values.top().find(key) != _values.top().end();
+}
+
+auto ValidationContext::clear() -> void { _values.top().clear(); }

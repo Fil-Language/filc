@@ -10,3 +10,4 @@ coverage.info
 .idea
 FilLexer.tokens
 node_modules
+vgcore.*

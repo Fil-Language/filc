@@ -25,10 +25,15 @@
 #include "FilLexer.h"
 #include "FilParser.h"
 #include "antlr4-runtime.h"
+#include <filesystem>
 
 using namespace filc;
 
 auto ParserProxy::parse(const std::string &filename) -> std::shared_ptr<Program> {
+    if (!std::filesystem::exists(filename)) {
+        throw std::logic_error("File '" + filename + "' not found");
+    }
+
     antlr4::ANTLRFileStream input;
     input.loadFromFile(filename);
     FilLexer lexer(&input);

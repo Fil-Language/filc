@@ -21,35 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_EXPRESSION_H
-#define FILC_EXPRESSION_H
+#include <filc/grammar/Type.h>
+#include <gtest/gtest.h>
 
-#include "filc/grammar/ast.h"
-#include "filc/grammar/Visitor.h"
-#include "filc/grammar/Position.h"
-#include "filc/grammar/Type.h"
-#include <string>
-
-namespace filc {
-class Expression: public Visitable {
-  public:
-    virtual ~Expression() = default;
-
-    auto setPosition(const Position& position) -> void;
-
-    [[nodiscard]] auto getPosition() const -> const Position&;
-
-    auto setType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto getType() const -> const std::shared_ptr<AbstractType>&;
-
-  protected:
-    Expression();
-
-  private:
-    Position _position;
-    std::shared_ptr<AbstractType> _type;
-};
+TEST(Type, getName) {
+    filc::Type type("my_type");
+    ASSERT_STREQ("my_type", type.getName().c_str());
 }
 
-#endif // FILC_EXPRESSION_H
+TEST(Type, getDisplayName) {
+    filc::Type type("another_type");
+    ASSERT_STREQ("another_type", type.getDisplayName().c_str());
+}
+
+TEST(PointerType, getName) {
+    filc::PointerType type(std::make_shared<filc::Type>("int"));
+    ASSERT_STREQ("int*", type.getName().c_str());
+}
+
+TEST(PointerType, getDisplayName) {
+    filc::PointerType type(std::make_shared<filc::Type>("int"));
+    ASSERT_STREQ("int*", type.getDisplayName().c_str());
+}
+
+TEST(AliasType, getName) {
+    filc::AliasType type("char", std::make_shared<filc::Type>("u8"));
+    ASSERT_STREQ("u8", type.getName().c_str());
+}
+
+TEST(AliasType, getDisplayName) {
+    filc::AliasType type("char", std::make_shared<filc::Type>("u8"));
+    ASSERT_STREQ("char", type.getDisplayName().c_str());
+}
