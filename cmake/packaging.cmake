@@ -37,6 +37,8 @@ function(filc_package)
     set(CPACK_RPM_PACKAGE_LICENSE "MIT")
     set(CPACK_RPM_PACKAGE_GROUP "Development/Tools")
     set(CPACK_RPM_PACKAGE_DESCRIPTION "Fil compiler")
+    set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr" "/usr/bin")
+    set(CPACK_RPM_CHANGELOG_FILE "${CMAKE_CURRENT_BINARY_DIR}/changelog")
 
     include(CPack)
 endfunction()
