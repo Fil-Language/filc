@@ -1,5 +1,5 @@
 let
-  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/63dacb46bf939521bdc93981b4cbb7ecb58427a0.tar.gz"; # 24.05
+  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/eb28b94bd14835836b539bc3854a6abf929876d4.tar.gz";
   pkgs = import nixpkgs { config = {}; overlays = []; };
 in
 
@@ -15,9 +15,9 @@ pkgs.mkShell {
     pkgs.valgrind
     pkgs.dpkg
     pkgs.rpm
-    pkgs.temurin-jre-bin-18
+    pkgs.jre_minimal
     pkgs.nodejs_20
-    pkgs.corepack
+    pkgs.corepack_20
   ];
 
   shellHook = ''

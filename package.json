@@ -4,6 +4,7 @@
 	},
 	"scripts": {
 		"prepare": "husky",
-        "lint": "./bin/run_clang-format.sh"
-	}
+		"lint": "./bin/run_clang-format.sh"
+	},
+	"packageManager": "pnpm@9.7.1+sha1.b0ae55d11432e1af341998848fdc219a62f7623a"
 }
