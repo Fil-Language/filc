@@ -24,7 +24,6 @@
 #include "filc/grammar/DumpVisitor.h"
 #include "filc/grammar/assignation/Assignation.h"
 #include "filc/grammar/calcul/Calcul.h"
-#include "filc/grammar/expression/Expression.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
@@ -37,7 +36,7 @@ DumpVisitor::DumpVisitor(std::ostream &out) : _out(out), _indent_level(0) {}
 auto DumpVisitor::visitProgram(Program *program) -> void {
     _out << "=== Begin AST dump ===\n";
     for (const auto &expression : program->getExpressions()) {
-        expression->accept(this);
+        expression->acceptVoidVisitor(this);
     }
     _out << "=== End AST dump ===\n";
 }
@@ -117,7 +116,7 @@ auto DumpVisitor::visitVariableDeclaration(VariableDeclaration *variable) -> voi
 
     if (variable->getValue() != nullptr) {
         _indent_level++;
-        variable->getValue()->accept(this);
+        variable->getValue()->acceptVoidVisitor(this);
         _indent_level--;
     }
 }
@@ -126,8 +125,8 @@ auto DumpVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
     printIdent();
     _out << "[BinaryCalcul:" << calcul->getOperator() << "]\n";
     _indent_level++;
-    calcul->getLeftExpression()->accept(this);
-    calcul->getRightExpression()->accept(this);
+    calcul->getLeftExpression()->acceptVoidVisitor(this);
+    calcul->getRightExpression()->acceptVoidVisitor(this);
     _indent_level--;
 }
 
@@ -140,7 +139,7 @@ auto DumpVisitor::visitAssignation(Assignation *assignation) -> void {
     printIdent();
     _out << "[Assignation:" << assignation->getIdentifier() << "]\n";
     _indent_level++;
-    assignation->getValue()->accept(this);
+    assignation->getValue()->acceptVoidVisitor(this);
     _indent_level--;
 }
 

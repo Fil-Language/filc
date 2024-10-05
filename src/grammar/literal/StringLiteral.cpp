@@ -27,4 +27,8 @@ using namespace filc;
 
 StringLiteral::StringLiteral(const std::string &value) : Literal(value.substr(1, value.length() - 2)) {}
 
-auto StringLiteral::accept(Visitor *visitor) -> void { visitor->visitStringLiteral(this); }
+auto StringLiteral::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitStringLiteral(this); }
+
+auto StringLiteral::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitStringLiteral(this);
+}

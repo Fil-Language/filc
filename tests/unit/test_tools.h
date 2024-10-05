@@ -36,7 +36,7 @@ auto toStringArray(const std::vector<std::string> &data) -> std::vector<char *>;
 
 auto parseString(const std::string &content) -> std::shared_ptr<filc::Program>;
 
-class PrinterVisitor final: public filc::Visitor {
+class PrinterVisitor final: public filc::Visitor<void> {
   public:
     PrinterVisitor();
 

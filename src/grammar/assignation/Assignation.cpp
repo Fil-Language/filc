@@ -33,4 +33,8 @@ auto Assignation::getIdentifier() const -> std::string { return _identifier; }
 
 auto Assignation::getValue() const -> std::shared_ptr<Expression> { return _value; }
 
-auto Assignation::accept(Visitor *visitor) -> void { visitor->visitAssignation(this); }
+auto Assignation::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitAssignation(this); }
+
+auto Assignation::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitAssignation(this);
+}

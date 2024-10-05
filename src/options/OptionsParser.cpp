@@ -36,7 +36,7 @@ OptionsParser::OptionsParser() : _options("filc", "Fil compiler"), _parsed(false
     _options.add_options("Troubleshooting")("help", "Show this help message and exit.")("version",
                                                                                         "Show version and exit.");
 
-    _options.add_options("Debug")("dump", "Dump some data. One of these values: ast.",
+    _options.add_options("Debug")("dump", "Dump some data. One of these values: ast, ir.",
                                   cxxopts::value<std::string>()->implicit_value("all")->default_value("none"));
 }
 
@@ -81,7 +81,7 @@ auto OptionsParser::getDump() -> std::string {
     }
 
     auto dump = _result["dump"].as<std::string>();
-    auto valid = {"none", "all", "ast"};
+    auto valid = {"none", "all", "ast", "ir"};
     if (std::find(valid.begin(), valid.end(), dump) == valid.end()) {
         throw OptionsParserException("Dump option value '" + dump + "' is not a valid value");
     }

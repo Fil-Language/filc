@@ -30,4 +30,8 @@ Identifier::Identifier(std::string name) : _name(std::move(name)) {}
 
 auto Identifier::getName() const -> std::string { return _name; }
 
-auto Identifier::accept(Visitor *visitor) -> void { visitor->visitIdentifier(this); }
+auto Identifier::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitIdentifier(this); }
+
+auto Identifier::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitIdentifier(this);
+}

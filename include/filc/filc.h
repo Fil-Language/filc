@@ -28,6 +28,7 @@
 #include "filc/options/OptionsParser.h"
 #include "filc/grammar/DumpVisitor.h"
 #include "filc/validation/ValidationVisitor.h"
+#include "filc/llvm/IRGenerator.h"
 
 namespace filc {
 class FilCompiler final {
