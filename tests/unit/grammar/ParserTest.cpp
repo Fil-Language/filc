@@ -110,7 +110,7 @@ TEST(Parser, parseSample) {
         SCOPED_TRACE("2 + 4 <= 3 * 2");
         const auto expression = program->getExpressions()[8];
         PrinterVisitor visitor;
-        expression->accept(&visitor);
+        expression->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("((2 + 4) <= (3 * 2))", visitor.getResult().c_str());
     }
 
@@ -118,7 +118,7 @@ TEST(Parser, parseSample) {
         SCOPED_TRACE("my_var = 2");
         const auto expression = program->getExpressions()[9];
         PrinterVisitor visitor;
-        expression->accept(&visitor);
+        expression->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("my_var = 2", visitor.getResult().c_str());
     }
 
@@ -126,7 +126,7 @@ TEST(Parser, parseSample) {
         SCOPED_TRACE("my_var += 2");
         const auto expression = program->getExpressions()[10];
         PrinterVisitor visitor;
-        expression->accept(&visitor);
+        expression->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("my_var = (my_var + 2)", visitor.getResult().c_str());
     }
 }

@@ -35,7 +35,9 @@ class Identifier final: public Expression {
 
     [[nodiscard]] auto getName() const -> std::string;
 
-    auto accept(Visitor *visitor) -> void override;
+    auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
+
+    auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
 
   private:
     std::string _name;

@@ -55,7 +55,7 @@ auto ValidationVisitor::visitProgram(Program *program) -> void {
             _context->set("return", true);
         }
 
-        (*it)->accept(this);
+        (*it)->acceptVoidVisitor(this);
 
         if (it + 1 == expressions.end()) {
             const auto expected = _environment->getType("int");
@@ -137,7 +137,7 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
     if (variable->getValue() != nullptr) {
         _context->stack();
         _context->set("return", true);
-        variable->getValue()->accept(this);
+        variable->getValue()->acceptVoidVisitor(this);
         _context->unstack();
         const auto value_type = variable->getValue()->getType();
         if (value_type == nullptr) {
@@ -179,13 +179,13 @@ auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
 auto ValidationVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
     _context->stack();
     _context->set("return", true);
-    calcul->getLeftExpression()->accept(this);
+    calcul->getLeftExpression()->acceptVoidVisitor(this);
     const auto left_type = calcul->getLeftExpression()->getType();
     _context->unstack();
 
     _context->stack();
     _context->set("return", true);
-    calcul->getRightExpression()->accept(this);
+    calcul->getRightExpression()->acceptVoidVisitor(this);
     const auto right_type = calcul->getRightExpression()->getType();
     _context->unstack();
 
@@ -221,7 +221,7 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
 
     _context->stack();
     _context->set("return", true);
-    assignation->getValue()->accept(this);
+    assignation->getValue()->acceptVoidVisitor(this);
     _context->unstack();
     const auto value_type = assignation->getValue()->getType();
     if (value_type == nullptr) {

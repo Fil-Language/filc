@@ -27,4 +27,8 @@ using namespace filc;
 
 FloatLiteral::FloatLiteral(double value) : Literal(value) {}
 
-auto FloatLiteral::accept(Visitor *visitor) -> void { visitor->visitFloatLiteral(this); }
+auto FloatLiteral::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitFloatLiteral(this); }
+
+auto FloatLiteral::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitFloatLiteral(this);
+}

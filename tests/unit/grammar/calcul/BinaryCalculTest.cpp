@@ -51,49 +51,49 @@ TEST(BinaryCalcul, parsingPriorities) {
     {
         SCOPED_TRACE("1 + 2 * 3");
         const auto program = parseString("1 + 2 * 3");
-        program->accept(&visitor);
+        program->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("(1 + (2 * 3))\n", visitor.getResult().c_str());
     }
     {
         SCOPED_TRACE("(1 + 2) * 3");
         const auto program = parseString("(1 + 2) * 3");
-        program->accept(&visitor);
+        program->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("((1 + 2) * 3)\n", visitor.getResult().c_str());
     }
     {
         SCOPED_TRACE("1 * 2 + 3");
         const auto program = parseString("1 * 2 + 3");
-        program->accept(&visitor);
+        program->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("((1 * 2) + 3)\n", visitor.getResult().c_str());
     }
     {
         SCOPED_TRACE("1 / 2 * 3");
         const auto program = parseString("1 / 2 * 3");
-        program->accept(&visitor);
+        program->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("((1 / 2) * 3)\n", visitor.getResult().c_str());
     }
     {
         SCOPED_TRACE("1 * 2 / 3");
         const auto program = parseString("1 * 2 / 3");
-        program->accept(&visitor);
+        program->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("((1 * 2) / 3)\n", visitor.getResult().c_str());
     }
     {
         SCOPED_TRACE("1 * 2 + 3 * 4");
         const auto program = parseString("1 * 2 + 3 * 4");
-        program->accept(&visitor);
+        program->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("((1 * 2) + (3 * 4))\n", visitor.getResult().c_str());
     }
     {
         SCOPED_TRACE("1 + 2 * 3 + 4");
         const auto program = parseString("1 + 2 * 3 + 4");
-        program->accept(&visitor);
+        program->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("((1 + (2 * 3)) + 4)\n", visitor.getResult().c_str());
     }
     {
         SCOPED_TRACE("false || 1 < 2 % 3 * 4 + 5");
         const auto program = parseString("false || 1 < 2 % 3 * 4 + 5");
-        program->accept(&visitor);
+        program->acceptVoidVisitor(&visitor);
         ASSERT_STREQ("(false || (1 < (((2 % 3) * 4) + 5)))\n", visitor.getResult().c_str());
     }
 }

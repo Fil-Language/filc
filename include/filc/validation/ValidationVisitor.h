@@ -62,7 +62,7 @@ class ValidationContext final {
     std::stack<std::map<std::string, std::any>> _values;
 };
 
-class ValidationVisitor final : public Visitor {
+class ValidationVisitor final : public Visitor<void> {
   public:
     explicit ValidationVisitor(std::ostream &out);
 

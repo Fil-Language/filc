@@ -56,7 +56,7 @@ auto PrinterVisitor::getResult() -> std::string {
 
 auto PrinterVisitor::visitProgram(filc::Program *program) -> void {
     for (const auto &expression : program->getExpressions()) {
-        expression->accept(this);
+        expression->acceptVoidVisitor(this);
         _out << "\n";
     }
 }
@@ -84,7 +84,7 @@ auto PrinterVisitor::visitVariableDeclaration(filc::VariableDeclaration *variabl
     }
     if (variable->getValue() != nullptr) {
         _out << " = ";
-        variable->getValue()->accept(this);
+        variable->getValue()->acceptVoidVisitor(this);
     }
 }
 
@@ -92,15 +92,15 @@ auto PrinterVisitor::visitIdentifier(filc::Identifier *identifier) -> void { _ou
 
 auto PrinterVisitor::visitBinaryCalcul(filc::BinaryCalcul *calcul) -> void {
     _out << "(";
-    calcul->getLeftExpression()->accept(this);
+    calcul->getLeftExpression()->acceptVoidVisitor(this);
     _out << " " << calcul->getOperator() << " ";
-    calcul->getRightExpression()->accept(this);
+    calcul->getRightExpression()->acceptVoidVisitor(this);
     _out << ")";
 }
 
 auto PrinterVisitor::visitAssignation(filc::Assignation *assignation) -> void {
     _out << assignation->getIdentifier() << " = ";
-    assignation->getValue()->accept(this);
+    assignation->getValue()->acceptVoidVisitor(this);
 }
 
 TokenSourceStub::TokenSourceStub(std::string filename) : _filename(std::move(filename)) {}

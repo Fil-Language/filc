@@ -27,4 +27,8 @@ using namespace filc;
 
 BooleanLiteral::BooleanLiteral(bool value) : Literal(value) {}
 
-auto BooleanLiteral::accept(Visitor *visitor) -> void { visitor->visitBooleanLiteral(this); }
+auto BooleanLiteral::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitBooleanLiteral(this); }
+
+auto BooleanLiteral::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitBooleanLiteral(this);
+}

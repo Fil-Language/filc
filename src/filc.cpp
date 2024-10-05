@@ -54,15 +54,21 @@ auto FilCompiler::run(int argc, char **argv) -> int {
 
     const auto program = ParserProxy::parse(filename);
     if (dump_option == "ast" || dump_option == "all") {
-        program->accept(&_ast_dump_visitor);
+        program->acceptVoidVisitor(&_ast_dump_visitor);
         if (dump_option == "ast") {
             return 0;
         }
     }
 
-    program->accept(&_validation_visitor);
+    program->acceptVoidVisitor(&_validation_visitor);
     if (_validation_visitor.hasError()) {
         return 1;
+    }
+
+    // FIXME: Temporary, time to implement IR generator. Option will be used later to dump generated IR
+    if (dump_option == "ir" || dump_option == "all") {
+        IRGenerator generator(filename);
+        program->acceptIRVisitor(&generator);
     }
 
     return 0;

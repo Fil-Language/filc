@@ -21,28 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_PROGRAM_H
-#define FILC_PROGRAM_H
+#ifndef FILC_IRGENERATOR_H
+#define FILC_IRGENERATOR_H
 
-#include "filc/grammar/ast.h"
 #include "filc/grammar/Visitor.h"
-#include <vector>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
 #include <memory>
 
 namespace filc {
-class Program final: public Visitable {
+class IRGenerator final: public Visitor<llvm::Value *> {
   public:
-    explicit Program(const std::vector<std::shared_ptr<Expression>> &expressions);
+    explicit IRGenerator(const std::string &filename);
 
-    [[nodiscard]] auto getExpressions() const -> const std::vector<std::shared_ptr<Expression>> &;
+    ~IRGenerator() override = default;
 
-    auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
+    auto visitProgram(Program *program) -> llvm::Value * override;
 
-    auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
+    auto visitBooleanLiteral(BooleanLiteral *literal) -> llvm::Value * override;
+
+    auto visitIntegerLiteral(IntegerLiteral *literal) -> llvm::Value * override;
+
+    auto visitFloatLiteral(FloatLiteral *literal) -> llvm::Value * override;
+
+    auto visitCharacterLiteral(CharacterLiteral *literal) -> llvm::Value * override;
+
+    auto visitStringLiteral(StringLiteral *literal) -> llvm::Value * override;
+
+    auto visitVariableDeclaration(VariableDeclaration *variable) -> llvm::Value * override;
+
+    auto visitIdentifier(Identifier *identifier) -> llvm::Value * override;
+
+    auto visitBinaryCalcul(BinaryCalcul *calcul) -> llvm::Value * override;
+
+    auto visitAssignation(Assignation *assignation) -> llvm::Value * override;
 
   private:
-    std::vector<std::shared_ptr<Expression>> _expressions;
+    llvm::LLVMContext _llvm_context;
+    std::unique_ptr<llvm::Module> _module;
+    std::unique_ptr<llvm::IRBuilder<>> _builder;
 };
 }
 
-#endif // FILC_PROGRAM_H
+#endif // FILC_IRGENERATOR_H

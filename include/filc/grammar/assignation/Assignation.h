@@ -38,7 +38,9 @@ class Assignation final: public Expression {
 
     [[nodiscard]] auto getValue() const -> std::shared_ptr<Expression>;
 
-    auto accept(Visitor *visitor) -> void override;
+    auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
+
+    auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
 
   private:
     std::string _identifier;

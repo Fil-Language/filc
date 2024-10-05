@@ -27,4 +27,8 @@ using namespace filc;
 
 IntegerLiteral::IntegerLiteral(int value) : Literal(value) {}
 
-auto IntegerLiteral::accept(Visitor *visitor) -> void { visitor->visitIntegerLiteral(this); }
+auto IntegerLiteral::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitIntegerLiteral(this); }
+
+auto IntegerLiteral::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitIntegerLiteral(this);
+}
