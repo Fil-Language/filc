@@ -26,6 +26,7 @@
 
 #include <string>
 #include <memory>
+#include <llvm/IR/Type.h>
 
 namespace filc {
 class AbstractType {
@@ -36,8 +37,15 @@ class AbstractType {
 
     [[nodiscard]] virtual auto toDisplay() const noexcept -> std::string = 0;
 
+    auto setLLVMType(llvm::Type *type) -> void;
+
+    [[nodiscard]] auto getLLVMType() const -> llvm::Type *;
+
   protected:
     AbstractType() = default;
+
+  private:
+    llvm::Type *_llvm_type = nullptr;
 };
 
 class Type final: public AbstractType {

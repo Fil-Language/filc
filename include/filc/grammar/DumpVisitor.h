@@ -28,7 +28,7 @@
 #include <iostream>
 
 namespace filc {
-class DumpVisitor final: public Visitor {
+class DumpVisitor final: public Visitor<void> {
   public:
     explicit DumpVisitor(std::ostream &out);
 

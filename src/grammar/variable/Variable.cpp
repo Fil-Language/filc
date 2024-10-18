@@ -38,4 +38,8 @@ auto VariableDeclaration::getTypeName() const -> std::string { return _type_name
 
 auto VariableDeclaration::getValue() const -> std::shared_ptr<Expression> { return _value; }
 
-auto VariableDeclaration::accept(Visitor *visitor) -> void { visitor->visitVariableDeclaration(this); }
+auto VariableDeclaration::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitVariableDeclaration(this); }
+
+auto VariableDeclaration::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitVariableDeclaration(this);
+}

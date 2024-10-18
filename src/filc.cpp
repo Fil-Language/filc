@@ -54,16 +54,28 @@ auto FilCompiler::run(int argc, char **argv) -> int {
 
     const auto program = ParserProxy::parse(filename);
     if (dump_option == "ast" || dump_option == "all") {
-        program->accept(&_ast_dump_visitor);
+        program->acceptVoidVisitor(&_ast_dump_visitor);
         if (dump_option == "ast") {
             return 0;
         }
     }
 
-    program->accept(&_validation_visitor);
+    program->acceptVoidVisitor(&_validation_visitor);
     if (_validation_visitor.hasError()) {
         return 1;
     }
+
+    IRGenerator generator(filename, _validation_visitor.getEnvironment());
+    program->acceptIRVisitor(&generator);
+    if (dump_option == "ir" || dump_option == "all") {
+        const auto ir_result = generator.dump();
+        std::cout << ir_result;
+        if (dump_option == "ir") {
+            return 0;
+        }
+    }
+
+    // TODO: transform ir to object code
 
     return 0;
 }

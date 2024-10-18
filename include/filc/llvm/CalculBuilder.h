@@ -21,17 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "filc/grammar/identifier/Identifier.h"
-#include <utility>
+#ifndef FILC_CALCULBUILDER_H
+#define FILC_CALCULBUILDER_H
 
-using namespace filc;
+#include "filc/grammar/calcul/Calcul.h"
+#include "filc/llvm/IRGenerator.h"
+#include <llvm/IR/IRBuilder.h>
 
-Identifier::Identifier(std::string name) : _name(std::move(name)) {}
+namespace filc {
+class CalculBuilder final {
+  public:
+    explicit CalculBuilder(IRGenerator *generator, llvm::IRBuilder<> *builder);
 
-auto Identifier::getName() const -> std::string { return _name; }
+    auto buildCalculValue(BinaryCalcul *calcul) -> llvm::Value *;
 
-auto Identifier::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitIdentifier(this); }
-
-auto Identifier::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
-    return visitor->visitIdentifier(this);
+  private:
+    IRGenerator *_generator;
+    llvm::IRBuilder<> *_builder;
+};
 }
+
+#endif // FILC_CALCULBUILDER_H

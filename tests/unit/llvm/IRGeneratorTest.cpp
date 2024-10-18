@@ -1,0 +1,119 @@
+/**
+ * MIT License
+ *
+ * Copyright (c) 2024-Present Kevin Traini
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#include "filc/grammar/assignation/Assignation.h"
+#include "filc/grammar/calcul/Calcul.h"
+#include "filc/grammar/identifier/Identifier.h"
+#include "filc/grammar/variable/Variable.h"
+#include "test_tools.h"
+#include <filc/grammar/literal/Literal.h>
+#include <filc/grammar/program/Program.h>
+#include <filc/llvm/IRGenerator.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+using namespace ::testing;
+
+auto getIR(const std::string &content) -> std::string {
+    filc::IRGenerator generator("main", new filc::Environment());
+    auto program = parseAndValidateString(content);
+    program->acceptIRVisitor(&generator);
+    return generator.dump();
+}
+
+TEST(IRGenerator, program_empty) {
+    filc::IRGenerator generator("program", new filc::Environment());
+    const auto ir = getIR("");
+    ASSERT_THAT(ir, HasSubstr("define i32 @main() {\n"
+                              "entry:\n"
+                              "  ret i32 0\n"
+                              "}"));
+}
+
+TEST(IRGenerator, program_nonEmpty) {
+    filc::IRGenerator generator("program", new filc::Environment());
+    const auto ir = getIR("1");
+    ASSERT_THAT(ir, HasSubstr("define i32 @main() {\n"
+                              "entry:\n"
+                              "  ret i32 1\n"
+                              "}"));
+}
+
+TEST(IRGenerator, booleanLiteral_true) {
+    const auto ir = getIR("true");
+    ASSERT_THAT(ir, HasSubstr("ret i1 true"));
+}
+
+TEST(IRGenerator, booleanLiteral_false) {
+    const auto ir = getIR("false");
+    ASSERT_THAT(ir, HasSubstr("ret i1 false"));
+}
+
+TEST(IRGenerator, integerLiteral) {
+    const auto ir = getIR("0");
+    ASSERT_THAT(ir, HasSubstr("ret i32 0"));
+}
+
+// TEST(IRGenerator, floatLiteral_throw) {
+//     filc::IRGenerator generator("float_literal", new filc::Environment());
+//     auto literal = filc::FloatLiteral(9.81);
+//     ASSERT_THROW(literal.acceptIRVisitor(&generator), std::logic_error);
+// }
+//
+// TEST(IRGenerator, characterLiteral_throw) {
+//     filc::IRGenerator generator("character_literal", new filc::Environment());
+//     auto literal = filc::CharacterLiteral('a');
+//     ASSERT_THROW(literal.acceptIRVisitor(&generator), std::logic_error);
+// }
+//
+// TEST(IRGenerator, stringLiteral_throw) {
+//     filc::IRGenerator generator("string_literal", new filc::Environment());
+//     auto literal = filc::StringLiteral("Hello");
+//     ASSERT_THROW(literal.acceptIRVisitor(&generator), std::logic_error);
+// }
+//
+// TEST(IRGenerator, variableDeclaration_throw) {
+//     filc::IRGenerator generator("variable_declaration", new filc::Environment());
+//     auto variable = filc::VariableDeclaration(true, "my_val", "its_type", nullptr);
+//     ASSERT_THROW(variable.acceptIRVisitor(&generator), std::logic_error);
+// }
+//
+// TEST(IRGenerator, identifier_throw) {
+//     filc::IRGenerator generator("identifier", new filc::Environment());
+//     auto identifier = filc::Identifier("identifier");
+//     ASSERT_THROW(identifier.acceptIRVisitor(&generator), std::logic_error);
+// }
+
+TEST(IRGenerator, calcul_integer) {
+    ASSERT_THAT(getIR("1 + 1"), HasSubstr("ret i32 2"));
+    ASSERT_THAT(getIR("1 - 1"), HasSubstr("ret i32 0"));
+    ASSERT_THAT(getIR("2 * 3"), HasSubstr("ret i32 6"));
+    ASSERT_THAT(getIR("6 / 2"), HasSubstr("ret i32 3"));
+    ASSERT_THAT(getIR("3 % 2"), HasSubstr("ret i32 1"));
+}
+
+// TEST(IRGenerator, assignation_throw) {
+//     filc::IRGenerator generator("assignation", new filc::Environment());
+//     auto assignation = filc::Assignation("my_var", nullptr);
+//     ASSERT_THROW(assignation.acceptIRVisitor(&generator), std::logic_error);
+// }
