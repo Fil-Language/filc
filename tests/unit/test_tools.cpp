@@ -25,6 +25,7 @@
 #include "FilLexer.h"
 #include "FilParser.h"
 #include "antlr4-runtime.h"
+#include <filc/validation/ValidationVisitor.h>
 
 auto toStringArray(const std::vector<std::string> &data) -> std::vector<char *> {
     std::vector<char *> strings;
@@ -45,6 +46,14 @@ auto parseString(const std::string &content) -> std::shared_ptr<filc::Program> {
     filc::FilParser parser(&tokens);
 
     return parser.program()->tree;
+}
+
+auto parseAndValidateString(const std::string &content) -> std::shared_ptr<filc::Program> {
+    const auto program = parseString(content);
+    std::stringstream ss;
+    filc::ValidationVisitor validation_visitor(ss);
+    program->acceptVoidVisitor(&validation_visitor);
+    return program;
 }
 
 PrinterVisitor::PrinterVisitor() : _out(std::stringstream()) {}

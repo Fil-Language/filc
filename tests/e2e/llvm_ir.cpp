@@ -21,31 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_CALCULVALIDATOR_H
-#define FILC_CALCULVALIDATOR_H
+#include "test_tools.h"
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <gtest/gtest.h>
 
-#include "filc/grammar/Type.h"
-#include "filc/validation/Environment.h"
-#include <memory>
-#include <string>
+auto getProgramResult(const std::string &program) -> int {
+    std::ofstream program_file(FIXTURES_PATH "/ir_test.fil");
+    program_file << program;
+    program_file.flush();
+    program_file.close();
 
-namespace filc {
-class CalculValidator {
-  public:
-    explicit CalculValidator(Environment *environment);
+    const auto ir_output = run_with_args("--dump=ir " FIXTURES_PATH "/ir_test.fil 2>&1");
+    std::ofstream ir_file(FIXTURES_PATH "/ir_test.ir");
+    ir_file << ir_output;
+    ir_file.flush();
+    ir_file.close();
 
-    [[nodiscard]] auto isCalculValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op,
-                                     const std::shared_ptr<AbstractType> &right_type) const -> std::shared_ptr<AbstractType>;
+    const auto status = system("lli " FIXTURES_PATH "/ir_test.ir");
 
-  private:
-    Environment *_environment;
+    std::filesystem::remove(FIXTURES_PATH "/ir_test.fil");
+    std::filesystem::remove(FIXTURES_PATH "/ir_test.ir");
 
-    [[nodiscard]] auto isNumericOperatorValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op) const -> std::shared_ptr<AbstractType>;
-
-    [[nodiscard]] auto isBoolOperatorValid(const std::string &op) const -> std::shared_ptr<AbstractType>;
-
-    [[nodiscard]] auto isPointerOperatorValid(const std::string &op) const -> std::shared_ptr<AbstractType>;
-};
+    return WEXITSTATUS(status);
 }
 
-#endif // FILC_CALCULVALIDATOR_H
+TEST(ir_dump, calcul_program) {
+    ASSERT_EQ(2, getProgramResult("1 + 1"));
+    ASSERT_EQ(5, getProgramResult("(3 * 2 + 4) / 2"));
+}
+
+TEST(ir_dump, variable_program) { ASSERT_EQ(2, getProgramResult("val foo = 2\nfoo")); }

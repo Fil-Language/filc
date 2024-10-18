@@ -25,67 +25,91 @@
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/variable/Variable.h"
+#include "filc/validation/ValidationVisitor.h"
+#include "test_tools.h"
 #include <filc/grammar/literal/Literal.h>
 #include <filc/grammar/program/Program.h>
 #include <filc/llvm/IRGenerator.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-TEST(IRGenerator, program_throw) {
-    filc::IRGenerator generator("program");
-    auto program = filc::Program({});
-    ASSERT_THROW(program.acceptIRVisitor(&generator), std::logic_error);
+using namespace ::testing;
+
+auto getIR(const std::string &content) -> std::string {
+    const auto program = parseString(content);
+    std::stringstream ss;
+    filc::ValidationVisitor validation_visitor(ss);
+    program->acceptVoidVisitor(&validation_visitor);
+    filc::IRGenerator generator("main", validation_visitor.getEnvironment());
+    program->acceptIRVisitor(&generator);
+    return generator.dump();
 }
 
-TEST(IRGenerator, booleanLiteral_throw) {
-    filc::IRGenerator generator("boolean_literal");
-    auto literal = filc::BooleanLiteral(true);
-    ASSERT_THROW(literal.acceptIRVisitor(&generator), std::logic_error);
+TEST(IRGenerator, program_empty) {
+    const auto ir = getIR("");
+    ASSERT_THAT(ir, HasSubstr("define i32 @main() {\n"
+                              "entry:\n"
+                              "  ret i32 0\n"
+                              "}"));
 }
 
-TEST(IRGenerator, integerLiteral_throw) {
-    filc::IRGenerator generator("integer_literal");
-    auto literal = filc::IntegerLiteral(2);
-    ASSERT_THROW(literal.acceptIRVisitor(&generator), std::logic_error);
+TEST(IRGenerator, program_nonEmpty) {
+    const auto ir = getIR("1");
+    ASSERT_THAT(ir, HasSubstr("define i32 @main() {\n"
+                              "entry:\n"
+                              "  ret i32 1\n"
+                              "}"));
 }
 
-TEST(IRGenerator, floatLiteral_throw) {
-    filc::IRGenerator generator("float_literal");
-    auto literal = filc::FloatLiteral(9.81);
-    ASSERT_THROW(literal.acceptIRVisitor(&generator), std::logic_error);
+TEST(IRGenerator, booleanLiteral_true) {
+    const auto ir = getIR("true");
+    ASSERT_THAT(ir, HasSubstr("ret i1 true"));
 }
 
-TEST(IRGenerator, characterLiteral_throw) {
-    filc::IRGenerator generator("character_literal");
-    auto literal = filc::CharacterLiteral('a');
-    ASSERT_THROW(literal.acceptIRVisitor(&generator), std::logic_error);
+TEST(IRGenerator, booleanLiteral_false) {
+    const auto ir = getIR("false");
+    ASSERT_THAT(ir, HasSubstr("ret i1 false"));
 }
 
-TEST(IRGenerator, stringLiteral_throw) {
-    filc::IRGenerator generator("string_literal");
-    auto literal = filc::StringLiteral("Hello");
-    ASSERT_THROW(literal.acceptIRVisitor(&generator), std::logic_error);
+TEST(IRGenerator, integerLiteral) {
+    const auto ir = getIR("0");
+    ASSERT_THAT(ir, HasSubstr("ret i32 0"));
 }
 
-TEST(IRGenerator, variableDeclaration_throw) {
-    filc::IRGenerator generator("variable_declaration");
-    auto variable = filc::VariableDeclaration(true, "my_val", "its_type", nullptr);
-    ASSERT_THROW(variable.acceptIRVisitor(&generator), std::logic_error);
+TEST(IRGenerator, floatLiteral_notThrow) {
+    const auto ir = getIR("3.5\n0");
+    ASSERT_THAT(ir, HasSubstr("ret i32 0"));
 }
 
-TEST(IRGenerator, identifier_throw) {
-    filc::IRGenerator generator("identifier");
-    auto identifier = filc::Identifier("identifier");
-    ASSERT_THROW(identifier.acceptIRVisitor(&generator), std::logic_error);
+TEST(IRGenerator, characterLiteral_notThrow) {
+    const auto ir = getIR("'a'\n0");
+    ASSERT_THAT(ir, HasSubstr("ret i32 0"));
 }
 
-TEST(IRGenerator, calcul_throw) {
-    filc::IRGenerator generator("calcul");
-    auto calcul = filc::BinaryCalcul(nullptr, "+", nullptr);
-    ASSERT_THROW(calcul.acceptIRVisitor(&generator), std::logic_error);
+TEST(IRGenerator, stringLiteral_notThrow) {
+    const auto ir = getIR("\"hello\"\n0");
+    ASSERT_THAT(ir, HasSubstr("ret i32 0"));
 }
 
-TEST(IRGenerator, assignation_throw) {
-    filc::IRGenerator generator("assignation");
-    auto assignation = filc::Assignation("my_var", nullptr);
-    ASSERT_THROW(assignation.acceptIRVisitor(&generator), std::logic_error);
+TEST(IRGenerator, variableDeclaration_value) {
+    const auto ir = getIR("val bar = 3");
+    ASSERT_THAT(ir, HasSubstr("ret i32 3"));
+}
+
+TEST(IRGenerator, variableDeclaration_identifier) {
+    const auto ir = getIR("val foo = 2\nfoo");
+    ASSERT_THAT(ir, HasSubstr("ret i32 %0")); // Returns the register in which it loads the constant
+}
+
+TEST(IRGenerator, calcul_integer) {
+    ASSERT_THAT(getIR("1 + 1"), HasSubstr("ret i32 2"));
+    ASSERT_THAT(getIR("1 - 1"), HasSubstr("ret i32 0"));
+    ASSERT_THAT(getIR("2 * 3"), HasSubstr("ret i32 6"));
+    ASSERT_THAT(getIR("6 / 2"), HasSubstr("ret i32 3"));
+    ASSERT_THAT(getIR("3 % 2"), HasSubstr("ret i32 1"));
+}
+
+TEST(IRGenerator, assignation_notThrow) {
+    const auto ir = getIR("var bar = 3\nbar = 0");
+    ASSERT_THAT(ir, HasSubstr("ret i32 0"));
 }

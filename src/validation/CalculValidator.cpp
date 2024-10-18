@@ -27,10 +27,13 @@
 
 using namespace filc;
 
+CalculValidator::CalculValidator(Environment *environment) : _environment(environment) {}
+
 auto CalculValidator::isCalculValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op,
-                                    const std::shared_ptr<AbstractType> &right_type) -> bool {
+                                    const std::shared_ptr<AbstractType> &right_type) const
+    -> std::shared_ptr<AbstractType> {
     if (left_type != right_type) {
-        return false;
+        return nullptr;
     }
     const auto type = left_type->getName();
 
@@ -38,7 +41,7 @@ auto CalculValidator::isCalculValid(const std::shared_ptr<AbstractType> &left_ty
         "i8", "i16", "i32", "i64", "i128", "u8", "u16", "u32", "u64", "u128", "f32", "f64",
     };
     if (std::find(numeric_type.begin(), numeric_type.end(), type) != numeric_type.end()) {
-        return isNumericOperatorValid(op);
+        return isNumericOperatorValid(left_type, op);
     }
 
     if (type == "bool") {
@@ -50,18 +53,37 @@ auto CalculValidator::isCalculValid(const std::shared_ptr<AbstractType> &left_ty
     }
 
     // We don't know what it is, so we assert it cannot be done
-    return false;
+    return nullptr;
 }
 
-auto CalculValidator::isNumericOperatorValid(const std::string &op) -> bool {
-    const std::vector<std::string> valid_op = {
-        "%", "+", "-", "/", "*", "<", "<=", ">", ">=", "==", "!=",
-    };
-    return std::find(valid_op.begin(), valid_op.end(), op) != valid_op.end();
+auto CalculValidator::isNumericOperatorValid(const std::shared_ptr<AbstractType> &left_type,
+                                             const std::string &op) const -> std::shared_ptr<AbstractType> {
+    const std::vector<std::string> numeric_op = {"%", "+", "-", "/", "*"};
+    const std::vector<std::string> boolean_op = {"<", "<=", ">", ">=", "==", "!="};
+
+    if (std::find(numeric_op.begin(), numeric_op.end(), op) != numeric_op.end()) {
+        return left_type;
+    }
+
+    if (std::find(boolean_op.begin(), boolean_op.end(), op) != boolean_op.end()) {
+        return _environment->getType("bool");
+    }
+
+    return nullptr;
 }
 
-auto CalculValidator::isBoolOperatorValid(const std::string &op) -> bool {
-    return op == "&&" || op == "||" || op == "==" || op == "!=";
+auto CalculValidator::isBoolOperatorValid(const std::string &op) const -> std::shared_ptr<AbstractType> {
+    if (op == "&&" || op == "||" || op == "==" || op == "!=") {
+        return _environment->getType("bool");
+    }
+
+    return nullptr;
 }
 
-auto CalculValidator::isPointerOperatorValid(const std::string &op) -> bool { return op == "==" || op == "!="; }
+auto CalculValidator::isPointerOperatorValid(const std::string &op) const -> std::shared_ptr<AbstractType> {
+    if (op == "==" || op == "!=") {
+        return _environment->getType("bool");
+    }
+
+    return nullptr;
+}

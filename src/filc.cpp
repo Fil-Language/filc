@@ -65,11 +65,17 @@ auto FilCompiler::run(int argc, char **argv) -> int {
         return 1;
     }
 
-    // FIXME: Temporary, time to implement IR generator. Option will be used later to dump generated IR
+    IRGenerator generator(filename, _validation_visitor.getEnvironment());
+    program->acceptIRVisitor(&generator);
     if (dump_option == "ir" || dump_option == "all") {
-        IRGenerator generator(filename);
-        program->acceptIRVisitor(&generator);
+        const auto ir_result = generator.dump();
+        std::cout << ir_result;
+        if (dump_option == "ir") {
+            return 0;
+        }
     }
+
+    // TODO: transform ir to object code
 
     return 0;
 }

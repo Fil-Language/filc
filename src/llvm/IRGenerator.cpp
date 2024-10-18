@@ -22,50 +22,113 @@
  * SOFTWARE.
  */
 #include "filc/llvm/IRGenerator.h"
+#include "filc/grammar/assignation/Assignation.h"
+#include "filc/grammar/calcul/Calcul.h"
+#include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
 #include "filc/grammar/program/Program.h"
+#include "filc/grammar/variable/Variable.h"
+#include "filc/llvm/CalculBuilder.h"
+#include <llvm/IR/Verifier.h>
 
 using namespace filc;
 
-IRGenerator::IRGenerator(const std::string &filename) {
-    _module = std::make_unique<llvm::Module>(llvm::StringRef(filename), _llvm_context);
-    _builder = std::make_unique<llvm::IRBuilder<>>(_llvm_context);
+IRGenerator::IRGenerator(const std::string &filename, const Environment *environment) {
+    _llvm_context = std::make_unique<llvm::LLVMContext>();
+    _module = std::make_unique<llvm::Module>(llvm::StringRef(filename), *_llvm_context);
+    _builder = std::make_unique<llvm::IRBuilder<>>(*_llvm_context);
+    environment->prepareLLVMTypes(_llvm_context.get());
 }
 
-auto IRGenerator::visitProgram(Program *program) -> llvm::Value * { throw std::logic_error("Not implemented yet"); }
+auto IRGenerator::dump() const -> std::string {
+    std::string ir_result;
+    llvm::raw_string_ostream out(ir_result);
+    out << *_module;
+    out.flush();
+    return ir_result;
+}
+
+auto IRGenerator::visitProgram(Program *program) -> llvm::Value * {
+    auto function_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(*_llvm_context), {}, false);
+    auto function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, "main", _module.get());
+    auto basic_block = llvm::BasicBlock::Create(*_llvm_context, "entry", function);
+    _builder->SetInsertPoint(basic_block);
+
+    const auto &expressions = program->getExpressions();
+    if (expressions.empty()) {
+        const auto return_value = llvm::ConstantInt::get(*_llvm_context, llvm::APInt(32, 0, true));
+        _builder->CreateRet(return_value);
+    } else {
+        for (auto it = expressions.begin(); it != expressions.end(); it++) {
+            if (it + 1 != expressions.end()) {
+                (*it)->acceptIRVisitor(this);
+            } else {
+                const auto return_value = (*it)->acceptIRVisitor(this);
+                _builder->CreateRet(return_value);
+            }
+        }
+    }
+
+    llvm::verifyFunction(*function);
+
+    return nullptr;
+}
 
 auto IRGenerator::visitBooleanLiteral(BooleanLiteral *literal) -> llvm::Value * {
-    throw std::logic_error("Not implemented yet");
+    return llvm::ConstantInt::get(*_llvm_context, llvm::APInt(1, literal->getValue(), false));
 }
 
 auto IRGenerator::visitIntegerLiteral(IntegerLiteral *literal) -> llvm::Value * {
-    throw std::logic_error("Not implemented yet");
+    const auto type_name = literal->getType()->getName();
+    const auto is_signed = type_name[0] == 'i';
+    const auto size = stoi(type_name.substr(1));
+    return llvm::ConstantInt::get(*_llvm_context, llvm::APInt(size, literal->getValue(), is_signed));
 }
 
 auto IRGenerator::visitFloatLiteral(FloatLiteral *literal) -> llvm::Value * {
-    throw std::logic_error("Not implemented yet");
+    const auto type_name = literal->getType()->getName();
+    if (type_name == "f32") {
+        return llvm::ConstantFP::get(*_llvm_context, llvm::APFloat((float)literal->getValue()));
+    }
+    return llvm::ConstantFP::get(*_llvm_context, llvm::APFloat(literal->getValue()));
 }
 
 auto IRGenerator::visitCharacterLiteral(CharacterLiteral *literal) -> llvm::Value * {
-    throw std::logic_error("Not implemented yet");
+    return llvm::ConstantInt::get(*_llvm_context, llvm::APInt(8, literal->getValue(), false));
 }
 
 auto IRGenerator::visitStringLiteral(StringLiteral *literal) -> llvm::Value * {
-    throw std::logic_error("Not implemented yet");
+    return _builder->CreateGlobalString(literal->getValue());
 }
 
 auto IRGenerator::visitVariableDeclaration(VariableDeclaration *variable) -> llvm::Value * {
-    throw std::logic_error("Not implemented yet");
+    const auto global = new llvm::GlobalVariable(variable->getType()->getLLVMType(), variable->isConstant(),
+                                                 llvm::GlobalValue::InternalLinkage);
+    global->setName(variable->getName());
+    _module->insertGlobalVariable(global);
+
+    if (variable->getValue() != nullptr) {
+        const auto value = variable->getValue()->acceptIRVisitor(this);
+        global->setInitializer((llvm::Constant *)value);
+        return value;
+    }
+
+    return global;
 }
 
 auto IRGenerator::visitIdentifier(Identifier *identifier) -> llvm::Value * {
-    throw std::logic_error("Not implemented yet");
+    const auto variable = _module->getNamedGlobal(identifier->getName());
+    return _builder->CreateLoad(variable->getValueType(), variable);
 }
 
 auto IRGenerator::visitBinaryCalcul(BinaryCalcul *calcul) -> llvm::Value * {
-    throw std::logic_error("Not implemented yet");
+    CalculBuilder builder(this, _builder.get());
+    return builder.buildCalculValue(calcul);
 }
 
 auto IRGenerator::visitAssignation(Assignation *assignation) -> llvm::Value * {
-    throw std::logic_error("Not implemented yet");
+    const auto variable = _module->getNamedGlobal(assignation->getIdentifier());
+    const auto value = assignation->getValue()->acceptIRVisitor(this);
+    _builder->CreateStore(value, variable);
+    return value;
 }

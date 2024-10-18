@@ -21,31 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_CALCULVALIDATOR_H
-#define FILC_CALCULVALIDATOR_H
+#ifndef FILC_CALCULBUILDER_H
+#define FILC_CALCULBUILDER_H
 
-#include "filc/grammar/Type.h"
-#include "filc/validation/Environment.h"
-#include <memory>
-#include <string>
+#include "filc/grammar/calcul/Calcul.h"
+#include "filc/llvm/IRGenerator.h"
+#include <llvm/IR/IRBuilder.h>
 
 namespace filc {
-class CalculValidator {
+class CalculBuilder final {
   public:
-    explicit CalculValidator(Environment *environment);
+    explicit CalculBuilder(IRGenerator *generator, llvm::IRBuilder<> *builder);
 
-    [[nodiscard]] auto isCalculValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op,
-                                     const std::shared_ptr<AbstractType> &right_type) const -> std::shared_ptr<AbstractType>;
+    auto buildCalculValue(BinaryCalcul *calcul) const -> llvm::Value *;
 
   private:
-    Environment *_environment;
+    IRGenerator *_generator;
+    llvm::IRBuilder<> *_builder;
 
-    [[nodiscard]] auto isNumericOperatorValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op) const -> std::shared_ptr<AbstractType>;
+    auto buildSignedInteger(BinaryCalcul *calcul) const -> llvm::Value *;
 
-    [[nodiscard]] auto isBoolOperatorValid(const std::string &op) const -> std::shared_ptr<AbstractType>;
+    auto buildUnsignedInteger(BinaryCalcul *calcul) const -> llvm::Value *;
 
-    [[nodiscard]] auto isPointerOperatorValid(const std::string &op) const -> std::shared_ptr<AbstractType>;
+    auto buildFloat(BinaryCalcul *calcul) const -> llvm::Value *;
+
+    auto buildBool(BinaryCalcul *calcul) const -> llvm::Value *;
+
+    auto buildPointer(BinaryCalcul *calcul) const -> llvm::Value *;
+
+    auto static buildError(BinaryCalcul *calcul) -> std::logic_error;
 };
 }
 
-#endif // FILC_CALCULVALIDATOR_H
+#endif // FILC_CALCULBUILDER_H

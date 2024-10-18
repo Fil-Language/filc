@@ -66,6 +66,8 @@ class ValidationVisitor final : public Visitor<void> {
   public:
     explicit ValidationVisitor(std::ostream &out);
 
+    [[nodiscard]] auto getEnvironment() const -> const Environment *;
+
     [[nodiscard]] auto hasError() const -> bool;
 
     auto visitProgram(Program *program) -> void override;
