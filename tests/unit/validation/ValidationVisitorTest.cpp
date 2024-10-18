@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
-#include <filc/grammar/Parser.h>
 #include <filc/grammar/expression/Expression.h>
 #include <filc/validation/ValidationVisitor.h>
 #include <gmock/gmock.h>
@@ -35,8 +34,6 @@ using namespace ::testing;
     std::stringstream ss;                                                                                              \
     filc::ValidationVisitor visitor(ss)
 
-#define VALIDATION_FIXTURES FIXTURES_PATH "/validation"
-
 TEST(ValidationVisitor, program_valid) {
     VISITOR;
     const auto program = parseString("0");
@@ -47,11 +44,27 @@ TEST(ValidationVisitor, program_valid) {
 
 TEST(ValidationVisitor, program_invalid) {
     VISITOR;
-    const auto program = parseString("'a'");
+    const auto program = parseString("3.4");
     program->acceptVoidVisitor(&visitor);
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}),
-                HasSubstr("Expected type int aka i32 but got char"));
+                HasSubstr("Expected type int aka i32 but got f64"));
     ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, program_finish_u8) {
+    VISITOR;
+    const auto program = parseString("val foo: u8 = 2\nfoo");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, program_finish_bool) {
+    VISITOR;
+    const auto program = parseString("true");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
 }
 
 TEST(ValidationVisitor, boolean) {
@@ -165,6 +178,15 @@ TEST(ValidationVisitor, variable_valid) {
     ASSERT_STREQ("i32", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
 
+TEST(ValidationVisitor, variable_castInteger) {
+    VISITOR;
+    const auto program = parseString("val bar: u8 = 4\n0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("u8", program->getExpressions()[0]->getType()->getDisplayName().c_str());
+}
+
 TEST(ValidationVisitor, identifier_nonExisting) {
     VISITOR;
     const auto program = parseString("bar");
@@ -259,4 +281,13 @@ TEST(ValidationVisitor, assignation_valid) {
     ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("int", program->getExpressions()[1]->getType()->getDisplayName().c_str());
+}
+
+TEST(ValidationVisitor, assignation_castInteger) {
+    VISITOR;
+    const auto program = parseString("var foo: u8 = 3\nfoo = 2\n0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator<char>(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("u8", program->getExpressions()[1]->getType()->getDisplayName().c_str());
 }

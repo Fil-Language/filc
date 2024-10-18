@@ -26,6 +26,10 @@
 
 using namespace filc;
 
+auto AbstractType::setLLVMType(llvm::Type *type) -> void { _llvm_type = type; }
+
+auto AbstractType::getLLVMType() const -> llvm::Type * { return _llvm_type; }
+
 Type::Type(std::string name) : _name(std::move(name)) {}
 
 auto Type::getName() const noexcept -> std::string { return _name; }

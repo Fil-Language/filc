@@ -21,37 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_ENVIRONMENT_H
-#define FILC_ENVIRONMENT_H
+#ifndef FILC_CALCULBUILDER_H
+#define FILC_CALCULBUILDER_H
 
-#include "filc/grammar/Type.h"
-#include "filc/validation/Name.h"
-#include <map>
-#include <string>
+#include "filc/grammar/calcul/Calcul.h"
+#include "filc/llvm/IRGenerator.h"
+#include <llvm/IR/IRBuilder.h>
 
 namespace filc {
-class Environment {
+class CalculBuilder final {
   public:
-    Environment();
+    explicit CalculBuilder(IRGenerator *generator, llvm::IRBuilder<> *builder);
 
-    auto prepareLLVMTypes(llvm::LLVMContext *context) const -> void;
-
-    [[nodiscard]] auto hasType(const std::string &name) const -> bool;
-
-    [[nodiscard]] auto getType(const std::string &name) const -> const std::shared_ptr<AbstractType> &;
-
-    auto addType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto hasName(const std::string &name) const -> bool;
-
-    [[nodiscard]] auto getName(const std::string &name) const -> const Name&;
-
-    auto addName(const Name &name) -> void;
+    auto buildCalculValue(BinaryCalcul *calcul) -> llvm::Value *;
 
   private:
-    std::map<std::string, std::shared_ptr<AbstractType>> _types;
-    std::map<std::string, Name> _names;
+    IRGenerator *_generator;
+    llvm::IRBuilder<> *_builder;
 };
 }
 
-#endif // FILC_ENVIRONMENT_H
+#endif // FILC_CALCULBUILDER_H

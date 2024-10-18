@@ -25,6 +25,7 @@
 #define FILC_IRGENERATOR_H
 
 #include "filc/grammar/Visitor.h"
+#include "filc/validation/Environment.h"
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
 #include <memory>
@@ -32,9 +33,11 @@
 namespace filc {
 class IRGenerator final: public Visitor<llvm::Value *> {
   public:
-    explicit IRGenerator(const std::string &filename);
+    explicit IRGenerator(const std::string &filename, const Environment *environment);
 
     ~IRGenerator() override = default;
+
+    [[nodiscard]] auto dump() const -> std::string;
 
     auto visitProgram(Program *program) -> llvm::Value * override;
 
@@ -57,7 +60,7 @@ class IRGenerator final: public Visitor<llvm::Value *> {
     auto visitAssignation(Assignation *assignation) -> llvm::Value * override;
 
   private:
-    llvm::LLVMContext _llvm_context;
+    std::unique_ptr<llvm::LLVMContext> _llvm_context;
     std::unique_ptr<llvm::Module> _module;
     std::unique_ptr<llvm::IRBuilder<>> _builder;
 };

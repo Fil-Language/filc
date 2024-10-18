@@ -21,37 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_ENVIRONMENT_H
-#define FILC_ENVIRONMENT_H
+#include "test_tools.h"
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <gtest/gtest.h>
 
-#include "filc/grammar/Type.h"
-#include "filc/validation/Name.h"
-#include <map>
-#include <string>
+auto getProgramResult(const std::string &program) -> int {
+    std::ofstream program_file(FIXTURES_PATH "/ir_test.fil");
+    program_file << program;
+    program_file.flush();
+    program_file.close();
 
-namespace filc {
-class Environment {
-  public:
-    Environment();
+    const auto ir_output = run_with_args("--dump=ir " FIXTURES_PATH "/ir_test.fil 2>&1");
+    std::ofstream ir_file(FIXTURES_PATH "/ir_test.ir");
+    ir_file << ir_output;
+    ir_file.flush();
+    ir_file.close();
 
-    auto prepareLLVMTypes(llvm::LLVMContext *context) const -> void;
+    const auto status = system("lli " FIXTURES_PATH "/ir_test.ir");
 
-    [[nodiscard]] auto hasType(const std::string &name) const -> bool;
+    std::filesystem::remove(FIXTURES_PATH "/ir_test.fil");
+    std::filesystem::remove(FIXTURES_PATH "/ir_test.ir");
 
-    [[nodiscard]] auto getType(const std::string &name) const -> const std::shared_ptr<AbstractType> &;
-
-    auto addType(const std::shared_ptr<AbstractType> &type) -> void;
-
-    [[nodiscard]] auto hasName(const std::string &name) const -> bool;
-
-    [[nodiscard]] auto getName(const std::string &name) const -> const Name&;
-
-    auto addName(const Name &name) -> void;
-
-  private:
-    std::map<std::string, std::shared_ptr<AbstractType>> _types;
-    std::map<std::string, Name> _names;
-};
+    return WEXITSTATUS(status);
 }
 
-#endif // FILC_ENVIRONMENT_H
+TEST(ir_dump, calcul_program) {
+    ASSERT_EQ(2, getProgramResult("1 + 1"));
+    ASSERT_EQ(5, getProgramResult("(3 * 2 + 4) / 2"));
+}
