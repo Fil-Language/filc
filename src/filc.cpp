@@ -75,7 +75,5 @@ auto FilCompiler::run(int argc, char **argv) -> int {
         }
     }
 
-    // TODO: transform ir to object code
-
-    return 0;
+    return generator.toTarget(_options_parser.getOutputFile(), _options_parser.getTarget());
 }

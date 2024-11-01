@@ -70,7 +70,11 @@ include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS})
 
-llvm_map_components_to_libnames(llvm_libs support core irreader)
+llvm_map_components_to_libnames(llvm_libs analysis support core object irreader executionengine scalaropts instcombine orcjit runtimedyld)
+
+foreach(target ${LLVM_TARGETS_TO_BUILD})
+    list(APPEND llvm_targets "LLVM${target}CodeGen")
+endforeach()
 
 ## filc lib
 file(GLOB_RECURSE SRC_FILES
@@ -80,7 +84,7 @@ file(GLOB_RECURSE SRC_FILES
 message(DEBUG SRC_FILES=${SRC_FILES})
 
 add_library(filc_lib ${SRC_FILES} ${ANTLR_Lexer_CXX_OUTPUTS} ${ANTLR_Parser_CXX_OUTPUTS})
-target_link_libraries(filc_lib PRIVATE additional_config cxxopts::cxxopts antlr4_static ${llvm_libs})
+target_link_libraries(filc_lib PRIVATE additional_config cxxopts::cxxopts antlr4_static ${llvm_libs} ${llvm_targets})
 
 target_include_directories(filc_lib PUBLIC
         "${PROJECT_SOURCE_DIR}/include"

@@ -18,7 +18,7 @@ pkgs.mkShell {
     pkgs.jre_minimal
     pkgs.nodejs_20
     pkgs.corepack_20
-    pkgs.llvmPackages_19.libllvm
+    pkgs.llvmPackages_18.libllvm
     pkgs.libffi
     pkgs.libxml2
   ];

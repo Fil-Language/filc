@@ -29,7 +29,14 @@
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 #include "filc/llvm/CalculBuilder.h"
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Verifier.h>
+#include <llvm/MC/MCTargetOptions.h>
+#include <llvm/MC/TargetRegistry.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/Target/TargetMachine.h>
+#include <llvm/Target/TargetOptions.h>
+#include <llvm/TargetParser/Host.h>
 
 using namespace filc;
 
@@ -46,6 +53,46 @@ auto IRGenerator::dump() const -> std::string {
     out << *_module;
     out.flush();
     return ir_result;
+}
+
+auto IRGenerator::toTarget(const std::string &output_file, const std::string &target_triple) const -> int {
+    const auto used_target_triple = target_triple.empty() ? llvm::sys::getDefaultTargetTriple() : target_triple;
+
+    llvm::InitializeAllTargetInfos();
+    llvm::InitializeAllTargets();
+    llvm::InitializeAllTargetMCs();
+    // FIXME: llvm::InitializeAllAsmParsers();
+    llvm::InitializeAllAsmPrinters();
+
+    std::string error;
+    const auto target = llvm::TargetRegistry::lookupTarget(used_target_triple, error);
+    if (!target) {
+        std::cerr << error;
+        return 1;
+    }
+    const llvm::TargetOptions options;
+    const auto target_machine = target->createTargetMachine(used_target_triple, "", "", options, llvm::Reloc::PIC_);
+
+    _module->setDataLayout(target_machine->createDataLayout());
+    _module->setTargetTriple(used_target_triple);
+
+    std::error_code ec;
+    llvm::raw_fd_stream out(output_file, ec);
+    if (ec) {
+        std::cerr << "Could not open file: " << ec.message();
+        return 1;
+    }
+
+    auto pass_manager = llvm::legacy::PassManager();
+    if (target_machine->addPassesToEmitFile(pass_manager, out, nullptr, llvm::CodeGenFileType::ObjectFile)) {
+        std::cerr << "Target machine can't emit an object file";
+        return 1;
+    }
+
+    pass_manager.run(*_module);
+    out.flush();
+
+    return 0;
 }
 
 auto IRGenerator::visitProgram(Program *program) -> llvm::Value * {

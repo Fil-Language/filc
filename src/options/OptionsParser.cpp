@@ -33,6 +33,10 @@ OptionsParser::OptionsParser() : _options("filc", "Fil compiler"), _parsed(false
     _options.parse_positional("file");
     _options.positional_help("file");
 
+    _options.add_options("General")("out,o", "Write output to file",
+                                    cxxopts::value<std::string>()->default_value("a.out"), "<file>")(
+        "target", "Generate code for the given target", cxxopts::value<std::string>(), "<value>");
+
     _options.add_options("Troubleshooting")("help", "Show this help message and exit.")("version",
                                                                                         "Show version and exit.");
 
@@ -49,7 +53,7 @@ auto OptionsParser::parse(int argc, char **argv) -> void {
     _parsed = true;
 }
 
-auto OptionsParser::isHelp() -> bool {
+auto OptionsParser::isHelp() const -> bool {
     if (!_parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
@@ -57,9 +61,9 @@ auto OptionsParser::isHelp() -> bool {
     return _result.count("help") > 0 || _result.arguments().empty();
 }
 
-auto OptionsParser::showHelp(std::ostream &out) -> void { out << _options.help() << "\n"; }
+auto OptionsParser::showHelp(std::ostream &out) const -> void { out << _options.help() << "\n"; }
 
-auto OptionsParser::isVersion() -> bool {
+auto OptionsParser::isVersion() const -> bool {
     if (!_parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
@@ -67,7 +71,7 @@ auto OptionsParser::isVersion() -> bool {
     return _result.count("version") > 0;
 }
 
-auto OptionsParser::getFile() -> std::string {
+auto OptionsParser::getFile() const -> std::string {
     if (!_parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
@@ -75,7 +79,7 @@ auto OptionsParser::getFile() -> std::string {
     return _result["file"].as<std::string>();
 }
 
-auto OptionsParser::getDump() -> std::string {
+auto OptionsParser::getDump() const -> std::string {
     if (!_parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
@@ -90,6 +94,25 @@ auto OptionsParser::getDump() -> std::string {
 }
 
 auto OptionsParser::showVersion(std::ostream &out) -> void { out << FILC_VERSION << "\n"; }
+
+auto OptionsParser::getOutputFile() const -> std::string {
+    if (!_parsed) {
+        throw OptionsParserException(NOT_PARSED_MESSAGE);
+    }
+
+    return _result["out"].as<std::string>();
+}
+
+auto OptionsParser::getTarget() const -> std::string {
+    if (!_parsed) {
+        throw OptionsParserException(NOT_PARSED_MESSAGE);
+    }
+
+    if (_result.count("target") == 0) {
+        return "";
+    }
+    return _result["target"].as<std::string>();
+}
 
 OptionsParserException::OptionsParserException(std::string message) : _message(std::move(message)) {}
 

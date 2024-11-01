@@ -39,6 +39,8 @@ class IRGenerator final: public Visitor<llvm::Value *> {
 
     [[nodiscard]] auto dump() const -> std::string;
 
+    [[nodiscard]] auto toTarget(const std::string &output_file, const std::string &target_triple) const -> int;
+
     auto visitProgram(Program *program) -> llvm::Value * override;
 
     auto visitBooleanLiteral(BooleanLiteral *literal) -> llvm::Value * override;
