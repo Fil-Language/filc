@@ -25,31 +25,33 @@
 #define FILC_VISITOR_H
 
 #include "filc/grammar/ast.h"
+#include "llvm/IR/Value.h"
 
 namespace filc {
+template<typename Return>
 class Visitor {
   public:
     virtual ~Visitor() = default;
 
-    virtual auto visitProgram(Program *program) -> void = 0;
+    virtual auto visitProgram(Program *program) -> Return = 0;
 
-    virtual auto visitBooleanLiteral(BooleanLiteral *literal) -> void = 0;
+    virtual auto visitBooleanLiteral(BooleanLiteral *literal) -> Return = 0;
 
-    virtual auto visitIntegerLiteral(IntegerLiteral *literal) -> void = 0;
+    virtual auto visitIntegerLiteral(IntegerLiteral *literal) -> Return = 0;
 
-    virtual auto visitFloatLiteral(FloatLiteral *literal) -> void = 0;
+    virtual auto visitFloatLiteral(FloatLiteral *literal) -> Return = 0;
 
-    virtual auto visitCharacterLiteral(CharacterLiteral *literal) -> void = 0;
+    virtual auto visitCharacterLiteral(CharacterLiteral *literal) -> Return = 0;
 
-    virtual auto visitStringLiteral(StringLiteral *literal) -> void = 0;
+    virtual auto visitStringLiteral(StringLiteral *literal) -> Return = 0;
 
-    virtual auto visitVariableDeclaration(VariableDeclaration *variable) -> void = 0;
+    virtual auto visitVariableDeclaration(VariableDeclaration *variable) -> Return = 0;
 
-    virtual auto visitIdentifier(Identifier *identifier) -> void = 0;
+    virtual auto visitIdentifier(Identifier *identifier) -> Return = 0;
 
-    virtual auto visitBinaryCalcul(BinaryCalcul *calcul) -> void = 0;
+    virtual auto visitBinaryCalcul(BinaryCalcul *calcul) -> Return = 0;
 
-    virtual auto visitAssignation(Assignation *assignation) -> void = 0;
+    virtual auto visitAssignation(Assignation *assignation) -> Return = 0;
 
   protected:
     Visitor() = default;
@@ -57,7 +59,9 @@ class Visitor {
 
 class Visitable {
   public:
-    virtual auto accept(Visitor *visitor) -> void = 0;
+    virtual auto acceptVoidVisitor(Visitor<void> *visitor) -> void = 0;
+
+    virtual auto acceptIRVisitor(Visitor<llvm::Value*> *visitor) -> llvm::Value * = 0;
 };
 }
 

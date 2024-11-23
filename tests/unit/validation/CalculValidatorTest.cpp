@@ -26,27 +26,41 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#define VALIDATOR                                                                                                      \
+    auto env = new filc::Environment();                                                                                \
+    filc::CalculValidator validator(env)
+
 TEST(CalculValidator, invalidDifferentType) {
-    ASSERT_FALSE(
-        filc::CalculValidator::isCalculValid(std::make_shared<filc::Type>("a"), "", std::make_shared<filc::Type>("b")));
+    VALIDATOR;
+    ASSERT_EQ(nullptr, validator.isCalculValid(env->getType("int"), "+", env->getType("f32")));
 }
 
 TEST(CalculValidator, validNumeric) {
-    ASSERT_TRUE(filc::CalculValidator::isCalculValid(std::make_shared<filc::Type>("i32"), "+",
-                                                     std::make_shared<filc::Type>("i32")));
+    VALIDATOR;
+    ASSERT_STREQ("i32", validator.isCalculValid(env->getType("i32"), "+", env->getType("i32"))->getName().c_str());
+}
+
+TEST(CalculValidator, validNumericComparison) {
+    VALIDATOR;
+    ASSERT_STREQ("bool", validator.isCalculValid(env->getType("i32"), "==", env->getType("i32"))->getName().c_str());
 }
 
 TEST(CalculValidator, validBool) {
-    ASSERT_TRUE(filc::CalculValidator::isCalculValid(std::make_shared<filc::Type>("bool"), "&&",
-                                                     std::make_shared<filc::Type>("bool")));
+    VALIDATOR;
+    ASSERT_STREQ("bool", validator.isCalculValid(env->getType("bool"), "&&", env->getType("bool"))->getName().c_str());
 }
 
 TEST(CalculValidator, validPointer) {
-    ASSERT_TRUE(filc::CalculValidator::isCalculValid(std::make_shared<filc::Type>("i32*"),
-                                                     "==", std::make_shared<filc::Type>("i32*")));
+    VALIDATOR;
+    ASSERT_STREQ("bool", validator
+                             .isCalculValid(std::make_shared<filc::PointerType>(env->getType("i32")),
+                                            "==", std::make_shared<filc::PointerType>(env->getType("i32")))
+                             ->getName()
+                             .c_str());
 }
 
 TEST(CalculValidator, invalidUnknown) {
-    ASSERT_FALSE(filc::CalculValidator::isCalculValid(std::make_shared<filc::Type>("foo"), "+",
-                                                      std::make_shared<filc::Type>("foo")));
+    VALIDATOR;
+    ASSERT_EQ(nullptr,
+              validator.isCalculValid(std::make_shared<filc::Type>("foo"), "+", std::make_shared<filc::Type>("foo")));
 }

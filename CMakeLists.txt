@@ -20,6 +20,7 @@ cmake_policy(SET CMP0135 NEW)
 # _.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-.
 # Library
 
+## Coverage config
 add_library(additional_config INTERFACE)
 
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
@@ -32,6 +33,7 @@ else ()
     target_compile_options(additional_config INTERFACE -O3)
 endif ()
 
+## Cxxopts
 FetchContent_Declare(
         cxxopts
         GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
@@ -40,6 +42,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(cxxopts)
 message(DEBUG cxxopts="${cxxopts_SOURCE_DIR}/include")
 
+## Antlr4
 add_definitions(-DANTLR4CPP_STATIC)
 set(ANTLR4_WITH_STATIC_CRT OFF)
 set(ANTLR4_TAG 4.13.2)
@@ -57,6 +60,23 @@ antlr_target(Parser ${PROJECT_SOURCE_DIR}/src/grammar/FilParser.g4 PARSER
         DEPENDS_ANTLR Lexer
         COMPILE_FLAGS -lib ${ANTLR_Lexer_OUTPUT_DIR})
 
+## LLVM
+find_package(LLVM REQUIRED CONFIG)
+
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
+include_directories(${LLVM_INCLUDE_DIRS})
+separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
+add_definitions(${LLVM_DEFINITIONS})
+
+llvm_map_components_to_libnames(llvm_libs analysis support core object irreader executionengine scalaropts instcombine orcjit runtimedyld)
+
+foreach(target ${LLVM_TARGETS_TO_BUILD})
+    list(APPEND llvm_targets "LLVM${target}CodeGen")
+endforeach()
+
+## filc lib
 file(GLOB_RECURSE SRC_FILES
         "${PROJECT_SOURCE_DIR}/src/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/**/*.cpp"
@@ -64,14 +84,15 @@ file(GLOB_RECURSE SRC_FILES
 message(DEBUG SRC_FILES=${SRC_FILES})
 
 add_library(filc_lib ${SRC_FILES} ${ANTLR_Lexer_CXX_OUTPUTS} ${ANTLR_Parser_CXX_OUTPUTS})
-target_link_libraries(filc_lib PRIVATE additional_config cxxopts::cxxopts antlr4_static)
+target_link_libraries(filc_lib PRIVATE additional_config cxxopts::cxxopts antlr4_static ${llvm_libs} ${llvm_targets})
 
 target_include_directories(filc_lib PUBLIC
         "${PROJECT_SOURCE_DIR}/include"
         "${cxxopts_SOURCE_DIR}/include"
         ${ANTLR4_INCLUDE_DIRS}
         ${ANTLR_Lexer_OUTPUT_DIR}
-        ${ANTLR_Parser_OUTPUT_DIR})
+        ${ANTLR_Parser_OUTPUT_DIR}
+        ${LLVM_INCLUDE_DIRS})
 
 target_compile_definitions(filc_lib
         PUBLIC FILC_VERSION="${FILC_VERSION}"

@@ -21,17 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "filc/grammar/identifier/Identifier.h"
-#include <utility>
+#include "test_tools.h"
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <gtest/gtest.h>
 
-using namespace filc;
+auto getProgramResult(const std::string &program) -> int {
+    std::ofstream program_file(FIXTURES_PATH "/ir_test.fil");
+    program_file << program;
+    program_file.flush();
+    program_file.close();
 
-Identifier::Identifier(std::string name) : _name(std::move(name)) {}
+    const auto ir_output = run_with_args("--dump=ir " FIXTURES_PATH "/ir_test.fil 2>&1");
+    std::ofstream ir_file(FIXTURES_PATH "/ir_test.ir");
+    ir_file << ir_output;
+    ir_file.flush();
+    ir_file.close();
 
-auto Identifier::getName() const -> std::string { return _name; }
+    const auto status = system("lli " FIXTURES_PATH "/ir_test.ir");
 
-auto Identifier::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitIdentifier(this); }
+    std::filesystem::remove(FIXTURES_PATH "/ir_test.fil");
+    std::filesystem::remove(FIXTURES_PATH "/ir_test.ir");
 
-auto Identifier::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
-    return visitor->visitIdentifier(this);
+    return WEXITSTATUS(status);
 }
+
+TEST(ir_dump, calcul_program) {
+    ASSERT_EQ(2, getProgramResult("1 + 1"));
+    ASSERT_EQ(5, getProgramResult("(3 * 2 + 4) / 2"));
+}
+
+TEST(ir_dump, variable_program) { ASSERT_EQ(2, getProgramResult("val foo = 2\nfoo")); }

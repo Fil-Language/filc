@@ -29,4 +29,6 @@ Program::Program(const std::vector<std::shared_ptr<Expression>> &expressions) : 
 
 auto Program::getExpressions() const -> const std::vector<std::shared_ptr<Expression>> & { return _expressions; }
 
-auto Program::accept(filc::Visitor *visitor) -> void { visitor->visitProgram(this); }
+auto Program::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitProgram(this); }
+
+auto Program::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * { return visitor->visitProgram(this); }

@@ -35,7 +35,7 @@ auto dumpProgram(const std::string &content) -> std::vector<std::string> {
     const auto program = parseString(content);
     std::stringstream ss;
     filc::DumpVisitor visitor(ss);
-    program->accept(&visitor);
+    program->acceptVoidVisitor(&visitor);
     std::string dump(std::istreambuf_iterator<char>(ss), {});
 
     std::vector<std::string> result;
@@ -60,7 +60,7 @@ TEST(DumpVisitor, dump) {
     const auto program = parseString("");
     std::stringstream ss;
     auto visitor = filc::DumpVisitor(ss);
-    program->accept(&visitor);
+    program->acceptVoidVisitor(&visitor);
     std::string result(std::istreambuf_iterator<char>(ss), {});
     ASSERT_STREQ("=== Begin AST dump ===\n=== End AST dump ===\n", result.c_str());
 }

@@ -37,4 +37,8 @@ auto BinaryCalcul::getOperator() const -> std::string { return _operator; }
 
 auto BinaryCalcul::getRightExpression() const -> std::shared_ptr<Expression> { return _right_expression; }
 
-auto BinaryCalcul::accept(Visitor *visitor) -> void { visitor->visitBinaryCalcul(this); }
+auto BinaryCalcul::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitBinaryCalcul(this); }
+
+auto BinaryCalcul::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitBinaryCalcul(this);
+}

@@ -52,6 +52,6 @@ TEST(Assignation, parsingCalcul) {
     const auto value = std::dynamic_pointer_cast<filc::BinaryCalcul>(assignation->getValue());
     ASSERT_NE(nullptr, value);
     PrinterVisitor visitor;
-    value->accept(&visitor);
+    value->acceptVoidVisitor(&visitor);
     ASSERT_STREQ("(bar || true)", visitor.getResult().c_str());
 }

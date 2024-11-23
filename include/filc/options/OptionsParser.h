@@ -36,17 +36,21 @@ class OptionsParser final {
 
     auto parse(int argc, char **argv) -> void;
 
-    [[nodiscard]] auto isHelp() -> bool;
+    [[nodiscard]] auto isHelp() const -> bool;
 
-    auto showHelp(std::ostream &out) -> void;
+    auto showHelp(std::ostream &out) const -> void;
 
-    [[nodiscard]] auto isVersion() -> bool;
+    [[nodiscard]] auto isVersion() const -> bool;
 
     static auto showVersion(std::ostream &out) -> void;
 
-    [[nodiscard]] auto getFile() -> std::string;
+    [[nodiscard]] auto getFile() const -> std::string;
 
-    [[nodiscard]] auto getDump() -> std::string;
+    [[nodiscard]] auto getDump() const -> std::string;
+
+    [[nodiscard]] auto getOutputFile() const -> std::string;
+
+    [[nodiscard]] auto getTarget() const -> std::string;
 
   private:
     cxxopts::Options _options;

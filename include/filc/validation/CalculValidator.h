@@ -25,21 +25,26 @@
 #define FILC_CALCULVALIDATOR_H
 
 #include "filc/grammar/Type.h"
+#include "filc/validation/Environment.h"
 #include <memory>
 #include <string>
 
 namespace filc {
 class CalculValidator {
   public:
-    [[nodiscard]] static auto isCalculValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op,
-                                     const std::shared_ptr<AbstractType> &right_type) -> bool;
+    explicit CalculValidator(Environment *environment);
+
+    [[nodiscard]] auto isCalculValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op,
+                                     const std::shared_ptr<AbstractType> &right_type) const -> std::shared_ptr<AbstractType>;
 
   private:
-    [[nodiscard]] static auto isNumericOperatorValid(const std::string &op) -> bool;
+    Environment *_environment;
 
-    [[nodiscard]] static auto isBoolOperatorValid(const std::string &op) -> bool;
+    [[nodiscard]] auto isNumericOperatorValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op) const -> std::shared_ptr<AbstractType>;
 
-    [[nodiscard]] static auto isPointerOperatorValid(const std::string &op) -> bool;
+    [[nodiscard]] auto isBoolOperatorValid(const std::string &op) const -> std::shared_ptr<AbstractType>;
+
+    [[nodiscard]] auto isPointerOperatorValid(const std::string &op) const -> std::shared_ptr<AbstractType>;
 };
 }
 

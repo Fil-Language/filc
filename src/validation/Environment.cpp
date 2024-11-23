@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "filc/validation/Environment.h"
+#include <llvm/IR/DerivedTypes.h>
 #include <stdexcept>
 
 using namespace filc;
@@ -48,6 +49,30 @@ Environment::Environment() {
 
     addType(std::make_shared<AliasType>("char", getType("u8")));
     addType(std::make_shared<PointerType>(getType("char")));
+}
+
+auto Environment::prepareLLVMTypes(llvm::LLVMContext *context) const -> void {
+    getType("i8")->setLLVMType(llvm::Type::getIntNTy(*context, 8));
+    getType("i16")->setLLVMType(llvm::Type::getIntNTy(*context, 16));
+    getType("i32")->setLLVMType(llvm::Type::getIntNTy(*context, 32));
+    getType("i64")->setLLVMType(llvm::Type::getIntNTy(*context, 64));
+    getType("i128")->setLLVMType(llvm::Type::getIntNTy(*context, 128));
+    getType("int")->setLLVMType(llvm::Type::getIntNTy(*context, 32));
+
+    getType("u8")->setLLVMType(llvm::Type::getIntNTy(*context, 8));
+    getType("u16")->setLLVMType(llvm::Type::getIntNTy(*context, 16));
+    getType("u32")->setLLVMType(llvm::Type::getIntNTy(*context, 32));
+    getType("u64")->setLLVMType(llvm::Type::getIntNTy(*context, 64));
+    getType("u128")->setLLVMType(llvm::Type::getIntNTy(*context, 128));
+    getType("uint")->setLLVMType(llvm::Type::getIntNTy(*context, 32));
+
+    getType("f32")->setLLVMType(llvm::Type::getFloatTy(*context));
+    getType("f64")->setLLVMType(llvm::Type::getDoubleTy(*context));
+
+    getType("bool")->setLLVMType(llvm::Type::getInt1Ty(*context));
+
+    getType("char")->setLLVMType(llvm::Type::getInt8Ty(*context));
+    getType("char*")->setLLVMType(llvm::PointerType::get(llvm::Type::getInt8Ty(*context), 0));
 }
 
 auto Environment::hasType(const std::string &name) const -> bool { return _types.find(name) != _types.end(); }

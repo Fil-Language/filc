@@ -34,6 +34,8 @@ class Environment {
   public:
     Environment();
 
+    auto prepareLLVMTypes(llvm::LLVMContext *context) const -> void;
+
     [[nodiscard]] auto hasType(const std::string &name) const -> bool;
 
     [[nodiscard]] auto getType(const std::string &name) const -> const std::shared_ptr<AbstractType> &;

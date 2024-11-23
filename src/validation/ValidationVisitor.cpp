@@ -37,6 +37,8 @@ using namespace filc;
 ValidationVisitor::ValidationVisitor(std::ostream &out)
     : _context(new ValidationContext()), _environment(new Environment()), _out(out), _error(false) {}
 
+auto ValidationVisitor::getEnvironment() const -> const Environment * { return _environment.get(); }
+
 auto ValidationVisitor::hasError() const -> bool { return _error; }
 
 auto ValidationVisitor::displayError(const std::string &message, const Position &position) -> void {
@@ -55,16 +57,18 @@ auto ValidationVisitor::visitProgram(Program *program) -> void {
             _context->set("return", true);
         }
 
-        (*it)->accept(this);
+        (*it)->acceptVoidVisitor(this);
 
         if (it + 1 == expressions.end()) {
             const auto expected = _environment->getType("int");
+            const std::vector<std::string> allowed_types = {"i8",  "i16", "i32", "i64",  "i128", "u8",
+                                                            "u16", "u32", "u64", "u128", "bool"};
             const auto found_type = (*it)->getType();
             if (found_type == nullptr) {
                 return;
             }
 
-            if (found_type != expected) {
+            if (std::find(allowed_types.begin(), allowed_types.end(), found_type->getName()) == allowed_types.end()) {
                 displayError("Expected type " + expected->toDisplay() + " but got " + found_type->toDisplay(),
                              (*it)->getPosition());
             }
@@ -83,7 +87,17 @@ auto ValidationVisitor::visitBooleanLiteral(BooleanLiteral *literal) -> void {
 }
 
 auto ValidationVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
-    literal->setType(_environment->getType("int"));
+    if (_context->has("cast_type")) {
+        const auto cast_type = _context->get<std::shared_ptr<AbstractType>>("cast_type");
+        std::vector<std::string> allowed_casts = {"i8", "i16", "i32", "i64", "i128", "u8", "u16", "u32", "u64", "u128"};
+        if (std::find(allowed_casts.begin(), allowed_casts.end(), cast_type->getName()) != allowed_casts.end()) {
+            literal->setType(cast_type);
+        } else {
+            literal->setType(_environment->getType("int"));
+        }
+    } else {
+        literal->setType(_environment->getType("int"));
+    }
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
         displayWarning("Integer value not used", literal->getPosition());
@@ -91,7 +105,17 @@ auto ValidationVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
 }
 
 auto ValidationVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
-    literal->setType(_environment->getType("f64"));
+    if (_context->has("cast_type")) {
+        const auto cast_type = _context->get<std::shared_ptr<AbstractType>>("cast_type");
+        std::vector<std::string> allowed_casts = {"f32", "f64"};
+        if (std::find(allowed_casts.begin(), allowed_casts.end(), cast_type->getName()) != allowed_casts.end()) {
+            literal->setType(cast_type);
+        } else {
+            literal->setType(_environment->getType("f64"));
+        }
+    } else {
+        literal->setType(_environment->getType("f64"));
+    }
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
         displayWarning("Float value not used", literal->getPosition());
@@ -137,7 +161,10 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
     if (variable->getValue() != nullptr) {
         _context->stack();
         _context->set("return", true);
-        variable->getValue()->accept(this);
+        if (variable_type != nullptr) {
+            _context->set("cast_type", variable_type);
+        }
+        variable->getValue()->acceptVoidVisitor(this);
         _context->unstack();
         const auto value_type = variable->getValue()->getType();
         if (value_type == nullptr) {
@@ -179,13 +206,13 @@ auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
 auto ValidationVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
     _context->stack();
     _context->set("return", true);
-    calcul->getLeftExpression()->accept(this);
+    calcul->getLeftExpression()->acceptVoidVisitor(this);
     const auto left_type = calcul->getLeftExpression()->getType();
     _context->unstack();
 
     _context->stack();
     _context->set("return", true);
-    calcul->getRightExpression()->accept(this);
+    calcul->getRightExpression()->acceptVoidVisitor(this);
     const auto right_type = calcul->getRightExpression()->getType();
     _context->unstack();
 
@@ -193,14 +220,16 @@ auto ValidationVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
         return;
     }
 
-    if (!CalculValidator::isCalculValid(left_type, calcul->getOperator(), right_type)) {
+    CalculValidator validator(_environment.get());
+    const auto found_type = validator.isCalculValid(left_type, calcul->getOperator(), right_type);
+    if (found_type == nullptr) {
         displayError("You cannot use operator " + calcul->getOperator() + " with " + left_type->toDisplay() + " and " +
                          right_type->toDisplay(),
                      calcul->getPosition());
         return;
     }
 
-    calcul->setType(left_type);
+    calcul->setType(found_type);
 
     if (!_context->has("return") || !_context->get<bool>("return")) {
         displayWarning("Value not used", calcul->getPosition());
@@ -221,7 +250,8 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
 
     _context->stack();
     _context->set("return", true);
-    assignation->getValue()->accept(this);
+    _context->set("cast_type", name.getType());
+    assignation->getValue()->acceptVoidVisitor(this);
     _context->unstack();
     const auto value_type = assignation->getValue()->getType();
     if (value_type == nullptr) {
