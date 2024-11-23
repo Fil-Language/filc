@@ -66,7 +66,9 @@ typedef struct {
 
 TEST(ValidationContext, get_set_structure) {
     filc::ValidationContext context;
-    SomeStructure value = {2, "Hello World", {'a', 'b', 'c', 'd', 'e'}};
+    SomeStructure value = {
+      2, "Hello World", {'a', 'b', 'c', 'd', 'e'}
+    };
     context.set("struct_value", value);
     ASSERT_TRUE(context.has("struct_value"));
     auto found = context.get<SomeStructure>("struct_value");
@@ -77,9 +79,11 @@ TEST(ValidationContext, get_set_structure) {
 
 class SomeClass {
   public:
-    SomeClass() : _a(12), _b("foo") {}
+    SomeClass(): _a(12), _b("foo") {}
 
-    [[nodiscard]] auto equals(const SomeClass &other) const -> bool { return _a == other._a && _b == other._b; }
+    [[nodiscard]] auto equals(const SomeClass &other) const -> bool {
+        return _a == other._a && _b == other._b;
+    }
 
   private:
     int _a;

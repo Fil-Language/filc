@@ -22,27 +22,42 @@
  * SOFTWARE.
  */
 #include "filc/grammar/Type.h"
+
 #include <utility>
 
 using namespace filc;
 
-auto AbstractType::setLLVMType(llvm::Type *type) -> void { _llvm_type = type; }
+auto AbstractType::setLLVMType(llvm::Type *type) -> void {
+    _llvm_type = type;
+}
 
-auto AbstractType::getLLVMType() const -> llvm::Type * { return _llvm_type; }
+auto AbstractType::getLLVMType() const -> llvm::Type * {
+    return _llvm_type;
+}
 
-Type::Type(std::string name) : _name(std::move(name)) {}
+Type::Type(std::string name): _name(std::move(name)) {}
 
-auto Type::getName() const noexcept -> std::string { return _name; }
+auto Type::getName() const noexcept -> std::string {
+    return _name;
+}
 
-auto Type::getDisplayName() const noexcept -> std::string { return getName(); }
+auto Type::getDisplayName() const noexcept -> std::string {
+    return getName();
+}
 
-auto Type::toDisplay() const noexcept -> std::string { return getName(); }
+auto Type::toDisplay() const noexcept -> std::string {
+    return getName();
+}
 
-PointerType::PointerType(std::shared_ptr<AbstractType> pointed_type) : _pointed_type(std::move(pointed_type)) {}
+PointerType::PointerType(std::shared_ptr<AbstractType> pointed_type): _pointed_type(std::move(pointed_type)) {}
 
-auto PointerType::getName() const noexcept -> std::string { return _pointed_type->getName() + "*"; }
+auto PointerType::getName() const noexcept -> std::string {
+    return _pointed_type->getName() + "*";
+}
 
-auto PointerType::getDisplayName() const noexcept -> std::string { return _pointed_type->getDisplayName() + "*"; }
+auto PointerType::getDisplayName() const noexcept -> std::string {
+    return _pointed_type->getDisplayName() + "*";
+}
 
 auto PointerType::toDisplay() const noexcept -> std::string {
     if (_pointed_type->getName() != _pointed_type->getDisplayName()) {
@@ -54,16 +69,22 @@ auto PointerType::toDisplay() const noexcept -> std::string {
 AliasType::AliasType(std::string name, std::shared_ptr<AbstractType> aliased_type)
     : _name(std::move(name)), _aliased_type(std::move(aliased_type)) {}
 
-auto AliasType::getName() const noexcept -> std::string { return _aliased_type->getName(); }
+auto AliasType::getName() const noexcept -> std::string {
+    return _aliased_type->getName();
+}
 
-auto AliasType::getDisplayName() const noexcept -> std::string { return _name; }
+auto AliasType::getDisplayName() const noexcept -> std::string {
+    return _name;
+}
 
-auto AliasType::toDisplay() const noexcept -> std::string { return getDisplayName() + " aka " + getName(); }
+auto AliasType::toDisplay() const noexcept -> std::string {
+    return getDisplayName() + " aka " + getName();
+}
 
 auto operator==(const std::shared_ptr<AbstractType> &a, const std::shared_ptr<AbstractType> &b) -> bool {
     return a->getName() == b->getName();
 }
 
 auto operator!=(const std::shared_ptr<AbstractType> &a, const std::shared_ptr<AbstractType> &b) -> bool {
-    return !(a == b);
+    return ! (a == b);
 }

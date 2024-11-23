@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/grammar/DumpVisitor.h>
 #include <filc/grammar/literal/Literal.h>
 #include <fstream>

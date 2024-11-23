@@ -24,11 +24,9 @@
 #ifndef FILC_EXPRESSION_H
 #define FILC_EXPRESSION_H
 
-#include "filc/grammar/ast.h"
 #include "filc/grammar/Visitor.h"
 #include "filc/grammar/Position.h"
 #include "filc/grammar/Type.h"
-#include <string>
 
 namespace filc {
 class Expression: public Visitable {

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/grammar/identifier/Identifier.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -29,7 +30,7 @@
 using namespace ::testing;
 
 TEST(Identifier, parsing) {
-    const auto program = parseString("myAwesome_var3");
+    const auto program     = parseString("myAwesome_var3");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     const auto identifier = std::dynamic_pointer_cast<filc::Identifier>(expressions[0]);

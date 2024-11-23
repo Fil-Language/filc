@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 #include "filc/utils/Message.h"
+
 #include <utility>
 
 using namespace filc;
 
-#define BOLD "\033[1m"
+#define BOLD  "\033[1m"
 #define RESET "\033[0m"
 
 Message::Message(std::string tag, std::string message, Position position, std::string color)
@@ -36,4 +37,6 @@ auto Message::write(std::ostream &out) const -> std::ostream & {
     return out << BOLD << _color << "[" << _tag << "] " << RESET << _message << "\n" << _position.dump(_color);
 }
 
-auto operator<<(std::ostream &out, const filc::Message &message) -> std::ostream & { return message.write(out); }
+auto operator<<(std::ostream &out, const filc::Message &message) -> std::ostream & {
+    return message.write(out);
+}

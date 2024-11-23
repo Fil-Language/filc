@@ -26,8 +26,8 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#define VALIDATOR                                                                                                      \
-    auto env = new filc::Environment();                                                                                \
+#define VALIDATOR                       \
+    auto env = new filc::Environment(); \
     filc::CalculValidator validator(env)
 
 TEST(CalculValidator, invalidDifferentType) {
@@ -52,15 +52,22 @@ TEST(CalculValidator, validBool) {
 
 TEST(CalculValidator, validPointer) {
     VALIDATOR;
-    ASSERT_STREQ("bool", validator
-                             .isCalculValid(std::make_shared<filc::PointerType>(env->getType("i32")),
-                                            "==", std::make_shared<filc::PointerType>(env->getType("i32")))
-                             ->getName()
-                             .c_str());
+    ASSERT_STREQ(
+        "bool",
+        validator
+            .isCalculValid(
+                std::make_shared<filc::PointerType>(env->getType("i32")),
+                "==",
+                std::make_shared<filc::PointerType>(env->getType("i32"))
+            )
+            ->getName()
+            .c_str()
+    );
 }
 
 TEST(CalculValidator, invalidUnknown) {
     VALIDATOR;
-    ASSERT_EQ(nullptr,
-              validator.isCalculValid(std::make_shared<filc::Type>("foo"), "+", std::make_shared<filc::Type>("foo")));
+    ASSERT_EQ(
+        nullptr, validator.isCalculValid(std::make_shared<filc::Type>("foo"), "+", std::make_shared<filc::Type>("foo"))
+    );
 }

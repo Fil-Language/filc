@@ -22,17 +22,24 @@
  * SOFTWARE.
  */
 #include "filc/validation/Name.h"
+
 #include <utility>
 
 using namespace filc;
 
-Name::Name() : _constant(true) {}
+Name::Name(): _constant(true) {}
 
-Name::Name(bool constant, std::string name, std::shared_ptr<AbstractType> type)
+Name::Name(const bool constant, std::string name, std::shared_ptr<AbstractType> type)
     : _constant(constant), _name(std::move(name)), _type(std::move(type)) {}
 
-auto Name::isConstant() const -> bool { return _constant; }
+auto Name::isConstant() const -> bool {
+    return _constant;
+}
 
-auto Name::getName() const -> const std::string & { return _name; }
+auto Name::getName() const -> const std::string & {
+    return _name;
+}
 
-auto Name::getType() const -> std::shared_ptr<AbstractType> { return _type; }
+auto Name::getType() const -> std::shared_ptr<AbstractType> {
+    return _type;
+}

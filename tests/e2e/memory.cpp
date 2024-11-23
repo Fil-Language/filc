@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 

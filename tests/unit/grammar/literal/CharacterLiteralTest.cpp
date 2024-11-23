@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/grammar/literal/Literal.h>
 #include <filc/utils/utils.h>
 #include <gmock/gmock.h>
@@ -30,7 +31,7 @@
 using namespace ::testing;
 
 TEST(CharacterLiteral, parsingSimpleChar) {
-    const auto program = parseString("'a'");
+    const auto program     = parseString("'a'");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto literal = std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);
@@ -42,7 +43,7 @@ TEST(CharacterLiteral, parsingEscapedChar) {
     for (const std::string content :
          {"'\\''", "'\\\"'", "'\\?'", "'\\a'", "'\\b'", "'\\f'", "'\\n'", "'\\r'", "'\\t'", "'\\v'", "'\\\\'"}) {
         SCOPED_TRACE(content);
-        const auto program = parseString(content);
+        const auto program     = parseString(content);
         const auto expressions = program->getExpressions();
         ASSERT_THAT(expressions, SizeIs(1));
         auto literal = std::dynamic_pointer_cast<filc::CharacterLiteral>(expressions[0]);

@@ -23,14 +23,16 @@
  */
 #include "filc/llvm/CalculBuilder.h"
 
+#include "filc/grammar/calcul/Calcul.h"
+
 using namespace filc;
 
 CalculBuilder::CalculBuilder(IRGenerator *generator, llvm::IRBuilder<> *builder)
     : _generator(generator), _builder(builder) {}
 
-auto CalculBuilder::buildCalculValue(BinaryCalcul *calcul) const -> llvm::Value * {
+auto CalculBuilder::buildCalculValue(const BinaryCalcul *calcul) const -> llvm::Value * {
     const auto left_type_name = calcul->getLeftExpression()->getType()->getName();
-    const auto operation = calcul->getOperator();
+    const auto operation      = calcul->getOperator();
 
     const std::vector<std::string> signed_integers = {"i8", "i16", "i32", "i64", "i128"};
     if (std::find(signed_integers.begin(), signed_integers.end(), left_type_name) != signed_integers.end()) {
@@ -57,189 +59,308 @@ auto CalculBuilder::buildCalculValue(BinaryCalcul *calcul) const -> llvm::Value 
     throw buildError(calcul);
 }
 
-auto CalculBuilder::buildSignedInteger(BinaryCalcul *calcul) const -> llvm::Value * {
+auto CalculBuilder::buildSignedInteger(const BinaryCalcul *calcul) const -> llvm::Value * {
     const auto operation = calcul->getOperator();
     if (operation == "%") {
-        return _builder->CreateSRem(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                    calcul->getRightExpression()->acceptIRVisitor(_generator), "int_mod");
+        return _builder->CreateSRem(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_mod"
+        );
     }
     if (operation == "+") {
-        return _builder->CreateAdd(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                   calcul->getRightExpression()->acceptIRVisitor(_generator), "int_add");
+        return _builder->CreateAdd(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_add"
+        );
     }
     if (operation == "-") {
-        return _builder->CreateSub(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                   calcul->getRightExpression()->acceptIRVisitor(_generator), "int_sub");
+        return _builder->CreateSub(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_sub"
+        );
     }
     if (operation == "/") {
-        return _builder->CreateSDiv(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                    calcul->getRightExpression()->acceptIRVisitor(_generator), "int_div");
+        return _builder->CreateSDiv(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_div"
+        );
     }
     if (operation == "*") {
-        return _builder->CreateMul(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                   calcul->getRightExpression()->acceptIRVisitor(_generator), "int_mul");
+        return _builder->CreateMul(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_mul"
+        );
     }
     if (operation == "<") {
-        return _builder->CreateICmpSLT(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "int_lt");
+        return _builder->CreateICmpSLT(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_lt"
+        );
     }
     if (operation == "<=") {
-        return _builder->CreateICmpSLE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "int_le");
+        return _builder->CreateICmpSLE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_le"
+        );
     }
     if (operation == ">") {
-        return _builder->CreateICmpSGT(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "int_gt");
+        return _builder->CreateICmpSGT(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_gt"
+        );
     }
     if (operation == ">=") {
-        return _builder->CreateICmpSGE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "int_ge");
+        return _builder->CreateICmpSGE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_ge"
+        );
     }
     if (operation == "==") {
-        return _builder->CreateICmpEQ(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                      calcul->getRightExpression()->acceptIRVisitor(_generator), "int_equality");
+        return _builder->CreateICmpEQ(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_equality"
+        );
     }
     if (operation == "!=") {
-        return _builder->CreateICmpNE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                      calcul->getRightExpression()->acceptIRVisitor(_generator), "int_inequality");
+        return _builder->CreateICmpNE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_inequality"
+        );
     }
     throw buildError(calcul);
 }
 
-auto CalculBuilder::buildUnsignedInteger(BinaryCalcul *calcul) const -> llvm::Value * {
+auto CalculBuilder::buildUnsignedInteger(const BinaryCalcul *calcul) const -> llvm::Value * {
     const auto operation = calcul->getOperator();
     if (operation == "%") {
-        return _builder->CreateURem(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                    calcul->getRightExpression()->acceptIRVisitor(_generator), "int_mod");
+        return _builder->CreateURem(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_mod"
+        );
     }
     if (operation == "+") {
-        return _builder->CreateAdd(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                   calcul->getRightExpression()->acceptIRVisitor(_generator), "int_add");
+        return _builder->CreateAdd(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_add"
+        );
     }
     if (operation == "-") {
-        return _builder->CreateSub(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                   calcul->getRightExpression()->acceptIRVisitor(_generator), "int_sub");
+        return _builder->CreateSub(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_sub"
+        );
     }
     if (operation == "/") {
-        return _builder->CreateUDiv(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                    calcul->getRightExpression()->acceptIRVisitor(_generator), "int_div");
+        return _builder->CreateUDiv(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_div"
+        );
     }
     if (operation == "*") {
-        return _builder->CreateMul(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                   calcul->getRightExpression()->acceptIRVisitor(_generator), "int_mul");
+        return _builder->CreateMul(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_mul"
+        );
     }
     if (operation == "<") {
-        return _builder->CreateICmpULT(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "int_lt");
+        return _builder->CreateICmpULT(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_lt"
+        );
     }
     if (operation == "<=") {
-        return _builder->CreateICmpULE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "int_le");
+        return _builder->CreateICmpULE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_le"
+        );
     }
     if (operation == ">") {
-        return _builder->CreateICmpUGT(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "int_gt");
+        return _builder->CreateICmpUGT(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_gt"
+        );
     }
     if (operation == ">=") {
-        return _builder->CreateICmpUGE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "int_ge");
+        return _builder->CreateICmpUGE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_ge"
+        );
     }
     if (operation == "==") {
-        return _builder->CreateICmpEQ(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                      calcul->getRightExpression()->acceptIRVisitor(_generator), "int_equality");
+        return _builder->CreateICmpEQ(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_equality"
+        );
     }
     if (operation == "!=") {
-        return _builder->CreateICmpNE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                      calcul->getRightExpression()->acceptIRVisitor(_generator), "int_inequality");
+        return _builder->CreateICmpNE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "int_inequality"
+        );
     }
     throw buildError(calcul);
 }
 
-auto CalculBuilder::buildFloat(BinaryCalcul *calcul) const -> llvm::Value * {
+auto CalculBuilder::buildFloat(const BinaryCalcul *calcul) const -> llvm::Value * {
     const auto operation = calcul->getOperator();
     if (operation == "%") {
-        return _builder->CreateFRem(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                    calcul->getRightExpression()->acceptIRVisitor(_generator), "float_mod");
+        return _builder->CreateFRem(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_mod"
+        );
     }
     if (operation == "+") {
-        return _builder->CreateFAdd(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                    calcul->getRightExpression()->acceptIRVisitor(_generator), "float_add");
+        return _builder->CreateFAdd(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_add"
+        );
     }
     if (operation == "-") {
-        return _builder->CreateFSub(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                    calcul->getRightExpression()->acceptIRVisitor(_generator), "float_sub");
+        return _builder->CreateFSub(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_sub"
+        );
     }
     if (operation == "/") {
-        return _builder->CreateFDiv(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                    calcul->getRightExpression()->acceptIRVisitor(_generator), "float_div");
+        return _builder->CreateFDiv(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_div"
+        );
     }
     if (operation == "*") {
-        return _builder->CreateFMul(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                    calcul->getRightExpression()->acceptIRVisitor(_generator), "float_mul");
+        return _builder->CreateFMul(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_mul"
+        );
     }
     if (operation == "<") {
-        return _builder->CreateFCmpOLT(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "float_lt");
+        return _builder->CreateFCmpOLT(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_lt"
+        );
     }
     if (operation == "<=") {
-        return _builder->CreateFCmpOLE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "float_le");
+        return _builder->CreateFCmpOLE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_le"
+        );
     }
     if (operation == ">") {
-        return _builder->CreateFCmpOGT(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "float_gt");
+        return _builder->CreateFCmpOGT(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_gt"
+        );
     }
     if (operation == ">=") {
-        return _builder->CreateFCmpOGE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "float_ge");
+        return _builder->CreateFCmpOGE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_ge"
+        );
     }
     if (operation == "==") {
-        return _builder->CreateFCmpOEQ(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "float_equality");
+        return _builder->CreateFCmpOEQ(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_equality"
+        );
     }
     if (operation == "!=") {
-        return _builder->CreateFCmpONE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                       calcul->getRightExpression()->acceptIRVisitor(_generator), "float_inequality");
+        return _builder->CreateFCmpONE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "float_inequality"
+        );
     }
     throw buildError(calcul);
 }
 
-auto CalculBuilder::buildBool(BinaryCalcul *calcul) const -> llvm::Value * {
+auto CalculBuilder::buildBool(const BinaryCalcul *calcul) const -> llvm::Value * {
     const auto operation = calcul->getOperator();
     if (operation == "&&") {
-        return _builder->CreateAnd(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                   calcul->getRightExpression()->acceptIRVisitor(_generator), "bool_and");
+        return _builder->CreateAnd(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "bool_and"
+        );
     }
     if (operation == "||") {
-        return _builder->CreateOr(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                  calcul->getRightExpression()->acceptIRVisitor(_generator), "bool_or");
+        return _builder->CreateOr(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "bool_or"
+        );
     }
     if (operation == "==") {
-        return _builder->CreateICmpEQ(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                      calcul->getRightExpression()->acceptIRVisitor(_generator), "bool_equality");
+        return _builder->CreateICmpEQ(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "bool_equality"
+        );
     }
     if (operation == "!=") {
-        return _builder->CreateICmpNE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                      calcul->getRightExpression()->acceptIRVisitor(_generator), "bool_inequality");
+        return _builder->CreateICmpNE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "bool_inequality"
+        );
     }
     throw buildError(calcul);
 }
 
-auto CalculBuilder::buildPointer(BinaryCalcul *calcul) const -> llvm::Value * {
+auto CalculBuilder::buildPointer(const BinaryCalcul *calcul) const -> llvm::Value * {
     const auto operation = calcul->getOperator();
     if (operation == "==") {
-        return _builder->CreateICmpEQ(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                      calcul->getRightExpression()->acceptIRVisitor(_generator), "pointer_equality");
+        return _builder->CreateICmpEQ(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "pointer_equality"
+        );
     }
     if (operation == "!=") {
-        return _builder->CreateICmpNE(calcul->getLeftExpression()->acceptIRVisitor(_generator),
-                                      calcul->getRightExpression()->acceptIRVisitor(_generator), "pointer_inequality");
+        return _builder->CreateICmpNE(
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "pointer_inequality"
+        );
     }
     throw buildError(calcul);
 }
 
-auto CalculBuilder::buildError(BinaryCalcul *calcul) -> std::logic_error {
-    return std::logic_error("Should be caught by validation, got operation (" + calcul->getOperator() + ") with:\n" +
-                            " - " + calcul->getLeftExpression()->getType()->toDisplay() + "\n" + " - " +
-                            calcul->getRightExpression()->getType()->toDisplay());
+auto CalculBuilder::buildError(const BinaryCalcul *calcul) -> std::logic_error {
+    return std::logic_error(
+        "Should be caught by validation, got operation (" + calcul->getOperator() + ") with:\n" + " - "
+        + calcul->getLeftExpression()->getType()->toDisplay() + "\n" + " - "
+        + calcul->getRightExpression()->getType()->toDisplay()
+    );
 }

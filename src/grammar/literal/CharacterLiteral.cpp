@@ -23,14 +23,15 @@
  */
 #include "filc/grammar/literal/Literal.h"
 #include "filc/utils/utils.h"
+
 #include <stdexcept>
 
 using namespace filc;
 
-CharacterLiteral::CharacterLiteral(char value) : Literal(value) {}
+CharacterLiteral::CharacterLiteral(const char value): Literal(value) {}
 
 auto CharacterLiteral::stringToChar(const std::string &snippet) -> char {
-    auto value = snippet.substr(1, snippet.length() - 2);
+    const auto value = snippet.substr(1, snippet.length() - 2);
 
     if (value.size() == 1) {
         return value[0];
@@ -43,7 +44,9 @@ auto CharacterLiteral::stringToChar(const std::string &snippet) -> char {
     throw std::logic_error("Lexer found a character that is not regular: " + snippet);
 }
 
-auto CharacterLiteral::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitCharacterLiteral(this); }
+auto CharacterLiteral::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitCharacterLiteral(this);
+}
 
 auto CharacterLiteral::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
     return visitor->visitCharacterLiteral(this);

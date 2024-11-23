@@ -56,7 +56,7 @@ class DumpVisitor final: public Visitor<void> {
     std::ostream &_out;
     int _indent_level;
 
-    auto printIdent() -> void;
+    auto printIdent() const -> void;
 };
 }
 

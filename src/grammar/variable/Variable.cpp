@@ -22,23 +22,35 @@
  * SOFTWARE.
  */
 #include "filc/grammar/variable/Variable.h"
+
 #include <utility>
 
 using namespace filc;
 
-VariableDeclaration::VariableDeclaration(bool is_constant, std::string name, std::string type_name,
-                                         std::shared_ptr<Expression> value)
+VariableDeclaration::VariableDeclaration(
+    const bool is_constant, std::string name, std::string type_name, std::shared_ptr<Expression> value
+)
     : _constant(is_constant), _name(std::move(name)), _type_name(std::move(type_name)), _value(std::move(value)) {}
 
-auto VariableDeclaration::isConstant() const -> bool { return _constant; }
+auto VariableDeclaration::isConstant() const -> bool {
+    return _constant;
+}
 
-auto VariableDeclaration::getName() const -> std::string { return _name; }
+auto VariableDeclaration::getName() const -> std::string {
+    return _name;
+}
 
-auto VariableDeclaration::getTypeName() const -> std::string { return _type_name; }
+auto VariableDeclaration::getTypeName() const -> std::string {
+    return _type_name;
+}
 
-auto VariableDeclaration::getValue() const -> std::shared_ptr<Expression> { return _value; }
+auto VariableDeclaration::getValue() const -> std::shared_ptr<Expression> {
+    return _value;
+}
 
-auto VariableDeclaration::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitVariableDeclaration(this); }
+auto VariableDeclaration::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitVariableDeclaration(this);
+}
 
 auto VariableDeclaration::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
     return visitor->visitVariableDeclaration(this);

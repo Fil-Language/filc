@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "filc/grammar/DumpVisitor.h"
+
 #include "filc/grammar/assignation/Assignation.h"
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
@@ -31,7 +32,7 @@
 
 using namespace filc;
 
-DumpVisitor::DumpVisitor(std::ostream &out) : _out(out), _indent_level(0) {}
+DumpVisitor::DumpVisitor(std::ostream &out): _out(out), _indent_level(0) {}
 
 auto DumpVisitor::visitProgram(Program *program) -> void {
     _out << "=== Begin AST dump ===\n";
@@ -57,7 +58,7 @@ auto DumpVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
 }
 
 auto DumpVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void {
-    auto value = literal->getValue();
+    const auto value = literal->getValue();
     std::string to_print;
     switch (value) {
     case '\'':
@@ -109,7 +110,7 @@ auto DumpVisitor::visitStringLiteral(StringLiteral *literal) -> void {
 auto DumpVisitor::visitVariableDeclaration(VariableDeclaration *variable) -> void {
     printIdent();
     _out << "[Variable:" << (variable->isConstant() ? "val" : "var") << ":" << variable->getName();
-    if (!variable->getTypeName().empty()) {
+    if (! variable->getTypeName().empty()) {
         _out << ":" << variable->getTypeName();
     }
     _out << "]\n";
@@ -143,4 +144,6 @@ auto DumpVisitor::visitAssignation(Assignation *assignation) -> void {
     _indent_level--;
 }
 
-auto DumpVisitor::printIdent() -> void { _out << std::string(_indent_level, '\t'); }
+auto DumpVisitor::printIdent() const -> void {
+    _out << std::string(_indent_level, '\t');
+}

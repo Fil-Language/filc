@@ -24,13 +24,12 @@
 #ifndef FILC_VARIABLE_H
 #define FILC_VARIABLE_H
 
-#include "filc/grammar/ast.h"
 #include "filc/grammar/expression/Expression.h"
 #include <string>
 #include <memory>
 
 namespace filc {
-class VariableDeclaration: public Expression {
+class VariableDeclaration final: public Expression {
   public:
     VariableDeclaration(bool is_constant, std::string name, std::string _type_name, std::shared_ptr<Expression> value);
 

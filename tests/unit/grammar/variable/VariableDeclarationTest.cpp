@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/grammar/literal/Literal.h>
 #include <filc/grammar/variable/Variable.h>
 #include <gmock/gmock.h>
@@ -30,7 +31,7 @@
 using namespace ::testing;
 
 TEST(VariableDeclaration, parsingSimpleConstant) {
-    const auto program = parseString("val foo");
+    const auto program     = parseString("val foo");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);
@@ -42,7 +43,7 @@ TEST(VariableDeclaration, parsingSimpleConstant) {
 }
 
 TEST(VariableDeclaration, parsingSimpleVariable) {
-    const auto program = parseString("var bar");
+    const auto program     = parseString("var bar");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);
@@ -54,7 +55,7 @@ TEST(VariableDeclaration, parsingSimpleVariable) {
 }
 
 TEST(VariableDeclaration, parsingWithType) {
-    const auto program = parseString("var bar: i32");
+    const auto program     = parseString("var bar: i32");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);
@@ -66,7 +67,7 @@ TEST(VariableDeclaration, parsingWithType) {
 }
 
 TEST(VariableDeclaration, parsingWithValue) {
-    const auto program = parseString("val foo = 'a'");
+    const auto program     = parseString("val foo = 'a'");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);
@@ -78,7 +79,7 @@ TEST(VariableDeclaration, parsingWithValue) {
 }
 
 TEST(VariableDeclaration, parsingWithTypeAndValue) {
-    const auto program = parseString("val foo: f64 = 3.1415");
+    const auto program     = parseString("val foo: f64 = 3.1415");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto variable = std::dynamic_pointer_cast<filc::VariableDeclaration>(expressions[0]);

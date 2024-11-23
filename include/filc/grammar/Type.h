@@ -24,13 +24,15 @@
 #ifndef FILC_TYPE_H
 #define FILC_TYPE_H
 
-#include <string>
-#include <memory>
 #include <llvm/IR/Type.h>
+#include <memory>
+#include <string>
 
 namespace filc {
 class AbstractType {
   public:
+    virtual ~AbstractType() = default;
+
     [[nodiscard]] virtual auto getName() const noexcept -> std::string = 0;
 
     [[nodiscard]] virtual auto getDisplayName() const noexcept -> std::string = 0;
@@ -48,7 +50,7 @@ class AbstractType {
     llvm::Type *_llvm_type = nullptr;
 };
 
-class Type final: public AbstractType {
+class Type final : public AbstractType {
   public:
     explicit Type(std::string name);
 
@@ -62,7 +64,7 @@ class Type final: public AbstractType {
     std::string _name;
 };
 
-class PointerType final: public AbstractType {
+class PointerType final : public AbstractType {
   public:
     explicit PointerType(std::shared_ptr<AbstractType> pointed_type);
 
@@ -76,7 +78,7 @@ class PointerType final: public AbstractType {
     std::shared_ptr<AbstractType> _pointed_type;
 };
 
-class AliasType final: public AbstractType {
+class AliasType final : public AbstractType {
   public:
     AliasType(std::string name, std::shared_ptr<AbstractType> aliased_type);
 
@@ -90,7 +92,7 @@ class AliasType final: public AbstractType {
     std::string _name;
     std::shared_ptr<AbstractType> _aliased_type;
 };
-}
+} // namespace filc
 
 auto operator==(const std::shared_ptr<filc::AbstractType> &a, const std::shared_ptr<filc::AbstractType> &b) -> bool;
 auto operator!=(const std::shared_ptr<filc::AbstractType> &a, const std::shared_ptr<filc::AbstractType> &b) -> bool;

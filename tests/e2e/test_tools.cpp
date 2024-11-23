@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <memory>
 #include <stdexcept>
 
@@ -30,7 +31,7 @@ auto exec_output(const char *cmd) -> std::string {
     std::string result;
     std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
 
-    if (!pipe) {
+    if (! pipe) {
         throw std::runtime_error("popen() failed!");
     }
 
