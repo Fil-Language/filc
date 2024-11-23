@@ -24,7 +24,6 @@
 #ifndef FILC_ASSIGNATION_H
 #define FILC_ASSIGNATION_H
 
-#include "filc/grammar/ast.h"
 #include "filc/grammar/expression/Expression.h"
 #include <string>
 #include <memory>

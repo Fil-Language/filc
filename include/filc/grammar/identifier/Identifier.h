@@ -24,7 +24,6 @@
 #ifndef FILC_IDENTIFIER_H
 #define FILC_IDENTIFIER_H
 
-#include "filc/grammar/ast.h"
 #include "filc/grammar/expression/Expression.h"
 #include <string>
 

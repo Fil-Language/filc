@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/grammar/literal/Literal.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -29,7 +30,7 @@
 using namespace ::testing;
 
 TEST(IntegerLiteral, parsing) {
-    const auto program = parseString("73");
+    const auto program     = parseString("73");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto literal = std::dynamic_pointer_cast<filc::IntegerLiteral>(expressions[0]);

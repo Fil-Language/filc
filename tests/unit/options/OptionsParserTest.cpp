@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/options/OptionsParser.h>
 #include <gtest/gtest.h>
 #include <sstream>
@@ -53,7 +54,7 @@ TEST(OptionsParser, showHelp) {
     options_parser.showHelp(stream);
     std::string result;
     stream >> result;
-    ASSERT_TRUE(!result.empty());
+    ASSERT_TRUE(! result.empty());
 }
 
 TEST(OptionsParser, showVersion) {

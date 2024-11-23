@@ -22,23 +22,37 @@
  * SOFTWARE.
  */
 #include "filc/validation/CalculValidator.h"
+
 #include <algorithm>
 #include <vector>
 
 using namespace filc;
 
-CalculValidator::CalculValidator(Environment *environment) : _environment(environment) {}
+CalculValidator::CalculValidator(Environment *environment): _environment(environment) {}
 
-auto CalculValidator::isCalculValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op,
-                                    const std::shared_ptr<AbstractType> &right_type) const
-    -> std::shared_ptr<AbstractType> {
+auto CalculValidator::isCalculValid(
+    const std::shared_ptr<AbstractType> &left_type,
+    const std::string &op,
+    const std::shared_ptr<AbstractType> &right_type
+) const -> std::shared_ptr<AbstractType> {
     if (left_type != right_type) {
         return nullptr;
     }
     const auto type = left_type->getName();
 
     const std::vector<std::string> numeric_type = {
-        "i8", "i16", "i32", "i64", "i128", "u8", "u16", "u32", "u64", "u128", "f32", "f64",
+      "i8",
+      "i16",
+      "i32",
+      "i64",
+      "i128",
+      "u8",
+      "u16",
+      "u32",
+      "u64",
+      "u128",
+      "f32",
+      "f64",
     };
     if (std::find(numeric_type.begin(), numeric_type.end(), type) != numeric_type.end()) {
         return isNumericOperatorValid(left_type, op);
@@ -56,8 +70,8 @@ auto CalculValidator::isCalculValid(const std::shared_ptr<AbstractType> &left_ty
     return nullptr;
 }
 
-auto CalculValidator::isNumericOperatorValid(const std::shared_ptr<AbstractType> &left_type,
-                                             const std::string &op) const -> std::shared_ptr<AbstractType> {
+auto CalculValidator::isNumericOperatorValid(const std::shared_ptr<AbstractType> &left_type, const std::string &op)
+    const -> std::shared_ptr<AbstractType> {
     const std::vector<std::string> numeric_op = {"%", "+", "-", "/", "*"};
     const std::vector<std::string> boolean_op = {"<", "<=", ">", ">=", "==", "!="};
 

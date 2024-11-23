@@ -22,22 +22,32 @@
  * SOFTWARE.
  */
 #include "filc/grammar/calcul/Calcul.h"
+
 #include <utility>
 
 using namespace filc;
 
-BinaryCalcul::BinaryCalcul(std::shared_ptr<Expression> left_expression, std::string op,
-                           std::shared_ptr<Expression> right_expression)
+BinaryCalcul::BinaryCalcul(
+    std::shared_ptr<Expression> left_expression, std::string op, std::shared_ptr<Expression> right_expression
+)
     : _left_expression(std::move(left_expression)), _operator(std::move(op)),
       _right_expression(std::move(right_expression)) {}
 
-auto BinaryCalcul::getLeftExpression() const -> std::shared_ptr<Expression> { return _left_expression; }
+auto BinaryCalcul::getLeftExpression() const -> std::shared_ptr<Expression> {
+    return _left_expression;
+}
 
-auto BinaryCalcul::getOperator() const -> std::string { return _operator; }
+auto BinaryCalcul::getOperator() const -> std::string {
+    return _operator;
+}
 
-auto BinaryCalcul::getRightExpression() const -> std::shared_ptr<Expression> { return _right_expression; }
+auto BinaryCalcul::getRightExpression() const -> std::shared_ptr<Expression> {
+    return _right_expression;
+}
 
-auto BinaryCalcul::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitBinaryCalcul(this); }
+auto BinaryCalcul::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitBinaryCalcul(this);
+}
 
 auto BinaryCalcul::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
     return visitor->visitBinaryCalcul(this);

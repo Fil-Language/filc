@@ -27,6 +27,7 @@
 #include "filc/grammar/variable/Variable.h"
 #include "filc/validation/ValidationVisitor.h"
 #include "test_tools.h"
+
 #include <filc/grammar/literal/Literal.h>
 #include <filc/grammar/program/Program.h>
 #include <filc/llvm/IRGenerator.h>
@@ -47,18 +48,24 @@ auto getIR(const std::string &content) -> std::string {
 
 TEST(IRGenerator, program_empty) {
     const auto ir = getIR("");
-    ASSERT_THAT(ir, HasSubstr("define i32 @main() {\n"
-                              "entry:\n"
-                              "  ret i32 0\n"
-                              "}"));
+    ASSERT_THAT(
+        ir,
+        HasSubstr("define i32 @main() {\n"
+                  "entry:\n"
+                  "  ret i32 0\n"
+                  "}")
+    );
 }
 
 TEST(IRGenerator, program_nonEmpty) {
     const auto ir = getIR("1");
-    ASSERT_THAT(ir, HasSubstr("define i32 @main() {\n"
-                              "entry:\n"
-                              "  ret i32 1\n"
-                              "}"));
+    ASSERT_THAT(
+        ir,
+        HasSubstr("define i32 @main() {\n"
+                  "entry:\n"
+                  "  ret i32 1\n"
+                  "}")
+    );
 }
 
 TEST(IRGenerator, booleanLiteral_true) {

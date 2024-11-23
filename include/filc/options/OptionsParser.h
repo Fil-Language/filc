@@ -27,7 +27,6 @@
 #include <cxxopts.hpp>
 #include <exception>
 #include <string>
-#include <ostream>
 
 namespace filc {
 class OptionsParser final {
@@ -58,7 +57,7 @@ class OptionsParser final {
     cxxopts::ParseResult _result;
 };
 
-class OptionsParserException : public std::exception {
+class OptionsParserException final : public std::exception {
   public:
     explicit OptionsParserException(std::string message);
 

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/grammar/Parser.h>
 #include <filc/grammar/calcul/Calcul.h>
 #include <filc/grammar/identifier/Identifier.h>
@@ -32,7 +33,9 @@
 
 using namespace ::testing;
 
-TEST(Parser, nonExistingFile) { ASSERT_THROW(filc::ParserProxy::parse("non-existing-file"), std::logic_error); }
+TEST(Parser, nonExistingFile) {
+    ASSERT_THROW(filc::ParserProxy::parse("non-existing-file"), std::logic_error);
+}
 
 TEST(Parser, parseSample) {
     const auto program = filc::ParserProxy::parse(FIXTURES_PATH "/sample.fil");

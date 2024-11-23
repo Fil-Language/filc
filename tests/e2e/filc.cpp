@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <gtest/gtest.h>
 
 TEST(filc, run_help) {

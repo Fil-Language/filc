@@ -24,7 +24,6 @@
 #ifndef FILC_CALCULBUILDER_H
 #define FILC_CALCULBUILDER_H
 
-#include "filc/grammar/calcul/Calcul.h"
 #include "filc/llvm/IRGenerator.h"
 #include <llvm/IR/IRBuilder.h>
 
@@ -33,23 +32,23 @@ class CalculBuilder final {
   public:
     explicit CalculBuilder(IRGenerator *generator, llvm::IRBuilder<> *builder);
 
-    auto buildCalculValue(BinaryCalcul *calcul) const -> llvm::Value *;
+    auto buildCalculValue(const BinaryCalcul *calcul) const -> llvm::Value *;
 
   private:
     IRGenerator *_generator;
     llvm::IRBuilder<> *_builder;
 
-    auto buildSignedInteger(BinaryCalcul *calcul) const -> llvm::Value *;
+    auto buildSignedInteger(const BinaryCalcul *calcul) const -> llvm::Value *;
 
-    auto buildUnsignedInteger(BinaryCalcul *calcul) const -> llvm::Value *;
+    auto buildUnsignedInteger(const BinaryCalcul *calcul) const -> llvm::Value *;
 
-    auto buildFloat(BinaryCalcul *calcul) const -> llvm::Value *;
+    auto buildFloat(const BinaryCalcul *calcul) const -> llvm::Value *;
 
-    auto buildBool(BinaryCalcul *calcul) const -> llvm::Value *;
+    auto buildBool(const BinaryCalcul *calcul) const -> llvm::Value *;
 
-    auto buildPointer(BinaryCalcul *calcul) const -> llvm::Value *;
+    auto buildPointer(const BinaryCalcul *calcul) const -> llvm::Value *;
 
-    auto static buildError(BinaryCalcul *calcul) -> std::logic_error;
+    auto static buildError(const BinaryCalcul *calcul) -> std::logic_error;
 };
 }
 

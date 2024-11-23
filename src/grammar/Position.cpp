@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "filc/grammar/Position.h"
+
 #include <fstream>
 
 using namespace filc;
 
 #define RESET "\033[0m"
 
-Position::Position() : _start_position(0, 0), _end_position(0, 0) {}
+Position::Position(): _start_position(0, 0), _end_position(0, 0) {}
 
 Position::Position(const antlr4::Token *start_token, const antlr4::Token *end_token)
     : _filename(start_token->getTokenSource()->getSourceName()) {
@@ -37,14 +38,20 @@ Position::Position(const antlr4::Token *start_token, const antlr4::Token *end_to
     }
 
     _start_position = std::make_pair(start_token->getLine(), start_token->getCharPositionInLine());
-    _end_position = std::make_pair(end_token->getLine(), end_token->getCharPositionInLine());
+    _end_position   = std::make_pair(end_token->getLine(), end_token->getCharPositionInLine());
 }
 
-auto Position::getFilename() const -> std::string { return _filename; }
+auto Position::getFilename() const -> std::string {
+    return _filename;
+}
 
-auto Position::getStartPosition() const -> std::pair<unsigned int, unsigned int> { return _start_position; }
+auto Position::getStartPosition() const -> std::pair<unsigned int, unsigned int> {
+    return _start_position;
+}
 
-auto Position::getEndPosition() const -> std::pair<unsigned int, unsigned int> { return _end_position; }
+auto Position::getEndPosition() const -> std::pair<unsigned int, unsigned int> {
+    return _end_position;
+}
 
 auto Position::getContent() const -> std::vector<std::string> {
     if (_filename.empty() || _filename == "<unknown>") {
@@ -52,14 +59,14 @@ auto Position::getContent() const -> std::vector<std::string> {
     }
 
     std::ifstream file(_filename);
-    if (!file.is_open() || !file.good()) {
+    if (! file.is_open() || ! file.good()) {
         throw std::logic_error("File '" + _filename + "' not found");
     }
 
     std::vector<std::string> content;
 
     const auto start_line = _start_position.first;
-    unsigned int index = 0;
+    unsigned int index    = 0;
     std::string line;
     for (; index < start_line; index++) {
         std::getline(file, line);
@@ -80,21 +87,21 @@ auto Position::getContent() const -> std::vector<std::string> {
 }
 
 auto Position::dump(const std::string &color) const -> std::string {
-    const auto start_line = _start_position.first;
+    const auto start_line   = _start_position.first;
     const auto start_column = _start_position.second;
-    const auto end_line = _end_position.first;
-    const auto end_column = _end_position.second;
-    const auto content = getContent();
+    const auto end_line     = _end_position.first;
+    const auto end_column   = _end_position.second;
+    const auto content      = getContent();
     if (content.empty()) {
         return "";
     }
 
     if (content.size() == 1) { // Single line
-        const auto nth = " " + std::to_string(start_line) + " ";
+        const auto nth    = " " + std::to_string(start_line) + " ";
         const auto spaces = start_column > 0 ? std::string(start_column, ' ') : "";
-        return std::string(nth.length() - 1, ' ') + "--> " + _filename + ":" + std::to_string(start_line) + ":" +
-               std::to_string(start_column) + "\n" + nth + "| " + content[0] + "\n" + std::string(nth.length(), ' ') +
-               "| " + spaces + color + "^" + RESET + "\n";
+        return std::string(nth.length() - 1, ' ') + "--> " + _filename + ":" + std::to_string(start_line) + ":"
+             + std::to_string(start_column) + "\n" + nth + "| " + content[0] + "\n" + std::string(nth.length(), ' ')
+             + "| " + spaces + color + "^" + RESET + "\n";
     }
 
     if (content.size() > 1) { // Multi line
@@ -104,12 +111,12 @@ auto Position::dump(const std::string &color) const -> std::string {
             const auto line = " " + std::to_string(i) + " ";
             nths.push_back(line + std::string(nth_end.length() - line.length(), ' '));
         }
-        const auto nth_spaces = std::string(nth_end.length(), ' ') + "| ";
+        const auto nth_spaces   = std::string(nth_end.length(), ' ') + "| ";
         const auto start_spaces = start_column > 0 ? std::string(start_column, ' ') : "";
-        const auto end_spaces = end_column > 0 ? std::string(end_column, ' ') : "";
+        const auto end_spaces   = end_column > 0 ? std::string(end_column, ' ') : "";
 
-        auto res = std::string(nth_end.length() - 1, ' ') + "--> " + _filename + ":" + std::to_string(start_line) +
-                   ":" + std::to_string(start_column) + "\n" + nth_spaces + start_spaces + color + "v" + RESET + "\n";
+        auto res = std::string(nth_end.length() - 1, ' ') + "--> " + _filename + ":" + std::to_string(start_line) + ":"
+                 + std::to_string(start_column) + "\n" + nth_spaces + start_spaces + color + "v" + RESET + "\n";
 
         for (unsigned int i = 0; i < nths.size(); i++) {
             res += nths[i] + "| " + content[i] + "\n";

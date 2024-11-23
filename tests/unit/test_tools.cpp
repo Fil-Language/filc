@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include "FilLexer.h"
 #include "FilParser.h"
 #include "antlr4-runtime.h"
+
 #include <filc/validation/ValidationVisitor.h>
 
 auto toStringArray(const std::vector<std::string> &data) -> std::vector<char *> {
@@ -56,7 +58,7 @@ auto parseAndValidateString(const std::string &content) -> std::shared_ptr<filc:
     return program;
 }
 
-PrinterVisitor::PrinterVisitor() : _out(std::stringstream()) {}
+PrinterVisitor::PrinterVisitor(): _out(std::stringstream()) {}
 
 auto PrinterVisitor::getResult() -> std::string {
     std::string result(std::istreambuf_iterator<char>(_out), {});
@@ -74,9 +76,13 @@ auto PrinterVisitor::visitBooleanLiteral(filc::BooleanLiteral *literal) -> void 
     _out << (literal->getValue() ? "true" : "false");
 }
 
-auto PrinterVisitor::visitIntegerLiteral(filc::IntegerLiteral *literal) -> void { _out << literal->getValue(); }
+auto PrinterVisitor::visitIntegerLiteral(filc::IntegerLiteral *literal) -> void {
+    _out << literal->getValue();
+}
 
-auto PrinterVisitor::visitFloatLiteral(filc::FloatLiteral *literal) -> void { _out << literal->getValue(); }
+auto PrinterVisitor::visitFloatLiteral(filc::FloatLiteral *literal) -> void {
+    _out << literal->getValue();
+}
 
 auto PrinterVisitor::visitCharacterLiteral(filc::CharacterLiteral *literal) -> void {
     _out << "'" << literal->getValue() << "'";
@@ -88,7 +94,7 @@ auto PrinterVisitor::visitStringLiteral(filc::StringLiteral *literal) -> void {
 
 auto PrinterVisitor::visitVariableDeclaration(filc::VariableDeclaration *variable) -> void {
     _out << (variable->isConstant() ? "val " : "var ") << variable->getName();
-    if (!variable->getTypeName().empty()) {
+    if (! variable->getTypeName().empty()) {
         _out << ": " << variable->getTypeName();
     }
     if (variable->getValue() != nullptr) {
@@ -97,7 +103,9 @@ auto PrinterVisitor::visitVariableDeclaration(filc::VariableDeclaration *variabl
     }
 }
 
-auto PrinterVisitor::visitIdentifier(filc::Identifier *identifier) -> void { _out << identifier->getName(); }
+auto PrinterVisitor::visitIdentifier(filc::Identifier *identifier) -> void {
+    _out << identifier->getName();
+}
 
 auto PrinterVisitor::visitBinaryCalcul(filc::BinaryCalcul *calcul) -> void {
     _out << "(";
@@ -112,41 +120,75 @@ auto PrinterVisitor::visitAssignation(filc::Assignation *assignation) -> void {
     assignation->getValue()->acceptVoidVisitor(this);
 }
 
-TokenSourceStub::TokenSourceStub(std::string filename) : _filename(std::move(filename)) {}
+TokenSourceStub::TokenSourceStub(std::string filename): _filename(std::move(filename)) {}
 
-auto TokenSourceStub::nextToken() -> std::unique_ptr<antlr4::Token> { return nullptr; }
+auto TokenSourceStub::nextToken() -> std::unique_ptr<antlr4::Token> {
+    return nullptr;
+}
 
-auto TokenSourceStub::getLine() const -> size_t { return 0; }
+auto TokenSourceStub::getLine() const -> size_t {
+    return 0;
+}
 
-auto TokenSourceStub::getCharPositionInLine() -> size_t { return 0; }
+auto TokenSourceStub::getCharPositionInLine() -> size_t {
+    return 0;
+}
 
-auto TokenSourceStub::getInputStream() -> antlr4::CharStream * { return nullptr; }
+auto TokenSourceStub::getInputStream() -> antlr4::CharStream * {
+    return nullptr;
+}
 
-auto TokenSourceStub::getSourceName() -> std::string { return _filename; }
+auto TokenSourceStub::getSourceName() -> std::string {
+    return _filename;
+}
 
-auto TokenSourceStub::getTokenFactory() -> antlr4::TokenFactory<antlr4::CommonToken> * { return nullptr; }
+auto TokenSourceStub::getTokenFactory() -> antlr4::TokenFactory<antlr4::CommonToken> * {
+    return nullptr;
+}
 
 TokenStub::TokenStub(const std::string &filename, const std::pair<unsigned int, unsigned int> &position)
     : _source(new TokenSourceStub(filename)), _position(position) {}
 
-auto TokenStub::getText() const -> std::string { return ""; }
+auto TokenStub::getText() const -> std::string {
+    return "";
+}
 
-auto TokenStub::getType() const -> size_t { return 0; }
+auto TokenStub::getType() const -> size_t {
+    return 0;
+}
 
-auto TokenStub::getLine() const -> size_t { return _position.first; }
+auto TokenStub::getLine() const -> size_t {
+    return _position.first;
+}
 
-auto TokenStub::getCharPositionInLine() const -> size_t { return _position.second; }
+auto TokenStub::getCharPositionInLine() const -> size_t {
+    return _position.second;
+}
 
-auto TokenStub::getChannel() const -> size_t { return 0; }
+auto TokenStub::getChannel() const -> size_t {
+    return 0;
+}
 
-auto TokenStub::getTokenIndex() const -> size_t { return 0; }
+auto TokenStub::getTokenIndex() const -> size_t {
+    return 0;
+}
 
-auto TokenStub::getStartIndex() const -> size_t { return 0; }
+auto TokenStub::getStartIndex() const -> size_t {
+    return 0;
+}
 
-auto TokenStub::getStopIndex() const -> size_t { return 0; }
+auto TokenStub::getStopIndex() const -> size_t {
+    return 0;
+}
 
-auto TokenStub::getTokenSource() const -> antlr4::TokenSource * { return _source; }
+auto TokenStub::getTokenSource() const -> antlr4::TokenSource * {
+    return _source;
+}
 
-auto TokenStub::getInputStream() const -> antlr4::CharStream * { return nullptr; }
+auto TokenStub::getInputStream() const -> antlr4::CharStream * {
+    return nullptr;
+}
 
-auto TokenStub::toString() const -> std::string { return ""; }
+auto TokenStub::toString() const -> std::string {
+    return "";
+}

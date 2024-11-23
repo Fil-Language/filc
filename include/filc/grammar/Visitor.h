@@ -25,11 +25,11 @@
 #define FILC_VISITOR_H
 
 #include "filc/grammar/ast.h"
+
 #include "llvm/IR/Value.h"
 
 namespace filc {
-template<typename Return>
-class Visitor {
+template<typename Return> class Visitor {
   public:
     virtual ~Visitor() = default;
 
@@ -59,10 +59,12 @@ class Visitor {
 
 class Visitable {
   public:
+    virtual ~Visitable() = default;
+
     virtual auto acceptVoidVisitor(Visitor<void> *visitor) -> void = 0;
 
-    virtual auto acceptIRVisitor(Visitor<llvm::Value*> *visitor) -> llvm::Value * = 0;
+    virtual auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * = 0;
 };
-}
+} // namespace filc
 
 #endif // FILC_VISITOR_H

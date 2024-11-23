@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "filc/llvm/IRGenerator.h"
+
 #include "filc/grammar/assignation/Assignation.h"
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
@@ -29,6 +30,7 @@
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 #include "filc/llvm/CalculBuilder.h"
+
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/MC/MCTargetOptions.h>
@@ -42,8 +44,8 @@ using namespace filc;
 
 IRGenerator::IRGenerator(const std::string &filename, const Environment *environment) {
     _llvm_context = std::make_unique<llvm::LLVMContext>();
-    _module = std::make_unique<llvm::Module>(llvm::StringRef(filename), *_llvm_context);
-    _builder = std::make_unique<llvm::IRBuilder<>>(*_llvm_context);
+    _module       = std::make_unique<llvm::Module>(llvm::StringRef(filename), *_llvm_context);
+    _builder      = std::make_unique<llvm::IRBuilder<>>(*_llvm_context);
     environment->prepareLLVMTypes(_llvm_context.get());
 }
 
@@ -66,7 +68,7 @@ auto IRGenerator::toTarget(const std::string &output_file, const std::string &ta
 
     std::string error;
     const auto target = llvm::TargetRegistry::lookupTarget(used_target_triple, error);
-    if (!target) {
+    if (! target) {
         std::cerr << error;
         return 1;
     }
@@ -96,9 +98,9 @@ auto IRGenerator::toTarget(const std::string &output_file, const std::string &ta
 }
 
 auto IRGenerator::visitProgram(Program *program) -> llvm::Value * {
-    auto function_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(*_llvm_context), {}, false);
-    auto function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, "main", _module.get());
-    auto basic_block = llvm::BasicBlock::Create(*_llvm_context, "entry", function);
+    const auto function_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(*_llvm_context), {}, false);
+    const auto function = llvm::Function::Create(function_type, llvm::Function::ExternalLinkage, "main", _module.get());
+    const auto basic_block = llvm::BasicBlock::Create(*_llvm_context, "entry", function);
     _builder->SetInsertPoint(basic_block);
 
     const auto &expressions = program->getExpressions();
@@ -106,7 +108,7 @@ auto IRGenerator::visitProgram(Program *program) -> llvm::Value * {
         const auto return_value = llvm::ConstantInt::get(*_llvm_context, llvm::APInt(32, 0, true));
         _builder->CreateRet(return_value);
     } else {
-        for (auto it = expressions.begin(); it != expressions.end(); it++) {
+        for (auto it = expressions.begin(); it != expressions.end(); ++it) {
             if (it + 1 != expressions.end()) {
                 (*it)->acceptIRVisitor(this);
             } else {
@@ -128,14 +130,13 @@ auto IRGenerator::visitBooleanLiteral(BooleanLiteral *literal) -> llvm::Value * 
 auto IRGenerator::visitIntegerLiteral(IntegerLiteral *literal) -> llvm::Value * {
     const auto type_name = literal->getType()->getName();
     const auto is_signed = type_name[0] == 'i';
-    const auto size = stoi(type_name.substr(1));
+    const auto size      = stoi(type_name.substr(1));
     return llvm::ConstantInt::get(*_llvm_context, llvm::APInt(size, literal->getValue(), is_signed));
 }
 
 auto IRGenerator::visitFloatLiteral(FloatLiteral *literal) -> llvm::Value * {
-    const auto type_name = literal->getType()->getName();
-    if (type_name == "f32") {
-        return llvm::ConstantFP::get(*_llvm_context, llvm::APFloat((float)literal->getValue()));
+    if (literal->getType()->getName() == "f32") {
+        return llvm::ConstantFP::get(*_llvm_context, llvm::APFloat(static_cast<float>(literal->getValue())));
     }
     return llvm::ConstantFP::get(*_llvm_context, llvm::APFloat(literal->getValue()));
 }
@@ -149,14 +150,15 @@ auto IRGenerator::visitStringLiteral(StringLiteral *literal) -> llvm::Value * {
 }
 
 auto IRGenerator::visitVariableDeclaration(VariableDeclaration *variable) -> llvm::Value * {
-    const auto global = new llvm::GlobalVariable(variable->getType()->getLLVMType(), variable->isConstant(),
-                                                 llvm::GlobalValue::InternalLinkage);
+    const auto global = new llvm::GlobalVariable(
+        variable->getType()->getLLVMType(), variable->isConstant(), llvm::GlobalValue::InternalLinkage
+    );
     global->setName(variable->getName());
     _module->insertGlobalVariable(global);
 
     if (variable->getValue() != nullptr) {
         const auto value = variable->getValue()->acceptIRVisitor(this);
-        global->setInitializer((llvm::Constant *)value);
+        global->setInitializer((llvm::Constant *) value);
         return value;
     }
 
@@ -169,13 +171,13 @@ auto IRGenerator::visitIdentifier(Identifier *identifier) -> llvm::Value * {
 }
 
 auto IRGenerator::visitBinaryCalcul(BinaryCalcul *calcul) -> llvm::Value * {
-    CalculBuilder builder(this, _builder.get());
+    const CalculBuilder builder(this, _builder.get());
     return builder.buildCalculValue(calcul);
 }
 
 auto IRGenerator::visitAssignation(Assignation *assignation) -> llvm::Value * {
     const auto variable = _module->getNamedGlobal(assignation->getIdentifier());
-    const auto value = assignation->getValue()->acceptIRVisitor(this);
+    const auto value    = assignation->getValue()->acceptIRVisitor(this);
     _builder->CreateStore(value, variable);
     return value;
 }

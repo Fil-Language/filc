@@ -25,10 +25,16 @@
 
 using namespace filc;
 
-Program::Program(const std::vector<std::shared_ptr<Expression>> &expressions) : _expressions(expressions) {}
+Program::Program(const std::vector<std::shared_ptr<Expression>> &expressions): _expressions(expressions) {}
 
-auto Program::getExpressions() const -> const std::vector<std::shared_ptr<Expression>> & { return _expressions; }
+auto Program::getExpressions() const -> const std::vector<std::shared_ptr<Expression>> & {
+    return _expressions;
+}
 
-auto Program::acceptVoidVisitor(Visitor<void> *visitor) -> void { visitor->visitProgram(this); }
+auto Program::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitProgram(this);
+}
 
-auto Program::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * { return visitor->visitProgram(this); }
+auto Program::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitProgram(this);
+}

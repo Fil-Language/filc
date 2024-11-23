@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/filc.h>
 #include <gtest/gtest.h>
 #include <sstream>
 
 TEST(FilCompiler, run) {
-    auto compiler =
-        filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout), filc::ValidationVisitor(std::cout));
+    auto compiler
+        = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(std::cout), filc::ValidationVisitor(std::cout));
 
     SCOPED_TRACE("No argument");
     ASSERT_EQ(0, compiler.run(1, toStringArray({"filc"}).data()));
@@ -45,32 +46,34 @@ TEST(FilCompiler, dumpAST) {
     auto compiler = filc::FilCompiler(filc::OptionsParser(), filc::DumpVisitor(ss), filc::ValidationVisitor(std::cout));
     ASSERT_EQ(0, compiler.run(3, toStringArray({"filc", "--dump=ast", FIXTURES_PATH "/sample.fil"}).data()));
     std::string result(std::istreambuf_iterator<char>(ss), {});
-    ASSERT_STREQ("=== Begin AST dump ===\n"
-                 "[Boolean:true]\n"
-                 "[Float:6.82]\n"
-                 "[String:\"hEllO\"]\n"
-                 "[Variable:val:some_constant_73]\n"
-                 "[Variable:var:myAweSOMeVariable:i32]\n"
-                 "[Variable:val:anotherConst]\n"
-                 "\t[Integer:73]\n"
-                 "[Variable:var:my_var:char]\n"
-                 "\t[Character:'c']\n"
-                 "[Identifier:_some_varWhichUses_Some_CHARACTERS]\n"
-                 "[BinaryCalcul:<=]\n"
-                 "\t[BinaryCalcul:+]\n"
-                 "\t\t[Integer:2]\n"
-                 "\t\t[Integer:4]\n"
-                 "\t[BinaryCalcul:*]\n"
-                 "\t\t[Integer:3]\n"
-                 "\t\t[Integer:2]\n"
-                 "[Assignation:my_var]\n"
-                 "\t[Integer:2]\n"
-                 "[Assignation:my_var]\n"
-                 "\t[BinaryCalcul:+]\n"
-                 "\t\t[Identifier:my_var]\n"
-                 "\t\t[Integer:2]\n"
-                 "=== End AST dump ===\n",
-                 result.c_str());
+    ASSERT_STREQ(
+        "=== Begin AST dump ===\n"
+        "[Boolean:true]\n"
+        "[Float:6.82]\n"
+        "[String:\"hEllO\"]\n"
+        "[Variable:val:some_constant_73]\n"
+        "[Variable:var:myAweSOMeVariable:i32]\n"
+        "[Variable:val:anotherConst]\n"
+        "\t[Integer:73]\n"
+        "[Variable:var:my_var:char]\n"
+        "\t[Character:'c']\n"
+        "[Identifier:_some_varWhichUses_Some_CHARACTERS]\n"
+        "[BinaryCalcul:<=]\n"
+        "\t[BinaryCalcul:+]\n"
+        "\t\t[Integer:2]\n"
+        "\t\t[Integer:4]\n"
+        "\t[BinaryCalcul:*]\n"
+        "\t\t[Integer:3]\n"
+        "\t\t[Integer:2]\n"
+        "[Assignation:my_var]\n"
+        "\t[Integer:2]\n"
+        "[Assignation:my_var]\n"
+        "\t[BinaryCalcul:+]\n"
+        "\t\t[Identifier:my_var]\n"
+        "\t\t[Integer:2]\n"
+        "=== End AST dump ===\n",
+        result.c_str()
+    );
 }
 
 TEST(FilCompiler, fullRun) {

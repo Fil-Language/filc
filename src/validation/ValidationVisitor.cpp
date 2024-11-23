@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "filc/validation/ValidationVisitor.h"
+
 #include "filc/grammar/assignation/Assignation.h"
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
@@ -30,6 +31,7 @@
 #include "filc/grammar/variable/Variable.h"
 #include "filc/utils/Message.h"
 #include "filc/validation/CalculValidator.h"
+
 #include <stdexcept>
 
 using namespace filc;
@@ -37,9 +39,13 @@ using namespace filc;
 ValidationVisitor::ValidationVisitor(std::ostream &out)
     : _context(new ValidationContext()), _environment(new Environment()), _out(out), _error(false) {}
 
-auto ValidationVisitor::getEnvironment() const -> const Environment * { return _environment.get(); }
+auto ValidationVisitor::getEnvironment() const -> const Environment * {
+    return _environment.get();
+}
 
-auto ValidationVisitor::hasError() const -> bool { return _error; }
+auto ValidationVisitor::hasError() const -> bool {
+    return _error;
+}
 
 auto ValidationVisitor::displayError(const std::string &message, const Position &position) -> void {
     _error = true;
@@ -52,7 +58,7 @@ auto ValidationVisitor::displayWarning(const std::string &message, const Positio
 
 auto ValidationVisitor::visitProgram(Program *program) -> void {
     auto expressions = program->getExpressions();
-    for (auto it = expressions.begin(); it != expressions.end(); it++) {
+    for (auto it = expressions.begin(); it != expressions.end(); ++it) {
         if (it + 1 == expressions.end()) {
             _context->set("return", true);
         }
@@ -61,16 +67,18 @@ auto ValidationVisitor::visitProgram(Program *program) -> void {
 
         if (it + 1 == expressions.end()) {
             const auto expected = _environment->getType("int");
-            const std::vector<std::string> allowed_types = {"i8",  "i16", "i32", "i64",  "i128", "u8",
-                                                            "u16", "u32", "u64", "u128", "bool"};
+            const std::vector<std::string> allowed_types
+                = {"i8", "i16", "i32", "i64", "i128", "u8", "u16", "u32", "u64", "u128", "bool"};
             const auto found_type = (*it)->getType();
             if (found_type == nullptr) {
                 return;
             }
 
             if (std::find(allowed_types.begin(), allowed_types.end(), found_type->getName()) == allowed_types.end()) {
-                displayError("Expected type " + expected->toDisplay() + " but got " + found_type->toDisplay(),
-                             (*it)->getPosition());
+                displayError(
+                    "Expected type " + expected->toDisplay() + " but got " + found_type->toDisplay(),
+                    (*it)->getPosition()
+                );
             }
         }
 
@@ -81,14 +89,14 @@ auto ValidationVisitor::visitProgram(Program *program) -> void {
 auto ValidationVisitor::visitBooleanLiteral(BooleanLiteral *literal) -> void {
     literal->setType(_environment->getType("bool"));
 
-    if (!_context->has("return") || !_context->get<bool>("return")) {
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("Boolean value not used", literal->getPosition());
     }
 }
 
 auto ValidationVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
     if (_context->has("cast_type")) {
-        const auto cast_type = _context->get<std::shared_ptr<AbstractType>>("cast_type");
+        const auto cast_type                   = _context->get<std::shared_ptr<AbstractType>>("cast_type");
         std::vector<std::string> allowed_casts = {"i8", "i16", "i32", "i64", "i128", "u8", "u16", "u32", "u64", "u128"};
         if (std::find(allowed_casts.begin(), allowed_casts.end(), cast_type->getName()) != allowed_casts.end()) {
             literal->setType(cast_type);
@@ -99,14 +107,14 @@ auto ValidationVisitor::visitIntegerLiteral(IntegerLiteral *literal) -> void {
         literal->setType(_environment->getType("int"));
     }
 
-    if (!_context->has("return") || !_context->get<bool>("return")) {
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("Integer value not used", literal->getPosition());
     }
 }
 
 auto ValidationVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
     if (_context->has("cast_type")) {
-        const auto cast_type = _context->get<std::shared_ptr<AbstractType>>("cast_type");
+        const auto cast_type                   = _context->get<std::shared_ptr<AbstractType>>("cast_type");
         std::vector<std::string> allowed_casts = {"f32", "f64"};
         if (std::find(allowed_casts.begin(), allowed_casts.end(), cast_type->getName()) != allowed_casts.end()) {
             literal->setType(cast_type);
@@ -117,7 +125,7 @@ auto ValidationVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
         literal->setType(_environment->getType("f64"));
     }
 
-    if (!_context->has("return") || !_context->get<bool>("return")) {
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("Float value not used", literal->getPosition());
     }
 }
@@ -125,7 +133,7 @@ auto ValidationVisitor::visitFloatLiteral(FloatLiteral *literal) -> void {
 auto ValidationVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void {
     literal->setType(_environment->getType("char"));
 
-    if (!_context->has("return") || !_context->get<bool>("return")) {
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("Character value not used", literal->getPosition());
     }
 }
@@ -133,7 +141,7 @@ auto ValidationVisitor::visitCharacterLiteral(CharacterLiteral *literal) -> void
 auto ValidationVisitor::visitStringLiteral(StringLiteral *literal) -> void {
     literal->setType(_environment->getType("char*"));
 
-    if (!_context->has("return") || !_context->get<bool>("return")) {
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("String value not used", literal->getPosition());
     }
 }
@@ -150,8 +158,8 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
     }
 
     std::shared_ptr<AbstractType> variable_type = nullptr;
-    if (!variable->getTypeName().empty()) {
-        if (!_environment->hasType(variable->getTypeName())) {
+    if (! variable->getTypeName().empty()) {
+        if (! _environment->hasType(variable->getTypeName())) {
             displayError("Unknown type: " + variable->getTypeName(), variable->getPosition());
             return;
         }
@@ -171,9 +179,11 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
             return;
         }
         if (variable_type != nullptr && variable_type->getName() != value_type->getName()) {
-            displayError("Cannot assign value of type " + value_type->toDisplay() + " to a variable of type " +
-                             variable_type->toDisplay(),
-                         variable->getPosition());
+            displayError(
+                "Cannot assign value of type " + value_type->toDisplay() + " to a variable of type "
+                    + variable_type->toDisplay(),
+                variable->getPosition()
+            );
             return;
         } else if (variable_type == nullptr) {
             variable_type = value_type;
@@ -190,7 +200,7 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
 }
 
 auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
-    if (!_environment->hasName(identifier->getName())) {
+    if (! _environment->hasName(identifier->getName())) {
         displayError("Unknown name, don't know what it refers to: " + identifier->getName(), identifier->getPosition());
         return;
     }
@@ -198,7 +208,7 @@ auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
     const auto name = _environment->getName(identifier->getName());
     identifier->setType(name.getType());
 
-    if (!_context->has("return") || !_context->get<bool>("return")) {
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("Value not used", identifier->getPosition());
     }
 }
@@ -220,26 +230,29 @@ auto ValidationVisitor::visitBinaryCalcul(BinaryCalcul *calcul) -> void {
         return;
     }
 
-    CalculValidator validator(_environment.get());
+    const CalculValidator validator(_environment.get());
     const auto found_type = validator.isCalculValid(left_type, calcul->getOperator(), right_type);
     if (found_type == nullptr) {
-        displayError("You cannot use operator " + calcul->getOperator() + " with " + left_type->toDisplay() + " and " +
-                         right_type->toDisplay(),
-                     calcul->getPosition());
+        displayError(
+            "You cannot use operator " + calcul->getOperator() + " with " + left_type->toDisplay() + " and "
+                + right_type->toDisplay(),
+            calcul->getPosition()
+        );
         return;
     }
 
     calcul->setType(found_type);
 
-    if (!_context->has("return") || !_context->get<bool>("return")) {
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("Value not used", calcul->getPosition());
     }
 }
 
 auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
-    if (!_environment->hasName(assignation->getIdentifier())) {
-        displayError("Unknown name, don't know what it refers to: " + assignation->getIdentifier(),
-                     assignation->getPosition());
+    if (! _environment->hasName(assignation->getIdentifier())) {
+        displayError(
+            "Unknown name, don't know what it refers to: " + assignation->getIdentifier(), assignation->getPosition()
+        );
         return;
     }
     const auto name = _environment->getName(assignation->getIdentifier());
@@ -258,9 +271,11 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
         return;
     }
     if (value_type->getName() != name.getType()->getName()) {
-        displayError("Cannot assign value of type " + value_type->toDisplay() + " to a variable of type " +
-                         name.getType()->toDisplay(),
-                     assignation->getPosition());
+        displayError(
+            "Cannot assign value of type " + value_type->toDisplay() + " to a variable of type "
+                + name.getType()->toDisplay(),
+            assignation->getPosition()
+        );
         return;
     }
 

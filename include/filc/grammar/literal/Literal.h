@@ -24,7 +24,6 @@
 #ifndef FILC_LITERAL_H
 #define FILC_LITERAL_H
 
-#include "filc/grammar/ast.h"
 #include "filc/grammar/expression/Expression.h"
 
 namespace filc {

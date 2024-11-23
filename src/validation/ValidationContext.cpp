@@ -25,9 +25,13 @@
 
 using namespace filc;
 
-ValidationContext::ValidationContext() { stack(); }
+ValidationContext::ValidationContext() {
+    stack();
+}
 
-auto ValidationContext::stack() -> void { _values.emplace(); }
+auto ValidationContext::stack() -> void {
+    _values.emplace();
+}
 
 auto ValidationContext::unstack() -> void {
     if (_values.size() > 1) {
@@ -35,10 +39,14 @@ auto ValidationContext::unstack() -> void {
     }
 }
 
-auto ValidationContext::set(const std::string &key, const std::any &value) -> void { _values.top()[key] = value; }
+auto ValidationContext::set(const std::string &key, const std::any &value) -> void {
+    _values.top()[key] = value;
+}
 
 auto ValidationContext::has(const std::string &key) const -> bool {
     return _values.top().find(key) != _values.top().end();
 }
 
-auto ValidationContext::clear() -> void { _values.top().clear(); }
+auto ValidationContext::clear() -> void {
+    _values.top().clear();
+}

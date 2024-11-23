@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -52,4 +53,6 @@ TEST(ir_dump, calcul_program) {
     ASSERT_EQ(5, getProgramResult("(3 * 2 + 4) / 2"));
 }
 
-TEST(ir_dump, variable_program) { ASSERT_EQ(2, getProgramResult("val foo = 2\nfoo")); }
+TEST(ir_dump, variable_program) {
+    ASSERT_EQ(2, getProgramResult("val foo = 2\nfoo"));
+}

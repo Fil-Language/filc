@@ -22,29 +22,34 @@
  * SOFTWARE.
  */
 #include "filc/options/OptionsParser.h"
+
 #include <utility>
 
 using namespace filc;
 
 #define NOT_PARSED_MESSAGE "You should call parse() before getting results"
 
-OptionsParser::OptionsParser() : _options("filc", "Fil compiler"), _parsed(false) {
+OptionsParser::OptionsParser(): _options("filc", "Fil compiler"), _parsed(false) {
     _options.add_options()("file", "Path of file to compile.", cxxopts::value<std::string>()->default_value(""));
     _options.parse_positional("file");
     _options.positional_help("file");
 
-    _options.add_options("General")("out,o", "Write output to file",
-                                    cxxopts::value<std::string>()->default_value("a.out"), "<file>")(
-        "target", "Generate code for the given target", cxxopts::value<std::string>(), "<value>");
+    _options.add_options("General")
+        ("out,o", "Write output to file", cxxopts::value<std::string>()->default_value("a.out"), "<file>")
+        ("target", "Generate code for the given target", cxxopts::value<std::string>(), "<value>");
 
-    _options.add_options("Troubleshooting")("help", "Show this help message and exit.")("version",
-                                                                                        "Show version and exit.");
+    _options.add_options("Troubleshooting")("help", "Show this help message and exit.")(
+        "version", "Show version and exit."
+    );
 
-    _options.add_options("Debug")("dump", "Dump some data. One of these values: ast, ir.",
-                                  cxxopts::value<std::string>()->implicit_value("all")->default_value("none"));
+    _options.add_options("Debug")(
+        "dump",
+        "Dump some data. One of these values: ast, ir.",
+        cxxopts::value<std::string>()->implicit_value("all")->default_value("none")
+    );
 }
 
-auto OptionsParser::parse(int argc, char **argv) -> void {
+auto OptionsParser::parse(const int argc, char **argv) -> void {
     try {
         _result = _options.parse(argc, argv);
     } catch (std::exception &error) {
@@ -54,17 +59,19 @@ auto OptionsParser::parse(int argc, char **argv) -> void {
 }
 
 auto OptionsParser::isHelp() const -> bool {
-    if (!_parsed) {
+    if (! _parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
 
     return _result.count("help") > 0 || _result.arguments().empty();
 }
 
-auto OptionsParser::showHelp(std::ostream &out) const -> void { out << _options.help() << "\n"; }
+auto OptionsParser::showHelp(std::ostream &out) const -> void {
+    out << _options.help() << "\n";
+}
 
 auto OptionsParser::isVersion() const -> bool {
-    if (!_parsed) {
+    if (! _parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
 
@@ -72,7 +79,7 @@ auto OptionsParser::isVersion() const -> bool {
 }
 
 auto OptionsParser::getFile() const -> std::string {
-    if (!_parsed) {
+    if (! _parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
 
@@ -80,12 +87,12 @@ auto OptionsParser::getFile() const -> std::string {
 }
 
 auto OptionsParser::getDump() const -> std::string {
-    if (!_parsed) {
+    if (! _parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
 
-    auto dump = _result["dump"].as<std::string>();
-    auto valid = {"none", "all", "ast", "ir"};
+    auto dump        = _result["dump"].as<std::string>();
+    const auto valid = {"none", "all", "ast", "ir"};
     if (std::find(valid.begin(), valid.end(), dump) == valid.end()) {
         throw OptionsParserException("Dump option value '" + dump + "' is not a valid value");
     }
@@ -93,10 +100,12 @@ auto OptionsParser::getDump() const -> std::string {
     return dump;
 }
 
-auto OptionsParser::showVersion(std::ostream &out) -> void { out << FILC_VERSION << "\n"; }
+auto OptionsParser::showVersion(std::ostream &out) -> void {
+    out << FILC_VERSION << "\n";
+}
 
 auto OptionsParser::getOutputFile() const -> std::string {
-    if (!_parsed) {
+    if (! _parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
 
@@ -104,7 +113,7 @@ auto OptionsParser::getOutputFile() const -> std::string {
 }
 
 auto OptionsParser::getTarget() const -> std::string {
-    if (!_parsed) {
+    if (! _parsed) {
         throw OptionsParserException(NOT_PARSED_MESSAGE);
     }
 
@@ -114,6 +123,8 @@ auto OptionsParser::getTarget() const -> std::string {
     return _result["target"].as<std::string>();
 }
 
-OptionsParserException::OptionsParserException(std::string message) : _message(std::move(message)) {}
+OptionsParserException::OptionsParserException(std::string message): _message(std::move(message)) {}
 
-const char *OptionsParserException::what() const noexcept { return _message.c_str(); }
+const char *OptionsParserException::what() const noexcept {
+    return _message.c_str();
+}

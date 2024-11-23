@@ -24,11 +24,9 @@
 #ifndef FILC_FILC_H
 #define FILC_FILC_H
 
-#include "filc/grammar/Parser.h"
 #include "filc/options/OptionsParser.h"
 #include "filc/grammar/DumpVisitor.h"
 #include "filc/validation/ValidationVisitor.h"
-#include "filc/llvm/IRGenerator.h"
 
 namespace filc {
 class FilCompiler final {

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/grammar/assignation/Assignation.h>
 #include <filc/grammar/calcul/Calcul.h>
 #include <filc/grammar/literal/Literal.h>
@@ -31,7 +32,7 @@
 using namespace ::testing;
 
 TEST(Assignation, parsingSimple) {
-    const auto program = parseString("foo = \"bar\"");
+    const auto program     = parseString("foo = \"bar\"");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     const auto assignation = std::dynamic_pointer_cast<filc::Assignation>(expressions[0]);
@@ -43,7 +44,7 @@ TEST(Assignation, parsingSimple) {
 }
 
 TEST(Assignation, parsingCalcul) {
-    const auto program = parseString("bar ||= true");
+    const auto program     = parseString("bar ||= true");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     const auto assignation = std::dynamic_pointer_cast<filc::Assignation>(expressions[0]);

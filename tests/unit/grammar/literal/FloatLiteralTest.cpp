@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/grammar/literal/Literal.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -29,7 +30,7 @@
 using namespace ::testing;
 
 TEST(FloatLiteral, parsingFullFloat) {
-    const auto program = parseString("3.14");
+    const auto program     = parseString("3.14");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
@@ -38,7 +39,7 @@ TEST(FloatLiteral, parsingFullFloat) {
 }
 
 TEST(FloatLiteral, parsingSemiFloat) {
-    const auto program = parseString(".2");
+    const auto program     = parseString(".2");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);

@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "test_tools.h"
+
 #include <filc/grammar/calcul/Calcul.h>
 #include <filc/grammar/literal/Literal.h>
 #include <gmock/gmock.h>
@@ -30,7 +31,7 @@
 using namespace ::testing;
 
 TEST(BinaryCalcul, parsingAddition) {
-    const auto program = parseString("1 + 2");
+    const auto program     = parseString("1 + 2");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
     auto calcul = std::dynamic_pointer_cast<filc::BinaryCalcul>(expressions[0]);

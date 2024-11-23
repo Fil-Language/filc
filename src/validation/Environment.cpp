@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "filc/validation/Environment.h"
+
 #include <llvm/IR/DerivedTypes.h>
 #include <stdexcept>
 
@@ -75,10 +76,12 @@ auto Environment::prepareLLVMTypes(llvm::LLVMContext *context) const -> void {
     getType("char*")->setLLVMType(llvm::PointerType::get(llvm::Type::getInt8Ty(*context), 0));
 }
 
-auto Environment::hasType(const std::string &name) const -> bool { return _types.find(name) != _types.end(); }
+auto Environment::hasType(const std::string &name) const -> bool {
+    return _types.find(name) != _types.end();
+}
 
 auto Environment::getType(const std::string &name) const -> const std::shared_ptr<AbstractType> & {
-    if (!hasType(name)) {
+    if (! hasType(name)) {
         throw std::logic_error("Environment doesn't have type " + name);
     }
     return _types.at(name);
@@ -91,10 +94,12 @@ auto Environment::addType(const std::shared_ptr<AbstractType> &type) -> void {
     _types[type->getDisplayName()] = type;
 }
 
-auto Environment::hasName(const std::string &name) const -> bool { return _names.find(name) != _names.end(); }
+auto Environment::hasName(const std::string &name) const -> bool {
+    return _names.find(name) != _names.end();
+}
 
 auto Environment::getName(const std::string &name) const -> const Name & {
-    if (!hasName(name)) {
+    if (! hasName(name)) {
         throw std::logic_error("Environment doesn't have name " + name);
     }
     return _names.at(name);
