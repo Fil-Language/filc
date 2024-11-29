@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 FORMAT="clang-format -style=file -i"
 
 $FORMAT main.cpp

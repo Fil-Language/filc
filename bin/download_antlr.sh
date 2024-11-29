@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 if (($# != 1)); then
   echo -e "\033[31mUsage : $0 <version>\033[0m"
   exit 1
