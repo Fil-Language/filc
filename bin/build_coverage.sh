@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 lcov --directory . --capture --output-file coverage.info
 
 # Remove external files and dependencies
