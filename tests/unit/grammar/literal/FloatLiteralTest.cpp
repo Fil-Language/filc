@@ -33,7 +33,7 @@ TEST(FloatLiteral, parsingFullFloat) {
     const auto program     = parseString("3.14");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
-    auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
+    const auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
     ASSERT_NE(nullptr, literal);
     ASSERT_EQ(3.14, literal->getValue());
 }
@@ -42,7 +42,19 @@ TEST(FloatLiteral, parsingSemiFloat) {
     const auto program     = parseString(".2");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
-    auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
+    const auto literal = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
     ASSERT_NE(nullptr, literal);
     ASSERT_EQ(.2, literal->getValue());
+}
+
+TEST(FloatLiteral, parsingSigned) {
+    const auto program     = parseString("-3.14;+0.2");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(2));
+    const auto literal1 = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal1);
+    ASSERT_EQ(-3.14, literal1->getValue());
+    const auto literal2 = std::dynamic_pointer_cast<filc::FloatLiteral>(expressions[1]);
+    ASSERT_NE(nullptr, literal2);
+    ASSERT_EQ(.2, literal2->getValue());
 }

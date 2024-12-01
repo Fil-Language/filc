@@ -48,7 +48,7 @@ program returns[std::shared_ptr<filc::Program> tree]
 }
     : (e=expression {
         expressions.push_back($e.tree);
-    })* EOF;
+    } SEMI?)* EOF;
 
 expression returns[std::shared_ptr<filc::Expression> tree]
 @after {
@@ -112,12 +112,25 @@ boolean returns[std::shared_ptr<filc::BooleanLiteral> tree]
     };
 
 number returns[std::shared_ptr<filc::Expression> tree]
-    : i=INTEGER {
-        $tree = std::make_shared<filc::IntegerLiteral>(stoi($i.text));
+@init {
+    bool is_negative = false;
+}
+    : (PLUS | MINUS {
+        is_negative = true;
+    })? (i=INTEGER {
+        auto ivalue = stoi($i.text);
+        if (is_negative) {
+            ivalue = -ivalue;
+        }
+        $tree = std::make_shared<filc::IntegerLiteral>(ivalue);
     }
     | f=FLOAT {
-        $tree = std::make_shared<filc::FloatLiteral>(stod($f.text));
-    };
+        auto fvalue = stod($f.text);
+        if (is_negative) {
+            fvalue = -fvalue;
+        }
+        $tree = std::make_shared<filc::FloatLiteral>(fvalue);
+    });
 
 variable_declaration returns[std::shared_ptr<filc::VariableDeclaration> tree]
 @init {

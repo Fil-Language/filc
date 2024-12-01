@@ -34,15 +34,32 @@ TEST(BinaryCalcul, parsingAddition) {
     const auto program     = parseString("1 + 2");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
-    auto calcul = std::dynamic_pointer_cast<filc::BinaryCalcul>(expressions[0]);
+    const auto calcul = std::dynamic_pointer_cast<filc::BinaryCalcul>(expressions[0]);
     ASSERT_NE(nullptr, calcul);
     ASSERT_STREQ("+", calcul->getOperator().c_str());
     ASSERT_NE(nullptr, calcul->getLeftExpression());
     ASSERT_NE(nullptr, calcul->getRightExpression());
-    auto left = std::dynamic_pointer_cast<filc::IntegerLiteral>(calcul->getLeftExpression());
+    const auto left = std::dynamic_pointer_cast<filc::IntegerLiteral>(calcul->getLeftExpression());
     ASSERT_NE(nullptr, left);
     ASSERT_EQ(1, left->getValue());
-    auto right = std::dynamic_pointer_cast<filc::IntegerLiteral>(calcul->getRightExpression());
+    const auto right = std::dynamic_pointer_cast<filc::IntegerLiteral>(calcul->getRightExpression());
+    ASSERT_NE(nullptr, right);
+    ASSERT_EQ(2, right->getValue());
+}
+
+TEST(BinaryCalcul, parsingAdditionGlued) { // issue #47
+    const auto program     = parseString("1+2");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    const auto calcul = std::dynamic_pointer_cast<filc::BinaryCalcul>(expressions[0]);
+    ASSERT_NE(nullptr, calcul);
+    ASSERT_STREQ("+", calcul->getOperator().c_str());
+    ASSERT_NE(nullptr, calcul->getLeftExpression());
+    ASSERT_NE(nullptr, calcul->getRightExpression());
+    const auto left = std::dynamic_pointer_cast<filc::IntegerLiteral>(calcul->getLeftExpression());
+    ASSERT_NE(nullptr, left);
+    ASSERT_EQ(1, left->getValue());
+    const auto right = std::dynamic_pointer_cast<filc::IntegerLiteral>(calcul->getRightExpression());
     ASSERT_NE(nullptr, right);
     ASSERT_EQ(2, right->getValue());
 }
