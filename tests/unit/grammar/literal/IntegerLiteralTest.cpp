@@ -33,7 +33,19 @@ TEST(IntegerLiteral, parsing) {
     const auto program     = parseString("73");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
-    auto literal = std::dynamic_pointer_cast<filc::IntegerLiteral>(expressions[0]);
+    const auto literal = std::dynamic_pointer_cast<filc::IntegerLiteral>(expressions[0]);
     ASSERT_NE(nullptr, literal);
     ASSERT_EQ(73, literal->getValue());
+}
+
+TEST(IntegerLiteral, parsingSigned) {
+    const auto program     = parseString("-2;+2");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(2));
+    const auto literal1 = std::dynamic_pointer_cast<filc::IntegerLiteral>(expressions[0]);
+    ASSERT_NE(nullptr, literal1);
+    ASSERT_EQ(-2, literal1->getValue());
+    const auto literal2 = std::dynamic_pointer_cast<filc::IntegerLiteral>(expressions[1]);
+    ASSERT_NE(nullptr, literal2);
+    ASSERT_EQ(2, literal2->getValue());
 }

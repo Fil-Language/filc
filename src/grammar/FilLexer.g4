@@ -32,6 +32,7 @@ FALSE: 'false';
 // Operators
 EQ: '=';
 COLON: ':';
+SEMI: ';';
 PLUS: '+';
 MINUS: '-';
 STAR: '*';
@@ -68,9 +69,8 @@ CHARACTER: '\'' (~('\'' | '\\' | '\n') | ESCAPE_CHAR) '\'';
 
 // Numbers
 fragment DIGIT: [0-9];
-fragment SIGN: '+'|'-';
-INTEGER: SIGN? DIGIT+;
-FLOAT: SIGN? DIGIT* '.' DIGIT+;
+INTEGER: DIGIT+;
+FLOAT: DIGIT* '.' DIGIT+;
 
 IDENTIFIER: (LETTER | '_') (LETTER | DIGIT | '_')*;
 
