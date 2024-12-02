@@ -27,12 +27,13 @@
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
+#include "filc/grammar/pointer/Pointer.h"
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 #include "filc/utils/Message.h"
 #include "filc/validation/CalculValidator.h"
 
-#include <stdexcept>
+#include <llvm/IR/DerivedTypes.h>
 
 using namespace filc;
 
@@ -280,4 +281,41 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
     }
 
     assignation->setType(name.getType());
+}
+
+auto ValidationVisitor::visitPointer(Pointer *pointer) -> void {
+    if (! _environment->hasType(pointer->getTypeName())) {
+        displayError("Unknown type: " + pointer->getTypeName(), pointer->getPosition());
+        return;
+    }
+    const auto pointed_type = _environment->getType(pointer->getTypeName());
+
+    std::shared_ptr<AbstractType> pointer_type = nullptr;
+    if (_environment->hasType(pointer->getTypeName() + "*")) {
+        pointer_type = _environment->getType(pointer->getTypeName() + "*");
+    } else {
+        pointer_type = std::make_shared<PointerType>(pointed_type);
+        _environment->addType(pointer_type);
+    }
+
+    _context->stack();
+    _context->set("return", true);
+    pointer->getValue()->acceptVoidVisitor(this);
+    _context->unstack();
+
+    const auto value_type = pointer->getValue()->getType();
+    if (value_type->getName() != pointed_type->getName()) {
+        displayError(
+            "Cannot assign a value of type " + value_type->toDisplay() + " to a pointer to type "
+                + pointed_type->toDisplay(),
+            pointer->getPosition()
+        );
+        return;
+    }
+
+    pointer->setType(pointer_type);
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", pointer->getPosition());
+    }
 }

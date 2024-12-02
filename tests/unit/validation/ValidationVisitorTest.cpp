@@ -311,3 +311,42 @@ TEST(ValidationVisitor, assignation_castInteger) {
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("u8", program->getExpressions()[1]->getType()->getDisplayName().c_str());
 }
+
+TEST(ValidationVisitor, pointer_unknownType) {
+    VISITOR;
+    const auto program = parseString("new bla(2)");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Unknown type: bla"));
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, pointer_invalidValueType) {
+    VISITOR;
+    const auto program = parseString("new i32(true)");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}),
+        HasSubstr("Cannot assign a value of type bool to a pointer to type i32")
+    );
+    ASSERT_TRUE(visitor.hasError());
+    ASSERT_EQ(nullptr, program->getExpressions()[0]->getType());
+}
+
+TEST(ValidationVisitor, pointer_notUsed) {
+    VISITOR;
+    const auto program = parseString("new i32(3);0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Value not used"));
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("i32*", program->getExpressions()[0]->getType()->getName().c_str());
+}
+
+TEST(ValidationVisitor, pointer_valid) {
+    VISITOR;
+    const auto program = parseString("val foo = new i32(3);0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("i32*", program->getExpressions()[0]->getType()->getName().c_str());
+}

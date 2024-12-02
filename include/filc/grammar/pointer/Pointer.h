@@ -21,45 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_DUMPVISITOR_H
-#define FILC_DUMPVISITOR_H
+#ifndef FILC_POINTER_H
+#define FILC_POINTER_H
 
-#include "filc/grammar/Visitor.h"
-#include <iostream>
+#include "filc/grammar/expression/Expression.h"
+
+#include <memory>
+#include <string>
 
 namespace filc {
-class DumpVisitor final: public Visitor<void> {
+class Pointer final : public Expression {
   public:
-    explicit DumpVisitor(std::ostream &out);
+    Pointer(std::string type_name, const std::shared_ptr<Expression> &value);
 
-    auto visitProgram(Program *program) -> void override;
+    [[nodiscard]] auto getTypeName() const -> std::string;
 
-    auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
+    [[nodiscard]] auto getValue() const -> std::shared_ptr<Expression>;
 
-    auto visitIntegerLiteral(IntegerLiteral *literal) -> void override;
+    [[nodiscard]] auto getPointedType() const -> std::shared_ptr<AbstractType>;
 
-    auto visitFloatLiteral(FloatLiteral *literal) -> void override;
+    auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
 
-    auto visitCharacterLiteral(CharacterLiteral *literal) -> void override;
-
-    auto visitStringLiteral(StringLiteral *literal) -> void override;
-
-    auto visitVariableDeclaration(VariableDeclaration *variable) -> void override;
-
-    auto visitIdentifier(Identifier *identifier) -> void override;
-
-    auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
-
-    auto visitAssignation(Assignation *assignation) -> void override;
-
-    auto visitPointer(Pointer *pointer) -> void override;
+    auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
 
   private:
-    std::ostream &_out;
-    int _indent_level;
-
-    auto printIdent() const -> void;
+    std::string _type_name;
+    std::shared_ptr<Expression> _value;
 };
-}
+} // namespace filc
 
-#endif // FILC_DUMPVISITOR_H
+#endif // FILC_POINTER_H

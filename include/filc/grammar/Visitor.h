@@ -53,6 +53,8 @@ template<typename Return> class Visitor {
 
     virtual auto visitAssignation(Assignation *assignation) -> Return = 0;
 
+    virtual auto visitPointer(Pointer *pointer) -> Return = 0;
+
   protected:
     Visitor() = default;
 };
