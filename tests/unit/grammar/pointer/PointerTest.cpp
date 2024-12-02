@@ -21,45 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_DUMPVISITOR_H
-#define FILC_DUMPVISITOR_H
+#include "test_tools.h"
 
-#include "filc/grammar/Visitor.h"
-#include <iostream>
+#include <filc/grammar/literal/Literal.h>
+#include <filc/grammar/pointer/Pointer.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-namespace filc {
-class DumpVisitor final: public Visitor<void> {
-  public:
-    explicit DumpVisitor(std::ostream &out);
+using namespace ::testing;
 
-    auto visitProgram(Program *program) -> void override;
+TEST(Pointer, parsing) {
+    const auto program     = parseString("new i32(3)");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    const auto pointer = std::dynamic_pointer_cast<filc::Pointer>(expressions[0]);
+    ASSERT_NE(nullptr, pointer);
+    ASSERT_STREQ("i32", pointer->getTypeName().c_str());
 
-    auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
-
-    auto visitIntegerLiteral(IntegerLiteral *literal) -> void override;
-
-    auto visitFloatLiteral(FloatLiteral *literal) -> void override;
-
-    auto visitCharacterLiteral(CharacterLiteral *literal) -> void override;
-
-    auto visitStringLiteral(StringLiteral *literal) -> void override;
-
-    auto visitVariableDeclaration(VariableDeclaration *variable) -> void override;
-
-    auto visitIdentifier(Identifier *identifier) -> void override;
-
-    auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
-
-    auto visitAssignation(Assignation *assignation) -> void override;
-
-    auto visitPointer(Pointer *pointer) -> void override;
-
-  private:
-    std::ostream &_out;
-    int _indent_level;
-
-    auto printIdent() const -> void;
-};
+    const auto value = std::dynamic_pointer_cast<filc::IntegerLiteral>(pointer->getValue());
+    ASSERT_NE(nullptr, value);
+    ASSERT_EQ(3, value->getValue());
 }
-
-#endif // FILC_DUMPVISITOR_H

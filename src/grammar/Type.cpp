@@ -23,6 +23,7 @@
  */
 #include "filc/grammar/Type.h"
 
+#include <llvm/IR/DerivedTypes.h>
 #include <utility>
 
 using namespace filc;
@@ -31,7 +32,11 @@ auto AbstractType::setLLVMType(llvm::Type *type) -> void {
     _llvm_type = type;
 }
 
-auto AbstractType::getLLVMType() const -> llvm::Type * {
+auto AbstractType::getLLVMType(llvm::LLVMContext *context) -> llvm::Type * {
+    if (_llvm_type == nullptr) {
+        generateLLVMType(context);
+    }
+
     return _llvm_type;
 }
 
@@ -47,6 +52,10 @@ auto Type::getDisplayName() const noexcept -> std::string {
 
 auto Type::toDisplay() const noexcept -> std::string {
     return getName();
+}
+
+auto Type::generateLLVMType(llvm::LLVMContext *context) -> void {
+    throw std::logic_error("Should not be called for scalar types");
 }
 
 PointerType::PointerType(std::shared_ptr<AbstractType> pointed_type): _pointed_type(std::move(pointed_type)) {}
@@ -66,6 +75,14 @@ auto PointerType::toDisplay() const noexcept -> std::string {
     return getName();
 }
 
+auto PointerType::getPointedType() const noexcept -> std::shared_ptr<AbstractType> {
+    return _pointed_type;
+}
+
+auto PointerType::generateLLVMType(llvm::LLVMContext *context) -> void {
+    setLLVMType(llvm::PointerType::getUnqual(_pointed_type->getLLVMType(context)));
+}
+
 AliasType::AliasType(std::string name, std::shared_ptr<AbstractType> aliased_type)
     : _name(std::move(name)), _aliased_type(std::move(aliased_type)) {}
 
@@ -79,6 +96,10 @@ auto AliasType::getDisplayName() const noexcept -> std::string {
 
 auto AliasType::toDisplay() const noexcept -> std::string {
     return getDisplayName() + " aka " + getName();
+}
+
+auto AliasType::generateLLVMType(llvm::LLVMContext *context) -> void {
+    throw std::logic_error("Should not be called for scalar alias types");
 }
 
 auto operator==(const std::shared_ptr<AbstractType> &a, const std::shared_ptr<AbstractType> &b) -> bool {

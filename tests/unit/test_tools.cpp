@@ -120,6 +120,12 @@ auto PrinterVisitor::visitAssignation(filc::Assignation *assignation) -> void {
     assignation->getValue()->acceptVoidVisitor(this);
 }
 
+auto PrinterVisitor::visitPointer(filc::Pointer *pointer) -> void {
+    _out << "new " << pointer->getTypeName() << "(";
+    pointer->getValue()->acceptVoidVisitor(this);
+    _out << ")";
+}
+
 TokenSourceStub::TokenSourceStub(std::string filename): _filename(std::move(filename)) {}
 
 auto TokenSourceStub::nextToken() -> std::unique_ptr<antlr4::Token> {

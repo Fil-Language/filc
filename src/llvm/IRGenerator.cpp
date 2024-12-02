@@ -31,6 +31,7 @@
 #include "filc/grammar/variable/Variable.h"
 #include "filc/llvm/CalculBuilder.h"
 
+#include <filc/grammar/pointer/Pointer.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/MC/MCTargetOptions.h>
@@ -151,7 +152,9 @@ auto IRGenerator::visitStringLiteral(StringLiteral *literal) -> llvm::Value * {
 
 auto IRGenerator::visitVariableDeclaration(VariableDeclaration *variable) -> llvm::Value * {
     const auto global = new llvm::GlobalVariable(
-        variable->getType()->getLLVMType(), variable->isConstant(), llvm::GlobalValue::InternalLinkage
+        variable->getType()->getLLVMType(_llvm_context.get()),
+        variable->isConstant(),
+        llvm::GlobalValue::InternalLinkage
     );
     global->setName(variable->getName());
     _module->insertGlobalVariable(global);
@@ -180,4 +183,11 @@ auto IRGenerator::visitAssignation(Assignation *assignation) -> llvm::Value * {
     const auto value    = assignation->getValue()->acceptIRVisitor(this);
     _builder->CreateStore(value, variable);
     return value;
+}
+
+auto IRGenerator::visitPointer(Pointer *pointer) -> llvm::Value * {
+    const auto alloca = _builder->CreateAlloca(pointer->getPointedType()->getLLVMType(_llvm_context.get()));
+    _builder->CreateStore(pointer->getValue()->acceptIRVisitor(this), alloca);
+
+    return _builder->CreateLoad(pointer->getType()->getLLVMType(_llvm_context.get()), alloca);
 }

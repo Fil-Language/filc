@@ -25,31 +25,36 @@
 #include <gtest/gtest.h>
 
 TEST(Type, getName) {
-    filc::Type type("my_type");
+    const filc::Type type("my_type");
     ASSERT_STREQ("my_type", type.getName().c_str());
 }
 
 TEST(Type, getDisplayName) {
-    filc::Type type("another_type");
+    const filc::Type type("another_type");
     ASSERT_STREQ("another_type", type.getDisplayName().c_str());
 }
 
 TEST(PointerType, getName) {
-    filc::PointerType type(std::make_shared<filc::Type>("int"));
+    const filc::PointerType type(std::make_shared<filc::Type>("int"));
     ASSERT_STREQ("int*", type.getName().c_str());
 }
 
 TEST(PointerType, getDisplayName) {
-    filc::PointerType type(std::make_shared<filc::Type>("int"));
+    const filc::PointerType type(std::make_shared<filc::Type>("int"));
     ASSERT_STREQ("int*", type.getDisplayName().c_str());
 }
 
+TEST(PonterType, getPointedType) {
+    const filc::PointerType type(std::make_shared<filc::Type>("int"));
+    ASSERT_STREQ("int", type.getPointedType()->getDisplayName().c_str());
+}
+
 TEST(AliasType, getName) {
-    filc::AliasType type("char", std::make_shared<filc::Type>("u8"));
+    const filc::AliasType type("char", std::make_shared<filc::Type>("u8"));
     ASSERT_STREQ("u8", type.getName().c_str());
 }
 
 TEST(AliasType, getDisplayName) {
-    filc::AliasType type("char", std::make_shared<filc::Type>("u8"));
+    const filc::AliasType type("char", std::make_shared<filc::Type>("u8"));
     ASSERT_STREQ("char", type.getDisplayName().c_str());
 }

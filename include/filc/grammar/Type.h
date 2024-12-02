@@ -41,10 +41,12 @@ class AbstractType {
 
     auto setLLVMType(llvm::Type *type) -> void;
 
-    [[nodiscard]] auto getLLVMType() const -> llvm::Type *;
+    [[nodiscard]] auto getLLVMType(llvm::LLVMContext *context) -> llvm::Type *;
 
   protected:
     AbstractType() = default;
+
+    virtual auto generateLLVMType(llvm::LLVMContext *context) -> void = 0;
 
   private:
     llvm::Type *_llvm_type = nullptr;
@@ -60,6 +62,8 @@ class Type final : public AbstractType {
 
     [[nodiscard]] auto toDisplay() const noexcept -> std::string override;
 
+    auto generateLLVMType(llvm::LLVMContext *context) -> void override;
+
   private:
     std::string _name;
 };
@@ -74,6 +78,10 @@ class PointerType final : public AbstractType {
 
     [[nodiscard]] auto toDisplay() const noexcept -> std::string override;
 
+    [[nodiscard]] auto getPointedType() const noexcept -> std::shared_ptr<AbstractType>;
+
+    auto generateLLVMType(llvm::LLVMContext *context) -> void override;
+
   private:
     std::shared_ptr<AbstractType> _pointed_type;
 };
@@ -87,6 +95,8 @@ class AliasType final : public AbstractType {
     [[nodiscard]] auto getDisplayName() const noexcept -> std::string override;
 
     [[nodiscard]] auto toDisplay() const noexcept -> std::string override;
+
+    auto generateLLVMType(llvm::LLVMContext *context) -> void override;
 
   private:
     std::string _name;

@@ -28,6 +28,7 @@ VAR: 'var';
 VAL: 'val';
 TRUE: 'true';
 FALSE: 'false';
+NEW: 'new';
 
 // Operators
 EQ: '=';

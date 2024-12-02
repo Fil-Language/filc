@@ -21,45 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_DUMPVISITOR_H
-#define FILC_DUMPVISITOR_H
+#include "filc/grammar/pointer/Pointer.h"
 
-#include "filc/grammar/Visitor.h"
-#include <iostream>
+using namespace filc;
 
-namespace filc {
-class DumpVisitor final: public Visitor<void> {
-  public:
-    explicit DumpVisitor(std::ostream &out);
+Pointer::Pointer(std::string type_name, const std::shared_ptr<Expression> &value)
+    : _type_name(std::move(type_name)), _value(value) {}
 
-    auto visitProgram(Program *program) -> void override;
-
-    auto visitBooleanLiteral(BooleanLiteral *literal) -> void override;
-
-    auto visitIntegerLiteral(IntegerLiteral *literal) -> void override;
-
-    auto visitFloatLiteral(FloatLiteral *literal) -> void override;
-
-    auto visitCharacterLiteral(CharacterLiteral *literal) -> void override;
-
-    auto visitStringLiteral(StringLiteral *literal) -> void override;
-
-    auto visitVariableDeclaration(VariableDeclaration *variable) -> void override;
-
-    auto visitIdentifier(Identifier *identifier) -> void override;
-
-    auto visitBinaryCalcul(BinaryCalcul *calcul) -> void override;
-
-    auto visitAssignation(Assignation *assignation) -> void override;
-
-    auto visitPointer(Pointer *pointer) -> void override;
-
-  private:
-    std::ostream &_out;
-    int _indent_level;
-
-    auto printIdent() const -> void;
-};
+auto Pointer::getTypeName() const -> std::string {
+    return _type_name;
 }
 
-#endif // FILC_DUMPVISITOR_H
+auto Pointer::getValue() const -> std::shared_ptr<Expression> {
+    return _value;
+}
+
+auto Pointer::getPointedType() const -> std::shared_ptr<AbstractType> {
+    const auto type = std::dynamic_pointer_cast<PointerType>(getType());
+    if (type == nullptr) {
+        return nullptr;
+    }
+
+    return type->getPointedType();
+}
+
+auto Pointer::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitPointer(this);
+}
+
+auto Pointer::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitPointer(this);
+}

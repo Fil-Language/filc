@@ -61,6 +61,8 @@ class IRGenerator final: public Visitor<llvm::Value *> {
 
     auto visitAssignation(Assignation *assignation) -> llvm::Value * override;
 
+    auto visitPointer(Pointer *pointer) -> llvm::Value * override;
+
   private:
     std::unique_ptr<llvm::LLVMContext> _llvm_context;
     std::unique_ptr<llvm::Module> _module;
