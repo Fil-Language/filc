@@ -151,26 +151,23 @@ auto IRGenerator::visitStringLiteral(StringLiteral *literal) -> llvm::Value * {
 }
 
 auto IRGenerator::visitVariableDeclaration(VariableDeclaration *variable) -> llvm::Value * {
-    const auto global = new llvm::GlobalVariable(
-        variable->getType()->getLLVMType(_llvm_context.get()),
-        variable->isConstant(),
-        llvm::GlobalValue::InternalLinkage
-    );
-    global->setName(variable->getName());
-    _module->insertGlobalVariable(global);
-
     if (variable->getValue() != nullptr) {
         const auto value = variable->getValue()->acceptIRVisitor(this);
-        global->setInitializer((llvm::Constant *) value);
+        _context.setValue(variable->getName(), value);
         return value;
     }
 
-    return global;
+    _context.setValue(variable->getName(), nullptr);
+
+    return nullptr;
 }
 
 auto IRGenerator::visitIdentifier(Identifier *identifier) -> llvm::Value * {
-    const auto variable = _module->getNamedGlobal(identifier->getName());
-    return _builder->CreateLoad(variable->getValueType(), variable);
+    const auto value = _context.getValue(identifier->getName());
+    if (value == nullptr) {
+        throw std::logic_error("Tried to access to a variable without a value set");
+    }
+    return value;
 }
 
 auto IRGenerator::visitBinaryCalcul(BinaryCalcul *calcul) -> llvm::Value * {
@@ -179,9 +176,8 @@ auto IRGenerator::visitBinaryCalcul(BinaryCalcul *calcul) -> llvm::Value * {
 }
 
 auto IRGenerator::visitAssignation(Assignation *assignation) -> llvm::Value * {
-    const auto variable = _module->getNamedGlobal(assignation->getIdentifier());
-    const auto value    = assignation->getValue()->acceptIRVisitor(this);
-    _builder->CreateStore(value, variable);
+    const auto value = assignation->getValue()->acceptIRVisitor(this);
+    _context.setValue(assignation->getIdentifier(), value);
     return value;
 }
 

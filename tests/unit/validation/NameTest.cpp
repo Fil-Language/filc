@@ -25,15 +25,26 @@
 #include <gtest/gtest.h>
 
 TEST(Name, defaultConstructor) {
-    filc::Name name;
+    const filc::Name name;
     ASSERT_TRUE(name.isConstant());
     ASSERT_STREQ("", name.getName().c_str());
     ASSERT_EQ(nullptr, name.getType());
+    ASSERT_FALSE(name.hasValue());
 }
 
 TEST(Name, constructor) {
-    filc::Name name(false, "my_var", std::make_shared<filc::Type>("i32"));
+    const filc::Name name(false, "my_var", std::make_shared<filc::Type>("i32"), true);
     ASSERT_FALSE(name.isConstant());
     ASSERT_STREQ("my_var", name.getName().c_str());
     ASSERT_STREQ("i32", name.getType()->getName().c_str());
+    ASSERT_TRUE(name.hasValue());
+}
+
+TEST(Name, setHasValue) {
+    filc::Name name(false, "my_var", std::make_shared<filc::Type>("i32"), false);
+    ASSERT_FALSE(name.hasValue());
+    name.hasValue(true);
+    ASSERT_TRUE(name.hasValue());
+    name.hasValue(false);
+    ASSERT_FALSE(name.hasValue());
 }

@@ -60,10 +60,25 @@ TEST(Environment, Name) {
     filc::Environment env;
     ASSERT_FALSE(env.hasName("my_name"));
     ASSERT_THROW(env.getName("my_name"), std::logic_error);
-    env.addName(filc::Name(false, "my_name", env.getType("i32")));
-    ASSERT_THROW(env.addName(filc::Name(true, "my_name", env.getType("i64"))), std::logic_error);
+    env.addName(filc::Name(false, "my_name", env.getType("i32"), true));
+    ASSERT_THROW(env.addName(filc::Name(true, "my_name", env.getType("i64"), true)), std::logic_error);
     ASSERT_TRUE(env.hasName("my_name"));
     ASSERT_FALSE(env.getName("my_name").isConstant());
     ASSERT_STREQ("my_name", env.getName("my_name").getName().c_str());
     ASSERT_STREQ("i32", env.getName("my_name").getType()->getName().c_str());
+}
+
+TEST(Environment, setName) {
+    filc::Environment env;
+    env.addName(filc::Name(false, "my_name", env.getType("i32"), true));
+    ASSERT_TRUE(env.hasName("my_name"));
+    ASSERT_FALSE(env.getName("my_name").isConstant());
+    ASSERT_STREQ("my_name", env.getName("my_name").getName().c_str());
+    ASSERT_STREQ("i32", env.getName("my_name").getType()->getName().c_str());
+    ASSERT_TRUE(env.getName("my_name").hasValue());
+    auto name = env.getName("my_name");
+    name.hasValue(false);
+    ASSERT_TRUE(env.getName("my_name").hasValue());
+    env.setName(name);
+    ASSERT_FALSE(env.getName("my_name").hasValue());
 }

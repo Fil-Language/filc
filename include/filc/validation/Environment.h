@@ -48,6 +48,8 @@ class Environment {
 
     auto addName(const Name &name) -> void;
 
+    auto setName(const Name &name) -> void;
+
   private:
     std::map<std::string, std::shared_ptr<AbstractType>> _types;
     std::map<std::string, Name> _names;

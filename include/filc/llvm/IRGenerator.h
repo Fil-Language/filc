@@ -26,6 +26,7 @@
 
 #include "filc/grammar/Visitor.h"
 #include "filc/validation/Environment.h"
+#include "filc/llvm/GeneratorContext.h"
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
 #include <memory>
@@ -67,6 +68,7 @@ class IRGenerator final: public Visitor<llvm::Value *> {
     std::unique_ptr<llvm::LLVMContext> _llvm_context;
     std::unique_ptr<llvm::Module> _module;
     std::unique_ptr<llvm::IRBuilder<>> _builder;
+    GeneratorContext _context;
 };
 }
 

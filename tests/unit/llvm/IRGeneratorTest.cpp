@@ -105,7 +105,7 @@ TEST(IRGenerator, variableDeclaration_value) {
 
 TEST(IRGenerator, variableDeclaration_identifier) {
     const auto ir = getIR("val foo = 2\nfoo");
-    ASSERT_THAT(ir, HasSubstr("ret i32 %0")); // Returns the register in which it loads the constant
+    ASSERT_THAT(ir, HasSubstr("ret i32 2")); // Returns the value directly
 }
 
 TEST(IRGenerator, calcul_integer) {

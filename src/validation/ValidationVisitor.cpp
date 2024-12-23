@@ -197,7 +197,9 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
     }
 
     variable->setType(variable_type);
-    _environment->addName(Name(variable->isConstant(), variable->getName(), variable_type));
+    _environment->addName(
+        Name(variable->isConstant(), variable->getName(), variable_type, variable->getValue() != nullptr)
+    );
 }
 
 auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
@@ -207,6 +209,13 @@ auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
     }
 
     const auto name = _environment->getName(identifier->getName());
+    if (! name.hasValue()) {
+        displayError(
+            "Variable " + identifier->getName() + " has no value, please set one before accessing it",
+            identifier->getPosition()
+        );
+        return;
+    }
     identifier->setType(name.getType());
 
     if (! _context->has("return") || ! _context->get<bool>("return")) {
@@ -256,7 +265,7 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
         );
         return;
     }
-    const auto name = _environment->getName(assignation->getIdentifier());
+    auto name = _environment->getName(assignation->getIdentifier());
     if (name.isConstant()) {
         displayError("Cannot modify a constant", assignation->getPosition());
         return;
@@ -280,6 +289,8 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
         return;
     }
 
+    name.hasValue(true);
+    _environment->setName(name);
     assignation->setType(name.getType());
 }
 
