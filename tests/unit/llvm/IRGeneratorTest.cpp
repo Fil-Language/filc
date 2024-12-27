@@ -127,3 +127,10 @@ TEST(IRGenerator, pointerDereferencing_notThrow) {
     const auto ir = getIR("val foo = new i32(0);*foo");
     ASSERT_THAT(ir, HasSubstr("ret i32 %1")); // Register %1 contains pointed value
 }
+
+TEST(IRGenerator, variableAddress_notThrow) {
+    const auto ir = getIR("val foo = 0;val bar = &foo;*bar");
+    ASSERT_THAT(ir, HasSubstr("%0 = alloca i32"));
+    ASSERT_THAT(ir, HasSubstr("store i32 0, ptr %0")); // bar = &foo
+    ASSERT_THAT(ir, HasSubstr("ret i32 %1"));          // Register %1 is *foo
+}

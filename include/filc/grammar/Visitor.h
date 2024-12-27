@@ -57,6 +57,8 @@ template<typename Return> class Visitor {
 
     virtual auto visitPointerDereferencing(PointerDereferencing *pointer) -> Return = 0;
 
+    virtual auto visitVariableAddress(VariableAddress *address) -> Return = 0;
+
   protected:
     Visitor() = default;
 };

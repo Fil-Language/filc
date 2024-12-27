@@ -127,7 +127,11 @@ auto PrinterVisitor::visitPointer(filc::Pointer *pointer) -> void {
 }
 
 auto PrinterVisitor::visitPointerDereferencing(filc::PointerDereferencing *pointer) -> void {
-    _out << pointer->getName() << "*";
+    _out << "*" << pointer->getName();
+}
+
+auto PrinterVisitor::visitVariableAddress(filc::VariableAddress *address) -> void {
+    _out << "&" << address->getName();
 }
 
 TokenSourceStub::TokenSourceStub(std::string filename): _filename(std::move(filename)) {}

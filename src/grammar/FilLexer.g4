@@ -49,6 +49,7 @@ GT: '>';
 GTE: '>=';
 LPAREN: '(';
 RPAREN: ')';
+AMP: '&';
 
 // Assignation operators
 PLUS_EQ: '+=';

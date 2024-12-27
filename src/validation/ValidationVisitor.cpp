@@ -350,3 +350,26 @@ auto ValidationVisitor::visitPointerDereferencing(PointerDereferencing *pointer)
         displayWarning("Value not used", pointer->getPosition());
     }
 }
+
+auto ValidationVisitor::visitVariableAddress(VariableAddress *address) -> void {
+    if (! _environment->hasName(address->getName())) {
+        displayError("Unknown name, don't know what it refers to: " + address->getName(), address->getPosition());
+        return;
+    }
+
+    const auto name                    = _environment->getName(address->getName());
+    const auto pointed_type            = name.getType();
+    std::shared_ptr<AbstractType> type = nullptr;
+    if (_environment->hasType(pointed_type->getName() + "*")) {
+        type = _environment->getType(pointed_type->getName() + "*");
+    } else {
+        type = std::make_shared<PointerType>(pointed_type);
+        _environment->addType(type);
+    }
+
+    address->setType(type);
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", address->getPosition());
+    }
+}

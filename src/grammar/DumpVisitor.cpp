@@ -158,6 +158,11 @@ auto DumpVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> vo
     _out << "[PointerDereferencing:" << pointer->getName() << "]\n";
 }
 
+auto DumpVisitor::visitVariableAddress(VariableAddress *address) -> void {
+    printIdent();
+    _out << "[VariableAddress:" << address->getName() << "]\n";
+}
+
 auto DumpVisitor::printIdent() const -> void {
     _out << std::string(_indent_level, '\t');
 }

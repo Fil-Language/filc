@@ -21,40 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_AST_H
-#define FILC_AST_H
+#include "filc/grammar/pointer/Pointer.h"
 
-namespace filc {
-class Program;
+#include <utility>
 
-class Expression;
+using namespace filc;
 
-template<typename T>
-class Literal;
+VariableAddress::VariableAddress(std::string name): _name(std::move(name)) {}
 
-class BooleanLiteral;
-
-class IntegerLiteral;
-
-class FloatLiteral;
-
-class CharacterLiteral;
-
-class StringLiteral;
-
-class VariableDeclaration;
-
-class Identifier;
-
-class BinaryCalcul;
-
-class Assignation;
-
-class Pointer;
-
-class PointerDereferencing;
-
-class VariableAddress;
+auto VariableAddress::getName() const -> std::string {
+    return _name;
 }
 
-#endif // FILC_AST_H
+auto VariableAddress::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitVariableAddress(this);
+}
+
+auto VariableAddress::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitVariableAddress(this);
+}

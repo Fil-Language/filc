@@ -62,6 +62,20 @@ class PointerDereferencing final : public Expression {
   private:
     std::string _name;
 };
+
+class VariableAddress final : public Expression {
+  public:
+    explicit VariableAddress(std::string name);
+
+    [[nodiscard]] auto getName() const -> std::string;
+
+    auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
+
+    auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
+
+  private:
+    std::string _name;
+};
 } // namespace filc
 
 #endif // FILC_POINTER_H

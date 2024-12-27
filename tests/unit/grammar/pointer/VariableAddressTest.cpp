@@ -23,44 +23,17 @@
  */
 #include "test_tools.h"
 
-#include <cstdlib>
-#include <filesystem>
-#include <fstream>
+#include <filc/grammar/pointer/Pointer.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-auto getProgramResult(const std::string &program) -> int {
-    std::ofstream program_file(FIXTURES_PATH "/ir_test.fil");
-    program_file << program;
-    program_file.flush();
-    program_file.close();
+using namespace ::testing;
 
-    const auto ir_output = run_with_args("--dump=ir " FIXTURES_PATH "/ir_test.fil 2>&1");
-    std::ofstream ir_file(FIXTURES_PATH "/ir_test.ir");
-    ir_file << ir_output;
-    ir_file.flush();
-    ir_file.close();
-
-    const auto status = system("lli " FIXTURES_PATH "/ir_test.ir");
-
-    std::filesystem::remove(FIXTURES_PATH "/ir_test.fil");
-    std::filesystem::remove(FIXTURES_PATH "/ir_test.ir");
-
-    return WEXITSTATUS(status);
-}
-
-TEST(ir_dump, calcul_program) {
-    ASSERT_EQ(2, getProgramResult("1 + 1"));
-    ASSERT_EQ(5, getProgramResult("(3 * 2 + 4) / 2"));
-}
-
-TEST(ir_dump, variable_program) {
-    ASSERT_EQ(2, getProgramResult("val foo = 2\nfoo"));
-}
-
-TEST(ir_dump, pointer_program) {
-    ASSERT_EQ(3, getProgramResult("val foo = new i32(3);*foo"));
-}
-
-TEST(ir_dump, address_program) {
-    ASSERT_EQ(4, getProgramResult("val foo = 4;val bar = &foo;*bar"));
+TEST(VariableAddress, parsing) {
+    const auto program     = parseString("&foo");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    const auto variable_address = std::dynamic_pointer_cast<filc::VariableAddress>(expressions[0]);
+    ASSERT_NE(nullptr, variable_address);
+    ASSERT_STREQ("foo", variable_address->getName().c_str());
 }

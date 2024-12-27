@@ -196,3 +196,11 @@ auto IRGenerator::visitPointerDereferencing(PointerDereferencing *pointer) -> ll
 
     return _builder->CreateLoad(pointer->getType()->getLLVMType(_llvm_context.get()), pointer_value);
 }
+
+auto IRGenerator::visitVariableAddress(VariableAddress *address) -> llvm::Value * {
+    const auto value  = _context.getValue(address->getName());
+    const auto alloca = _builder->CreateAlloca(value->getType());
+    _builder->CreateStore(value, alloca);
+
+    return alloca;
+}
