@@ -1,6 +1,10 @@
 let
-  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/eb28b94bd14835836b539bc3854a6abf929876d4.tar.gz";
+  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/3e889463e499537c602e3ea83da6e33f9dc974da.tar.gz";
   pkgs = import nixpkgs { config = {}; overlays = []; };
+in
+
+let
+  pnpm = pkgs.callPackage ./tools/nix/pnpm.nix { nodejs = pkgs.nodejs_20; };
 in
 
 pkgs.mkShell {
@@ -17,7 +21,7 @@ pkgs.mkShell {
     pkgs.rpm
     pkgs.jre_minimal
     pkgs.nodejs_20
-    pkgs.corepack_20
+    pnpm
     pkgs.llvmPackages_18.libllvm
     pkgs.libffi
     pkgs.libxml2
