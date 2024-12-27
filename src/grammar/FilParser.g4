@@ -35,6 +35,7 @@ options {
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/assignation/Assignation.h"
+#include "filc/grammar/pointer/Pointer.h"
 #include <memory>
 #include <vector>
 }
@@ -62,6 +63,12 @@ expression returns[std::shared_ptr<filc::Expression> tree]
     }
     | i=IDENTIFIER {
         $tree = std::make_shared<filc::Identifier>($i.text);
+    }
+    | p=pointer {
+        $tree = $p.tree;
+    }
+    | po=pointer_operation {
+        $tree = $po.tree;
     }
 
     // === Binary calcul ===
@@ -135,19 +142,21 @@ number returns[std::shared_ptr<filc::Expression> tree]
 variable_declaration returns[std::shared_ptr<filc::VariableDeclaration> tree]
 @init {
     bool is_constant = true;
-    std::string type;
+    std::string type_name;
     std::shared_ptr<filc::Expression> value = nullptr;
 }
 @after {
-    $tree = std::make_shared<filc::VariableDeclaration>(is_constant, $name.text, type, value);
+    $tree = std::make_shared<filc::VariableDeclaration>(is_constant, $name.text, type_name, value);
 }
     : (VAL | VAR {
         is_constant = false;
-    }) name=IDENTIFIER (COLON type=IDENTIFIER {
-        type = $type.text;
+    }) name=IDENTIFIER (COLON type {
+        type_name = $type.text;
     })? (EQ value=expression {
         value = $value.tree;
     })?;
+
+type : IDENTIFIER STAR?;
 
 assignation returns[std::shared_ptr<filc::Assignation> tree]
     : i1=IDENTIFIER EQ e1=expression {
@@ -157,4 +166,17 @@ assignation returns[std::shared_ptr<filc::Assignation> tree]
         const auto calcul = std::make_shared<filc::BinaryCalcul>(std::make_shared<filc::Identifier>($i2.text), $op.text.substr(0, $op.text.size() - 1), $e2.tree);
         calcul->setPosition(filc::Position($op, $e2.stop));
         $tree = std::make_shared<filc::Assignation>($i2.text, calcul);
+    };
+
+pointer returns[std::shared_ptr<filc::Pointer> tree]
+    : NEW t=IDENTIFIER LPAREN e=expression RPAREN {
+        $tree = std::make_shared<filc::Pointer>($t.text, $e.tree);
+    };
+
+pointer_operation returns[std::shared_ptr<filc::Expression> tree]
+    : STAR i=IDENTIFIER {
+        $tree = std::make_shared<filc::PointerDereferencing>($i.text);
+    }
+    | AMP i=IDENTIFIER {
+        $tree = std::make_shared<filc::VariableAddress>($i.text);
     };

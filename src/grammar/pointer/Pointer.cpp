@@ -21,36 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_NAME_H
-#define FILC_NAME_H
+#include "filc/grammar/pointer/Pointer.h"
 
-#include "filc/grammar/Type.h"
-#include <string>
-#include <memory>
+using namespace filc;
 
-namespace filc {
-class Name {
-  public:
-    Name();
+Pointer::Pointer(std::string type_name, const std::shared_ptr<Expression> &value)
+    : _type_name(std::move(type_name)), _value(value) {}
 
-    Name(bool constant, std::string name, std::shared_ptr<AbstractType> type, bool has_value);
-
-    [[nodiscard]] auto isConstant() const -> bool;
-
-    [[nodiscard]] auto hasValue() const -> bool;
-
-    [[nodiscard]] auto getName() const -> const std::string&;
-
-    [[nodiscard]] auto getType() const -> std::shared_ptr<AbstractType>;
-
-    auto hasValue(bool has_value) -> void;
-
-  private:
-    bool _constant;
-    bool _has_value;
-    std::string _name;
-    std::shared_ptr<AbstractType> _type;
-};
+auto Pointer::getTypeName() const -> std::string {
+    return _type_name;
 }
 
-#endif // FILC_NAME_H
+auto Pointer::getValue() const -> std::shared_ptr<Expression> {
+    return _value;
+}
+
+auto Pointer::getPointedType() const -> std::shared_ptr<AbstractType> {
+    const auto type = std::dynamic_pointer_cast<PointerType>(getType());
+    if (type == nullptr) {
+        return nullptr;
+    }
+
+    return type->getPointedType();
+}
+
+auto Pointer::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitPointer(this);
+}
+
+auto Pointer::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitPointer(this);
+}

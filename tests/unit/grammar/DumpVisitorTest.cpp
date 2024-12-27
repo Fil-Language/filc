@@ -62,7 +62,7 @@ TEST(DumpVisitor, dump) {
     std::stringstream ss;
     auto visitor = filc::DumpVisitor(ss);
     program->acceptVoidVisitor(&visitor);
-    std::string result(std::istreambuf_iterator<char>(ss), {});
+    const std::string result(std::istreambuf_iterator<char>(ss), {});
     ASSERT_STREQ("=== Begin AST dump ===\n=== End AST dump ===\n", result.c_str());
 }
 
@@ -117,7 +117,7 @@ TEST(DumpVisitor, visitCharacterLiteral_Classic) {
     filc::DumpVisitor visitor(ss);
     filc::CharacterLiteral literal('a');
     visitor.visitCharacterLiteral(&literal);
-    std::string dump(std::istreambuf_iterator<char>(ss), {});
+    const std::string dump(std::istreambuf_iterator<char>(ss), {});
     ASSERT_STREQ("[Character:'a']\n", dump.c_str());
 }
 
@@ -184,4 +184,23 @@ TEST(DumpVisitor, Assignation) {
     ASSERT_THAT(dump, SizeIs(2));
     ASSERT_STREQ("[Assignation:foo]", dump[0].c_str());
     ASSERT_STREQ("\t[Character:'a']", dump[1].c_str());
+}
+
+TEST(DumpVisitor, Pointer) {
+    const auto dump = dumpProgram("new i32(3)");
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[Pointer:i32]", dump[0].c_str());
+    ASSERT_STREQ("\t[Integer:3]", dump[1].c_str());
+}
+
+TEST(DumpVisitor, PointerDereferencing) {
+    const auto dump = dumpProgram("*foo");
+    ASSERT_THAT(dump, SizeIs(1));
+    ASSERT_STREQ("[PointerDereferencing:foo]", dump[0].c_str());
+}
+
+TEST(DumpVisitor, VariableAddress) {
+    const auto dump = dumpProgram("&foo");
+    ASSERT_THAT(dump, SizeIs(1));
+    ASSERT_STREQ("[VariableAddress:foo]", dump[0].c_str());
 }

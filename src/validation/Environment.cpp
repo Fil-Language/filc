@@ -105,9 +105,16 @@ auto Environment::getName(const std::string &name) const -> const Name & {
     return _names.at(name);
 }
 
-auto Environment::addName(const filc::Name &name) -> void {
+auto Environment::addName(const Name &name) -> void {
     if (hasName(name.getName())) {
         throw std::logic_error("Environment already have name " + name.getName());
+    }
+    _names[name.getName()] = name;
+}
+
+auto Environment::setName(const Name &name) -> void {
+    if (! hasName(name.getName())) {
+        throw std::logic_error("Cannot change a name which does not exists: " + name.getName());
     }
     _names[name.getName()] = name;
 }

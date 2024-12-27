@@ -56,3 +56,11 @@ TEST(ir_dump, calcul_program) {
 TEST(ir_dump, variable_program) {
     ASSERT_EQ(2, getProgramResult("val foo = 2\nfoo"));
 }
+
+TEST(ir_dump, pointer_program) {
+    ASSERT_EQ(3, getProgramResult("val foo = new i32(3);*foo"));
+}
+
+TEST(ir_dump, address_program) {
+    ASSERT_EQ(4, getProgramResult("val foo = 4;val bar = &foo;*bar"));
+}

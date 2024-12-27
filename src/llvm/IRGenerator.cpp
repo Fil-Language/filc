@@ -27,6 +27,7 @@
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
+#include "filc/grammar/pointer/Pointer.h"
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 #include "filc/llvm/CalculBuilder.h"
@@ -150,24 +151,23 @@ auto IRGenerator::visitStringLiteral(StringLiteral *literal) -> llvm::Value * {
 }
 
 auto IRGenerator::visitVariableDeclaration(VariableDeclaration *variable) -> llvm::Value * {
-    const auto global = new llvm::GlobalVariable(
-        variable->getType()->getLLVMType(), variable->isConstant(), llvm::GlobalValue::InternalLinkage
-    );
-    global->setName(variable->getName());
-    _module->insertGlobalVariable(global);
-
     if (variable->getValue() != nullptr) {
         const auto value = variable->getValue()->acceptIRVisitor(this);
-        global->setInitializer((llvm::Constant *) value);
+        _context.setValue(variable->getName(), value);
         return value;
     }
 
-    return global;
+    _context.setValue(variable->getName(), nullptr);
+
+    return nullptr;
 }
 
 auto IRGenerator::visitIdentifier(Identifier *identifier) -> llvm::Value * {
-    const auto variable = _module->getNamedGlobal(identifier->getName());
-    return _builder->CreateLoad(variable->getValueType(), variable);
+    const auto value = _context.getValue(identifier->getName());
+    if (value == nullptr) {
+        throw std::logic_error("Tried to access to a variable without a value set");
+    }
+    return value;
 }
 
 auto IRGenerator::visitBinaryCalcul(BinaryCalcul *calcul) -> llvm::Value * {
@@ -176,8 +176,31 @@ auto IRGenerator::visitBinaryCalcul(BinaryCalcul *calcul) -> llvm::Value * {
 }
 
 auto IRGenerator::visitAssignation(Assignation *assignation) -> llvm::Value * {
-    const auto variable = _module->getNamedGlobal(assignation->getIdentifier());
-    const auto value    = assignation->getValue()->acceptIRVisitor(this);
-    _builder->CreateStore(value, variable);
+    const auto value = assignation->getValue()->acceptIRVisitor(this);
+    _context.setValue(assignation->getIdentifier(), value);
     return value;
+}
+
+auto IRGenerator::visitPointer(Pointer *pointer) -> llvm::Value * {
+    const auto alloca = _builder->CreateAlloca(pointer->getPointedType()->getLLVMType(_llvm_context.get()));
+    _builder->CreateStore(pointer->getValue()->acceptIRVisitor(this), alloca);
+
+    return alloca;
+}
+
+auto IRGenerator::visitPointerDereferencing(PointerDereferencing *pointer) -> llvm::Value * {
+    const auto pointer_value = _context.getValue(pointer->getName());
+    if (pointer_value == nullptr) {
+        throw std::logic_error("Tried to access to a variable without a value set");
+    }
+
+    return _builder->CreateLoad(pointer->getType()->getLLVMType(_llvm_context.get()), pointer_value);
+}
+
+auto IRGenerator::visitVariableAddress(VariableAddress *address) -> llvm::Value * {
+    const auto value  = _context.getValue(address->getName());
+    const auto alloca = _builder->CreateAlloca(value->getType());
+    _builder->CreateStore(value, alloca);
+
+    return alloca;
 }

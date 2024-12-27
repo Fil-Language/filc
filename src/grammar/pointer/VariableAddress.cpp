@@ -21,36 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_NAME_H
-#define FILC_NAME_H
+#include "filc/grammar/pointer/Pointer.h"
 
-#include "filc/grammar/Type.h"
-#include <string>
-#include <memory>
+#include <utility>
 
-namespace filc {
-class Name {
-  public:
-    Name();
+using namespace filc;
 
-    Name(bool constant, std::string name, std::shared_ptr<AbstractType> type, bool has_value);
+VariableAddress::VariableAddress(std::string name): _name(std::move(name)) {}
 
-    [[nodiscard]] auto isConstant() const -> bool;
-
-    [[nodiscard]] auto hasValue() const -> bool;
-
-    [[nodiscard]] auto getName() const -> const std::string&;
-
-    [[nodiscard]] auto getType() const -> std::shared_ptr<AbstractType>;
-
-    auto hasValue(bool has_value) -> void;
-
-  private:
-    bool _constant;
-    bool _has_value;
-    std::string _name;
-    std::shared_ptr<AbstractType> _type;
-};
+auto VariableAddress::getName() const -> std::string {
+    return _name;
 }
 
-#endif // FILC_NAME_H
+auto VariableAddress::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitVariableAddress(this);
+}
+
+auto VariableAddress::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitVariableAddress(this);
+}

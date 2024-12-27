@@ -21,36 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_NAME_H
-#define FILC_NAME_H
+#include "test_tools.h"
 
-#include "filc/grammar/Type.h"
-#include <string>
-#include <memory>
+#include <filc/grammar/literal/Literal.h>
+#include <filc/grammar/pointer/Pointer.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-namespace filc {
-class Name {
-  public:
-    Name();
+using namespace ::testing;
 
-    Name(bool constant, std::string name, std::shared_ptr<AbstractType> type, bool has_value);
+TEST(Pointer, parsing) {
+    const auto program     = parseString("new i32(3)");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    const auto pointer = std::dynamic_pointer_cast<filc::Pointer>(expressions[0]);
+    ASSERT_NE(nullptr, pointer);
+    ASSERT_STREQ("i32", pointer->getTypeName().c_str());
 
-    [[nodiscard]] auto isConstant() const -> bool;
-
-    [[nodiscard]] auto hasValue() const -> bool;
-
-    [[nodiscard]] auto getName() const -> const std::string&;
-
-    [[nodiscard]] auto getType() const -> std::shared_ptr<AbstractType>;
-
-    auto hasValue(bool has_value) -> void;
-
-  private:
-    bool _constant;
-    bool _has_value;
-    std::string _name;
-    std::shared_ptr<AbstractType> _type;
-};
+    const auto value = std::dynamic_pointer_cast<filc::IntegerLiteral>(pointer->getValue());
+    ASSERT_NE(nullptr, value);
+    ASSERT_EQ(3, value->getValue());
 }
-
-#endif // FILC_NAME_H

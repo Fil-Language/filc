@@ -21,36 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_NAME_H
-#define FILC_NAME_H
 
-#include "filc/grammar/Type.h"
+#ifndef GENERATORCONTEXT_H
+#define GENERATORCONTEXT_H
+
+#include <llvm/IR/IRBuilder.h>
+#include <map>
 #include <string>
-#include <memory>
 
 namespace filc {
-class Name {
+class GeneratorContext {
   public:
-    Name();
+    GeneratorContext();
 
-    Name(bool constant, std::string name, std::shared_ptr<AbstractType> type, bool has_value);
+    auto setValue(const std::string &name, llvm::Value *value) -> void;
 
-    [[nodiscard]] auto isConstant() const -> bool;
-
-    [[nodiscard]] auto hasValue() const -> bool;
-
-    [[nodiscard]] auto getName() const -> const std::string&;
-
-    [[nodiscard]] auto getType() const -> std::shared_ptr<AbstractType>;
-
-    auto hasValue(bool has_value) -> void;
+    [[nodiscard]] auto getValue(const std::string &name) const -> llvm::Value *;
 
   private:
-    bool _constant;
-    bool _has_value;
-    std::string _name;
-    std::shared_ptr<AbstractType> _type;
+    std::map<std::string, llvm::Value *> _values;
 };
-}
+} // namespace filc
 
-#endif // FILC_NAME_H
+#endif // GENERATORCONTEXT_H

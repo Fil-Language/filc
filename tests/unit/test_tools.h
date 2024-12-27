@@ -64,6 +64,12 @@ class PrinterVisitor final: public filc::Visitor<void> {
 
     auto visitAssignation(filc::Assignation *assignation) -> void override;
 
+    auto visitPointer(filc::Pointer *pointer) -> void override;
+
+    auto visitPointerDereferencing(filc::PointerDereferencing *pointer) -> void override;
+
+    auto visitVariableAddress(filc::VariableAddress *address) -> void override;
+
   private:
     std::stringstream _out;
 };

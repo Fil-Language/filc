@@ -22,13 +22,9 @@
  * SOFTWARE.
  */
 #include "filc/grammar/assignation/Assignation.h"
-#include "filc/grammar/calcul/Calcul.h"
-#include "filc/grammar/identifier/Identifier.h"
-#include "filc/grammar/variable/Variable.h"
 #include "filc/validation/ValidationVisitor.h"
 #include "test_tools.h"
 
-#include <filc/grammar/literal/Literal.h>
 #include <filc/grammar/program/Program.h>
 #include <filc/llvm/IRGenerator.h>
 #include <gmock/gmock.h>
@@ -105,7 +101,7 @@ TEST(IRGenerator, variableDeclaration_value) {
 
 TEST(IRGenerator, variableDeclaration_identifier) {
     const auto ir = getIR("val foo = 2\nfoo");
-    ASSERT_THAT(ir, HasSubstr("ret i32 %0")); // Returns the register in which it loads the constant
+    ASSERT_THAT(ir, HasSubstr("ret i32 2")); // Returns the value directly
 }
 
 TEST(IRGenerator, calcul_integer) {
@@ -119,4 +115,22 @@ TEST(IRGenerator, calcul_integer) {
 TEST(IRGenerator, assignation_notThrow) {
     const auto ir = getIR("var bar = 3\nbar = 0");
     ASSERT_THAT(ir, HasSubstr("ret i32 0"));
+}
+
+TEST(IRGenerator, pointer_notThrow) {
+    const auto ir = getIR("val foo = new i32(3);foo;0");
+    ASSERT_THAT(ir, HasSubstr("alloca i32"));
+    ASSERT_THAT(ir, HasSubstr("store i32 3, ptr %"));
+}
+
+TEST(IRGenerator, pointerDereferencing_notThrow) {
+    const auto ir = getIR("val foo = new i32(0);*foo");
+    ASSERT_THAT(ir, HasSubstr("ret i32 %1")); // Register %1 contains pointed value
+}
+
+TEST(IRGenerator, variableAddress_notThrow) {
+    const auto ir = getIR("val foo = 0;val bar = &foo;*bar");
+    ASSERT_THAT(ir, HasSubstr("%0 = alloca i32"));
+    ASSERT_THAT(ir, HasSubstr("store i32 0, ptr %0")); // bar = &foo
+    ASSERT_THAT(ir, HasSubstr("ret i32 %1"));          // Register %1 is *foo
 }

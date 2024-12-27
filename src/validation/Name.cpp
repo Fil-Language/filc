@@ -27,13 +27,17 @@
 
 using namespace filc;
 
-Name::Name(): _constant(true) {}
+Name::Name(): _constant(true), _has_value(false) {}
 
-Name::Name(const bool constant, std::string name, std::shared_ptr<AbstractType> type)
-    : _constant(constant), _name(std::move(name)), _type(std::move(type)) {}
+Name::Name(const bool constant, std::string name, std::shared_ptr<AbstractType> type, const bool has_value)
+    : _constant(constant), _has_value(has_value), _name(std::move(name)), _type(std::move(type)) {}
 
 auto Name::isConstant() const -> bool {
     return _constant;
+}
+
+auto Name::hasValue() const -> bool {
+    return _has_value;
 }
 
 auto Name::getName() const -> const std::string & {
@@ -42,4 +46,8 @@ auto Name::getName() const -> const std::string & {
 
 auto Name::getType() const -> std::shared_ptr<AbstractType> {
     return _type;
+}
+
+auto Name::hasValue(const bool has_value) -> void {
+    _has_value = has_value;
 }

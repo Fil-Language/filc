@@ -28,6 +28,7 @@ VAR: 'var';
 VAL: 'val';
 TRUE: 'true';
 FALSE: 'false';
+NEW: 'new';
 
 // Operators
 EQ: '=';
@@ -48,6 +49,7 @@ GT: '>';
 GTE: '>=';
 LPAREN: '(';
 RPAREN: ')';
+AMP: '&';
 
 // Assignation operators
 PLUS_EQ: '+=';

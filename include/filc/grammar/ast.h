@@ -49,6 +49,12 @@ class Identifier;
 class BinaryCalcul;
 
 class Assignation;
+
+class Pointer;
+
+class PointerDereferencing;
+
+class VariableAddress;
 }
 
 #endif // FILC_AST_H

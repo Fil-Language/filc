@@ -27,6 +27,7 @@
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
+#include "filc/grammar/pointer/Pointer.h"
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 
@@ -142,6 +143,24 @@ auto DumpVisitor::visitAssignation(Assignation *assignation) -> void {
     _indent_level++;
     assignation->getValue()->acceptVoidVisitor(this);
     _indent_level--;
+}
+
+auto DumpVisitor::visitPointer(Pointer *pointer) -> void {
+    printIdent();
+    _out << "[Pointer:" << pointer->getTypeName() << "]\n";
+    _indent_level++;
+    pointer->getValue()->acceptVoidVisitor(this);
+    _indent_level--;
+}
+
+auto DumpVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> void {
+    printIdent();
+    _out << "[PointerDereferencing:" << pointer->getName() << "]\n";
+}
+
+auto DumpVisitor::visitVariableAddress(VariableAddress *address) -> void {
+    printIdent();
+    _out << "[VariableAddress:" << address->getName() << "]\n";
 }
 
 auto DumpVisitor::printIdent() const -> void {

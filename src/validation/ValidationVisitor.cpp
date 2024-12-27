@@ -27,12 +27,13 @@
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
+#include "filc/grammar/pointer/Pointer.h"
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 #include "filc/utils/Message.h"
 #include "filc/validation/CalculValidator.h"
 
-#include <stdexcept>
+#include <llvm/IR/DerivedTypes.h>
 
 using namespace filc;
 
@@ -196,7 +197,9 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
     }
 
     variable->setType(variable_type);
-    _environment->addName(Name(variable->isConstant(), variable->getName(), variable_type));
+    _environment->addName(
+        Name(variable->isConstant(), variable->getName(), variable_type, variable->getValue() != nullptr)
+    );
 }
 
 auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
@@ -206,6 +209,13 @@ auto ValidationVisitor::visitIdentifier(Identifier *identifier) -> void {
     }
 
     const auto name = _environment->getName(identifier->getName());
+    if (! name.hasValue()) {
+        displayError(
+            "Variable " + identifier->getName() + " has no value, please set one before accessing it",
+            identifier->getPosition()
+        );
+        return;
+    }
     identifier->setType(name.getType());
 
     if (! _context->has("return") || ! _context->get<bool>("return")) {
@@ -255,7 +265,7 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
         );
         return;
     }
-    const auto name = _environment->getName(assignation->getIdentifier());
+    auto name = _environment->getName(assignation->getIdentifier());
     if (name.isConstant()) {
         displayError("Cannot modify a constant", assignation->getPosition());
         return;
@@ -279,5 +289,87 @@ auto ValidationVisitor::visitAssignation(Assignation *assignation) -> void {
         return;
     }
 
+    name.hasValue(true);
+    _environment->setName(name);
     assignation->setType(name.getType());
+}
+
+auto ValidationVisitor::visitPointer(Pointer *pointer) -> void {
+    if (! _environment->hasType(pointer->getTypeName())) {
+        displayError("Unknown type: " + pointer->getTypeName(), pointer->getPosition());
+        return;
+    }
+    const auto pointed_type = _environment->getType(pointer->getTypeName());
+
+    std::shared_ptr<AbstractType> pointer_type = nullptr;
+    if (_environment->hasType(pointer->getTypeName() + "*")) {
+        pointer_type = _environment->getType(pointer->getTypeName() + "*");
+    } else {
+        pointer_type = std::make_shared<PointerType>(pointed_type);
+        _environment->addType(pointer_type);
+    }
+
+    _context->stack();
+    _context->set("return", true);
+    pointer->getValue()->acceptVoidVisitor(this);
+    _context->unstack();
+
+    const auto value_type = pointer->getValue()->getType();
+    if (value_type->getName() != pointed_type->getName()) {
+        displayError(
+            "Cannot assign a value of type " + value_type->toDisplay() + " to a pointer to type "
+                + pointed_type->toDisplay(),
+            pointer->getPosition()
+        );
+        return;
+    }
+
+    pointer->setType(pointer_type);
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", pointer->getPosition());
+    }
+}
+
+auto ValidationVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> void {
+    if (! _environment->hasName(pointer->getName())) {
+        displayError("Unknown name, don't know what it refers to: " + pointer->getName(), pointer->getPosition());
+        return;
+    }
+
+    const auto name = _environment->getName(pointer->getName());
+    const auto type = std::dynamic_pointer_cast<PointerType>(name.getType());
+    if (type == nullptr) {
+        displayError("Cannot dereference a variable which is not a pointer", pointer->getPosition());
+        return;
+    }
+
+    pointer->setType(type->getPointedType());
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", pointer->getPosition());
+    }
+}
+
+auto ValidationVisitor::visitVariableAddress(VariableAddress *address) -> void {
+    if (! _environment->hasName(address->getName())) {
+        displayError("Unknown name, don't know what it refers to: " + address->getName(), address->getPosition());
+        return;
+    }
+
+    const auto name                    = _environment->getName(address->getName());
+    const auto pointed_type            = name.getType();
+    std::shared_ptr<AbstractType> type = nullptr;
+    if (_environment->hasType(pointed_type->getName() + "*")) {
+        type = _environment->getType(pointed_type->getName() + "*");
+    } else {
+        type = std::make_shared<PointerType>(pointed_type);
+        _environment->addType(type);
+    }
+
+    address->setType(type);
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", address->getPosition());
+    }
 }

@@ -52,6 +52,12 @@ class DumpVisitor final: public Visitor<void> {
 
     auto visitAssignation(Assignation *assignation) -> void override;
 
+    auto visitPointer(Pointer *pointer) -> void override;
+
+    auto visitPointerDereferencing(PointerDereferencing *pointer) -> void override;
+
+    auto visitVariableAddress(VariableAddress *address) -> void override;
+
   private:
     std::ostream &_out;
     int _indent_level;

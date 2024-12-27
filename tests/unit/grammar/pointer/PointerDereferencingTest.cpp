@@ -21,36 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_NAME_H
-#define FILC_NAME_H
+#include "test_tools.h"
 
-#include "filc/grammar/Type.h"
-#include <string>
-#include <memory>
+#include <filc/grammar/pointer/Pointer.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-namespace filc {
-class Name {
-  public:
-    Name();
+using namespace ::testing;
 
-    Name(bool constant, std::string name, std::shared_ptr<AbstractType> type, bool has_value);
-
-    [[nodiscard]] auto isConstant() const -> bool;
-
-    [[nodiscard]] auto hasValue() const -> bool;
-
-    [[nodiscard]] auto getName() const -> const std::string&;
-
-    [[nodiscard]] auto getType() const -> std::shared_ptr<AbstractType>;
-
-    auto hasValue(bool has_value) -> void;
-
-  private:
-    bool _constant;
-    bool _has_value;
-    std::string _name;
-    std::shared_ptr<AbstractType> _type;
-};
+TEST(PointerDereferencing, parsing) {
+    const auto program     = parseString("*foo");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    const auto pointer_dereferencing = std::dynamic_pointer_cast<filc::PointerDereferencing>(expressions[0]);
+    ASSERT_NE(nullptr, pointer_dereferencing);
+    ASSERT_STREQ("foo", pointer_dereferencing->getName().c_str());
 }
-
-#endif // FILC_NAME_H
