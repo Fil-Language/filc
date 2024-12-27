@@ -66,6 +66,8 @@ class PrinterVisitor final: public filc::Visitor<void> {
 
     auto visitPointer(filc::Pointer *pointer) -> void override;
 
+    auto visitPointerDereferencing(filc::PointerDereferencing *pointer) -> void override;
+
   private:
     std::stringstream _out;
 };

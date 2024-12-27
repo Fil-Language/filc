@@ -153,6 +153,11 @@ auto DumpVisitor::visitPointer(Pointer *pointer) -> void {
     _indent_level--;
 }
 
+auto DumpVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> void {
+    printIdent();
+    _out << "[PointerDereferencing:" << pointer->getName() << "]\n";
+}
+
 auto DumpVisitor::printIdent() const -> void {
     _out << std::string(_indent_level, '\t');
 }

@@ -330,3 +330,23 @@ auto ValidationVisitor::visitPointer(Pointer *pointer) -> void {
         displayWarning("Value not used", pointer->getPosition());
     }
 }
+
+auto ValidationVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> void {
+    if (! _environment->hasName(pointer->getName())) {
+        displayError("Unknown name, don't know what it refers to: " + pointer->getName(), pointer->getPosition());
+        return;
+    }
+
+    const auto name = _environment->getName(pointer->getName());
+    const auto type = std::dynamic_pointer_cast<PointerType>(name.getType());
+    if (type == nullptr) {
+        displayError("Cannot dereference a variable which is not a pointer", pointer->getPosition());
+        return;
+    }
+
+    pointer->setType(type->getPointedType());
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", pointer->getPosition());
+    }
+}

@@ -67,6 +67,9 @@ expression returns[std::shared_ptr<filc::Expression> tree]
     | p=pointer {
         $tree = $p.tree;
     }
+    | po=pointer_operation {
+        $tree = $po.tree;
+    }
 
     // === Binary calcul ===
     | el3=expression op3=MOD er3=expression {
@@ -168,4 +171,9 @@ assignation returns[std::shared_ptr<filc::Assignation> tree]
 pointer returns[std::shared_ptr<filc::Pointer> tree]
     : NEW t=IDENTIFIER LPAREN e=expression RPAREN {
         $tree = std::make_shared<filc::Pointer>($t.text, $e.tree);
+    };
+
+pointer_operation returns[std::shared_ptr<filc::Expression> tree]
+    : STAR i=IDENTIFIER {
+        $tree = std::make_shared<filc::PointerDereferencing>($i.text);
     };

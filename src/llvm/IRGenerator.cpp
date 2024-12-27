@@ -27,11 +27,11 @@
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/literal/Literal.h"
+#include "filc/grammar/pointer/Pointer.h"
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 #include "filc/llvm/CalculBuilder.h"
 
-#include <filc/grammar/pointer/Pointer.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/MC/MCTargetOptions.h>
@@ -185,5 +185,14 @@ auto IRGenerator::visitPointer(Pointer *pointer) -> llvm::Value * {
     const auto alloca = _builder->CreateAlloca(pointer->getPointedType()->getLLVMType(_llvm_context.get()));
     _builder->CreateStore(pointer->getValue()->acceptIRVisitor(this), alloca);
 
-    return _builder->CreateLoad(pointer->getType()->getLLVMType(_llvm_context.get()), alloca);
+    return alloca;
+}
+
+auto IRGenerator::visitPointerDereferencing(PointerDereferencing *pointer) -> llvm::Value * {
+    const auto pointer_value = _context.getValue(pointer->getName());
+    if (pointer_value == nullptr) {
+        throw std::logic_error("Tried to access to a variable without a value set");
+    }
+
+    return _builder->CreateLoad(pointer->getType()->getLLVMType(_llvm_context.get()), pointer_value);
 }

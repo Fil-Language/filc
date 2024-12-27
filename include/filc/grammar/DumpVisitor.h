@@ -54,6 +54,8 @@ class DumpVisitor final: public Visitor<void> {
 
     auto visitPointer(Pointer *pointer) -> void override;
 
+    auto visitPointerDereferencing(PointerDereferencing *pointer) -> void override;
+
   private:
     std::ostream &_out;
     int _indent_level;

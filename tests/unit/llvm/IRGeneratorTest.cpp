@@ -22,13 +22,9 @@
  * SOFTWARE.
  */
 #include "filc/grammar/assignation/Assignation.h"
-#include "filc/grammar/calcul/Calcul.h"
-#include "filc/grammar/identifier/Identifier.h"
-#include "filc/grammar/variable/Variable.h"
 #include "filc/validation/ValidationVisitor.h"
 #include "test_tools.h"
 
-#include <filc/grammar/literal/Literal.h>
 #include <filc/grammar/program/Program.h>
 #include <filc/llvm/IRGenerator.h>
 #include <gmock/gmock.h>
@@ -125,4 +121,9 @@ TEST(IRGenerator, pointer_notThrow) {
     const auto ir = getIR("val foo = new i32(3);foo;0");
     ASSERT_THAT(ir, HasSubstr("alloca i32"));
     ASSERT_THAT(ir, HasSubstr("store i32 3, ptr %"));
+}
+
+TEST(IRGenerator, pointerDereferencing_notThrow) {
+    const auto ir = getIR("val foo = new i32(0);*foo");
+    ASSERT_THAT(ir, HasSubstr("ret i32 %1")); // Register %1 contains pointed value
 }

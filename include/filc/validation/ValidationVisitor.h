@@ -92,6 +92,8 @@ class ValidationVisitor final : public Visitor<void> {
 
     auto visitPointer(Pointer *pointer) -> void override;
 
+    auto visitPointerDereferencing(PointerDereferencing *pointer) -> void override;
+
   private:
     std::unique_ptr<ValidationContext> _context;
     std::unique_ptr<Environment> _environment;

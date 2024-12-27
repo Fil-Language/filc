@@ -367,3 +367,32 @@ TEST(ValidationVisitor, pointer_valid) {
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("i32*", program->getExpressions()[0]->getType()->getName().c_str());
 }
+
+TEST(ValidationVisitor, pointerDereferencing_unknown) {
+    VISITOR;
+    const auto program = parseString("*foo");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Unknown name, don't know what it refers to: foo")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, pointerDereferencing_notAPointer) {
+    VISITOR;
+    const auto program = parseString("val foo = 'a';*foo");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Cannot dereference a variable which is not a pointer")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, pointerDereferencing_valid) {
+    VISITOR;
+    const auto program = parseString("val foo = new i32(3);*foo");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("i32", program->getExpressions()[1]->getType()->getName().c_str());
+}

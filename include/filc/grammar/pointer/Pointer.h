@@ -48,6 +48,20 @@ class Pointer final : public Expression {
     std::string _type_name;
     std::shared_ptr<Expression> _value;
 };
+
+class PointerDereferencing final : public Expression {
+  public:
+    explicit PointerDereferencing(std::string name);
+
+    [[nodiscard]] auto getName() const -> std::string;
+
+    auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
+
+    auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
+
+  private:
+    std::string _name;
+};
 } // namespace filc
 
 #endif // FILC_POINTER_H

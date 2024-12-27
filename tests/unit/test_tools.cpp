@@ -126,6 +126,10 @@ auto PrinterVisitor::visitPointer(filc::Pointer *pointer) -> void {
     _out << ")";
 }
 
+auto PrinterVisitor::visitPointerDereferencing(filc::PointerDereferencing *pointer) -> void {
+    _out << pointer->getName() << "*";
+}
+
 TokenSourceStub::TokenSourceStub(std::string filename): _filename(std::move(filename)) {}
 
 auto TokenSourceStub::nextToken() -> std::unique_ptr<antlr4::Token> {
