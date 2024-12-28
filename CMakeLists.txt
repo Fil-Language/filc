@@ -47,7 +47,7 @@ add_definitions(-DANTLR4CPP_STATIC)
 set(ANTLR4_WITH_STATIC_CRT OFF)
 set(ANTLR4_TAG 4.13.2)
 set(ANTLR4_ZIP_REPOSITORY https://github.com/antlr/antlr4/archive/refs/tags/${ANTLR4_TAG}.zip)
-set(ANTLR_EXECUTABLE ${PROJECT_SOURCE_DIR}/bin/antlr-${ANTLR4_TAG}-complete.jar)
+set(ANTLR_EXECUTABLE ${PROJECT_SOURCE_DIR}/tools/antlr-${ANTLR4_TAG}-complete.jar)
 
 include(ExternalAntlr4Cpp)
 include_directories(${ANTLR4_INCLUDE_DIRS})

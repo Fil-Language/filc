@@ -4,10 +4,10 @@ set -euo pipefail
 
 # Get version in argument
 if (($# != 1)); then
-  echo -e "\033[31mUsage : $0 <new version>\033[0m"
+  echo -e "\033[31mUsage : $(basename "$0") <new version>\033[0m"
   exit 1
 fi
-version=$1
+version=$(echo "$1" | sed 's/[^A-Za-z0-9._-]//g')
 major=$(echo "$version" | cut -d. -f1)
 minor=$(echo "$version" | cut -d. -f2)
 patch=$(echo "$version" | cut -d. -f3)
@@ -32,12 +32,12 @@ then
 fi
 
 echo -e "    https://img.shields.io/badge/version-$version_badge-green"
-http --download --output=version.svg "https://img.shields.io/badge/version-$version_badge-green" -q
+http --download --output="$ROOT_DIR/version.svg" "https://img.shields.io/badge/version-$version_badge-green" -q
 echo -e "    \033[32mDone\033[0m"
 
 # Change version in VERSION
 echo -e " -> Change version in VERSION"
-echo -e -n "$version" > VERSION
+echo -e -n "$version" > "$ROOT_DIR/VERSION"
 echo -e "    \033[32mDone\033[0m"
 
 # Version to change manually

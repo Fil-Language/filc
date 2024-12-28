@@ -3,10 +3,10 @@
 set -euo pipefail
 
 if (($# != 1)); then
-  echo -e "\033[31mUsage : $0 <version>\033[0m"
+  echo -e "\033[31mUsage : $(basename "$0") <version>\033[0m"
   exit 1
 fi
-version=$1
+version=$(echo "$1" | sed 's/[^A-Za-z0-9._-]//g')
 
 # Check that command http is installed
 if ! type "http" >/dev/null; then
@@ -15,10 +15,10 @@ if ! type "http" >/dev/null; then
 fi
 
 echo -e "\033[34mRemove previous jar\033[0m"
-rm ./bin/antlr-*-complete.jar
+rm -f "$ROOT_DIR/tools/antlr-*-complete.jar"
 echo -e "    \033[32mDone\033[0m"
 
 echo -e "\033[34mDownload jar \033[1m$version\033[0m"
 echo -e "    https://www.antlr.org/download/antlr-$version-complete.jar"
-http --download --output="./bin/antlr-$version-complete.jar" "https://www.antlr.org/download/antlr-$version-complete.jar" -q
+http --download --output="$ROOT_DIR/tools/antlr-$version-complete.jar" "https://www.antlr.org/download/antlr-$version-complete.jar" -q
 echo -e "    \033[32mDone\033[0m"

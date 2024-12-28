@@ -4,7 +4,7 @@ build
 filc
 !include/*
 !src/*
-build_*
+out
 !bin/*
 coverage.info
 .idea

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+FORMAT="clang-format -style=file -i"
+
+$FORMAT main.cpp
+find "$ROOT_DIR/src" -iname '*.h' -o -iname '*.cpp' -exec $FORMAT {} \;
+find "$ROOT_DIR/include" -iname '*.h' -o -iname '*.cpp' -exec $FORMAT {} \;
+find "$ROOT_DIR/tests" -iname '*.h' -o -iname '*.cpp' -exec $FORMAT {} \;

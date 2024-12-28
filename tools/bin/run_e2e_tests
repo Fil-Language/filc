@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+WORKDIR="$ROOT_DIR/out/e2e_tests"
+
+cmake -B "$WORKDIR" -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=On -G Ninja
+cmake --build "$WORKDIR" --target e2e-tests
+cd "$WORKDIR"
+ctest -L e2e --output-on-failure

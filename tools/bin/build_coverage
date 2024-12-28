@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-lcov --directory . --capture --output-file coverage.info
+lcov --directory "$ROOT_DIR" --capture --output-file coverage.info
 
 # Remove external files and dependencies
 lcov --remove coverage.info '/nix/store/*' --output-file coverage.info

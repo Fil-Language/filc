@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+WORKDIR="$ROOT_DIR/out/deb_package"
+
+cmake -B "$WORKDIR" -DCMAKE_BUILD_TYPE=Release -G Ninja
+cmake --build "$WORKDIR"
+cd "$WORKDIR"
+cpack -G DEB

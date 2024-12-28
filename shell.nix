@@ -4,6 +4,7 @@ let
 in
 
 let
+  currentDir = builtins.toString ./.;
   pnpm = pkgs.callPackage ./tools/nix/pnpm.nix { nodejs = pkgs.nodejs_20; };
 in
 
@@ -28,6 +29,8 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
+    export ROOT_DIR="${currentDir}"
+    export PATH="$PATH:${currentDir}/tools/bin"
     pnpm install;
     echo -e "\n\033[34mWelcome to \033[1mfilc\033[0m\033[34m dev environment\033[0m\n"
   '';

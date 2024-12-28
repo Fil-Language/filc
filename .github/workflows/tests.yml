@@ -17,7 +17,7 @@ jobs:
         uses: cachix/install-nix-action@3715ab1a11cac9e991980d7b4a28d80c7ebdd8f9 # v28
       - name: Build then run
         run: |
-          nix-shell --run '${{ github.workspace }}/bin/build_release.sh'
+          nix-shell --run 'build_release'
           
           ${{ github.workspace }}/filc
 
@@ -30,10 +30,10 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@3715ab1a11cac9e991980d7b4a28d80c7ebdd8f9 # v28
       - name: Run tests
-        run: nix-shell --run '${{ github.workspace }}/bin/run_unit_tests.sh'
+        run: nix-shell --run 'run_unit_tests'
 
       - name: Build coverage
-        run: nix-shell --run '${{ github.workspace }}/bin/build_coverage.sh'
+        run: nix-shell --run 'build_coverage'
       - name: Upload coverage report to Codacy
         if: ${{ github.actor != 'dependabot[bot]' }}
         uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699 # v1.3.0
@@ -50,7 +50,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@3715ab1a11cac9e991980d7b4a28d80c7ebdd8f9 # v28
       - name: Run tests
-        run: nix-shell --run '${{ github.workspace }}/bin/run_e2e_tests.sh'
+        run: nix-shell --run 'run_e2e_tests'
 
   clang-format:
     name: "Run clang-format"
@@ -61,6 +61,6 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@3715ab1a11cac9e991980d7b4a28d80c7ebdd8f9 # v28
       - name: Run clang-format
-        run: nix-shell --run '${{ github.workspace }}/bin/run_clang-format.sh'
+        run: nix-shell --run 'run_clang-format'
       - name: Check no changes
-        run: ${{ github.workspace }}/bin/check_no_changes.sh
+        run: nix-shell --run 'check_no_changes'
