@@ -34,7 +34,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@3715ab1a11cac9e991980d7b4a28d80c7ebdd8f9 # v28
       - name: Build
-        run: nix-shell --run '${{ github.workspace }}/bin/build_release.sh'
+        run: nix-shell --run 'build_release'
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
