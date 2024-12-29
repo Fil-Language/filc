@@ -26,7 +26,7 @@
 
 #include "filc/grammar/ast.h"
 
-#include "llvm/IR/Value.h"
+#include <llvm/IR/Value.h>
 
 namespace filc {
 template<typename Return> class Visitor {

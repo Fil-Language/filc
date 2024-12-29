@@ -1,11 +1,10 @@
-let
-  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/3e889463e499537c602e3ea83da6e33f9dc974da.tar.gz";
-  pkgs = import nixpkgs { config = {}; overlays = []; };
-in
+{ pkgs ? (import ./tools/nix/pin-nixpkgs.nix) {} }:
 
 let
   currentDir = builtins.toString ./.;
   pnpm = pkgs.callPackage ./tools/nix/pnpm.nix { nodejs = pkgs.nodejs_20; };
+  cxxopts = pkgs.callPackage ./tools/nix/cxxopts.nix { };
+  antlr4 = pkgs.callPackage ./tools/nix/antlr4.nix { };
 in
 
 pkgs.mkShell {
@@ -23,9 +22,13 @@ pkgs.mkShell {
     pkgs.jre_minimal
     pkgs.nodejs_20
     pnpm
+    pkgs.httpie
     pkgs.llvmPackages_18.libllvm
     pkgs.libffi
     pkgs.libxml2
+    cxxopts
+    antlr4.antlr
+    antlr4.runtime.cpp
   ];
 
   shellHook = ''

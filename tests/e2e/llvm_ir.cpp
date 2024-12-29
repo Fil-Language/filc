@@ -40,7 +40,7 @@ auto getProgramResult(const std::string &program) -> int {
     ir_file.flush();
     ir_file.close();
 
-    const auto status = system("lli " FIXTURES_PATH "/ir_test.ir");
+    const auto status = system(LLI_BIN " " FIXTURES_PATH "/ir_test.ir");
 
     std::filesystem::remove(FIXTURES_PATH "/ir_test.fil");
     std::filesystem::remove(FIXTURES_PATH "/ir_test.ir");

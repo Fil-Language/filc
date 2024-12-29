@@ -34,6 +34,10 @@ gtest_discover_tests(unit-tests
 )
 
 # _.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-.
+# e2e tests
+
+find_program(LLI_EXECUTABLE lli REQUIRED)
+message(STATUS "Found lli: ${LLI_EXECUTABLE}")
 
 file(GLOB_RECURSE E2E_TEST_FILES
         "${PROJECT_SOURCE_DIR}/tests/e2e/*.cpp"
@@ -50,6 +54,7 @@ target_compile_definitions(e2e-tests PUBLIC
         FILC_BIN="$<TARGET_FILE:filc>"
         FILC_VERSION="${FILC_VERSION}"
         FIXTURES_PATH="${PROJECT_SOURCE_DIR}/tests/unit/Fixtures"
+        LLI_BIN="${LLI_EXECUTABLE}"
 )
 
 target_link_libraries(e2e-tests PRIVATE gtest_main gtest gmock)

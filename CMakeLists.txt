@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
 
+# Nix dependencies
+file(GLOB NIX_STORE_LIB LIST_DIRECTORIES true "/nix/store/*/lib/cmake/*")
+message(DEBUG NIX_STORE_LIB=${NIX_STORE_LIB})
+list(APPEND CMAKE_PREFIX_PATH ${NIX_STORE_LIB})
+file(GLOB NIX_STORE_BIN LIST_DIRECTORIES true "/nix/store/*/bin/")
+message(DEBUG NIX_STORE_BIN=${NIX_STORE_BIN})
+list(APPEND CMAKE_PROGRAM_PATH ${NIX_STORE_BIN})
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -16,6 +24,8 @@ project(
 
 include(FetchContent)
 cmake_policy(SET CMP0135 NEW)
+
+include(commands)
 
 # _.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-._.-.
 # Library
@@ -34,24 +44,20 @@ else ()
 endif ()
 
 ## Cxxopts
-FetchContent_Declare(
-        cxxopts
-        GIT_REPOSITORY https://github.com/jarro2783/cxxopts.git
-        GIT_TAG 3bf268481da8208d171d8908e6491459de3651d7 #v3.2.0
-)
-FetchContent_MakeAvailable(cxxopts)
-message(DEBUG cxxopts="${cxxopts_SOURCE_DIR}/include")
+find_package(cxxopts 3.2.0 REQUIRED CONFIG)
+message(STATUS "Found cxxopts ${cxxopts_PACKAGE_VERSION}")
+message(STATUS "Located in: ${cxxopts_DIR}")
+get_target_property(cxxopts_INCLUDE_DIR cxxopts::cxxopts INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "Included from: ${cxxopts_INCLUDE_DIR}")
 
 ## Antlr4
-add_definitions(-DANTLR4CPP_STATIC)
-set(ANTLR4_WITH_STATIC_CRT OFF)
-set(ANTLR4_TAG 4.13.2)
-set(ANTLR4_ZIP_REPOSITORY https://github.com/antlr/antlr4/archive/refs/tags/${ANTLR4_TAG}.zip)
-set(ANTLR_EXECUTABLE ${PROJECT_SOURCE_DIR}/tools/antlr-${ANTLR4_TAG}-complete.jar)
+find_package(antlr4-runtime 4.13.0 REQUIRED CONFIG)
+message(STATUS "Found antlr ${ANTLR_VERSION}")
+message(STATUS "Located in: ${antlr4-runtime_DIR}")
+message(STATUS "Included from: ${ANTLR4_INCLUDE_DIR}")
 
-include(ExternalAntlr4Cpp)
-include_directories(${ANTLR4_INCLUDE_DIRS})
-find_package(ANTLR REQUIRED)
+find_program(ANTLR_EXECUTABLE antlr REQUIRED)
+message(STATUS "Found antlr: ${ANTLR_EXECUTABLE}")
 
 antlr_target(Lexer ${PROJECT_SOURCE_DIR}/src/grammar/FilLexer.g4 LEXER
         PACKAGE filc)
@@ -61,10 +67,9 @@ antlr_target(Parser ${PROJECT_SOURCE_DIR}/src/grammar/FilParser.g4 PARSER
         COMPILE_FLAGS -lib ${ANTLR_Lexer_OUTPUT_DIR})
 
 ## LLVM
-find_package(LLVM REQUIRED CONFIG)
-
+find_package(LLVM 18.1.8 REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+message(STATUS "Located in: ${LLVM_DIR}")
 
 include_directories(${LLVM_INCLUDE_DIRS})
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
@@ -77,7 +82,7 @@ foreach(target ${LLVM_TARGETS_TO_BUILD})
 endforeach()
 
 ## filc lib
-file(GLOB_RECURSE SRC_FILES
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS filc_lib
         "${PROJECT_SOURCE_DIR}/src/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/**/*.cpp"
 )
@@ -88,8 +93,8 @@ target_link_libraries(filc_lib PRIVATE additional_config cxxopts::cxxopts antlr4
 
 target_include_directories(filc_lib PUBLIC
         "${PROJECT_SOURCE_DIR}/include"
-        "${cxxopts_SOURCE_DIR}/include"
-        ${ANTLR4_INCLUDE_DIRS}
+        ${cxxopts_INCLUDE_DIR}
+        ${ANTLR4_INCLUDE_DIR}
         ${ANTLR_Lexer_OUTPUT_DIR}
         ${ANTLR_Parser_OUTPUT_DIR}
         ${LLVM_INCLUDE_DIRS})
