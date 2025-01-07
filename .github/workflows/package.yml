@@ -41,7 +41,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@3715ab1a11cac9e991980d7b4a28d80c7ebdd8f9 # v28
       - name: Build
-        run: nix-shell --run '${{ github.workspace }}/bin/build_release.sh'
+        run: nix-shell --run 'build_release'
 
       - name: Archive binary
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
@@ -59,22 +59,22 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@3715ab1a11cac9e991980d7b4a28d80c7ebdd8f9 # v28
       - name: Build
-        run: nix-shell --run '${{ github.workspace }}/bin/build_deb_package.sh'
+        run: nix-shell --run 'build_deb_package'
 
       - name: Archive package
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: filc-${{ needs.metadata.outputs.version }}_deb
           path: |
-            ${{ github.workspace }}/build_deb_package/*.deb
-            ${{ github.workspace }}/build_deb_package/*.deb.sha512
+            ${{ github.workspace }}/out/deb_package/*.deb
+            ${{ github.workspace }}/out/deb_package/*.deb.sha512
       - name: Upload to release
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: xresloader/upload-to-github-release@26f7cc1d7d924dc9b6d5008808be8278b7177811  # v1.6.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: "${{ github.workspace }}/build_deb_package/*.deb;${{ github.workspace }}/build_deb_package/*.deb.sha512"
+          file: "${{ github.workspace }}/out/deb_package/*.deb;${{ github.workspace }}/out/deb_package/*.deb.sha512"
           tags: true
 
   rpm:
@@ -87,20 +87,20 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@3715ab1a11cac9e991980d7b4a28d80c7ebdd8f9 # v28
       - name: Build
-        run: nix-shell --run '${{ github.workspace }}/bin/build_rpm_package.sh'
+        run: nix-shell --run 'build_rpm_package'
 
       - name: Archive package
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: filc-${{ needs.metadata.outputs.version }}_rpm
           path: |
-            ${{ github.workspace }}/build_rpm_package/*.rpm
-            ${{ github.workspace }}/build_rpm_package/*.rpm.sha512
+            ${{ github.workspace }}/out/rpm_package/*.rpm
+            ${{ github.workspace }}/out/rpm_package/*.rpm.sha512
       - name: Upload to release
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: xresloader/upload-to-github-release@26f7cc1d7d924dc9b6d5008808be8278b7177811  # v1.6.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: "${{ github.workspace }}/build_rpm_package/*.rpm;${{ github.workspace }}/build_rpm_package/*.rpm.sha512"
+          file: "${{ github.workspace }}/out/rpm_package/*.rpm;${{ github.workspace }}/out/rpm_package/*.rpm.sha512"
           tags: true

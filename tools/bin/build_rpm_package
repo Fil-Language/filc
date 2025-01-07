@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+WORKDIR="$ROOT_DIR/out/rpm_package"
+
+cmake -B "$WORKDIR" -DCMAKE_BUILD_TYPE=Release -G Ninja
+cmake --build "$WORKDIR"
+echo "* $(date +"%a %b %d %Y") filc developers - $(cat VERSION)
+- Package from git sha $(git show-ref --head -s HEAD)" > "$WORKDIR"/changelog
+cd "$WORKDIR"
+cpack -G RPM

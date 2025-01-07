@@ -30,19 +30,21 @@ using namespace filc;
 #define NOT_PARSED_MESSAGE "You should call parse() before getting results"
 
 OptionsParser::OptionsParser(): _options("filc", "Fil compiler"), _parsed(false) {
-    _options.add_options()("file", "Path of file to compile.", cxxopts::value<std::string>()->default_value(""));
+    auto main_options = _options.add_options();
+    main_options("file", "Path of file to compile.", cxxopts::value<std::string>()->default_value(""));
     _options.parse_positional("file");
     _options.positional_help("file");
 
-    _options.add_options("General")
-        ("out,o", "Write output to file", cxxopts::value<std::string>()->default_value("a.out"), "<file>")
-        ("target", "Generate code for the given target", cxxopts::value<std::string>(), "<value>");
+    auto general_options = _options.add_options("General");
+    general_options("out,o", "Write output to file", cxxopts::value<std::string>()->default_value("a.out"), "<file>");
+    general_options("target", "Generate code for the given target", cxxopts::value<std::string>(), "<value>");
 
-    _options.add_options("Troubleshooting")("help", "Show this help message and exit.")(
-        "version", "Show version and exit."
-    );
+    auto trouble_options = _options.add_options("Troubleshooting");
+    trouble_options("help", "Show this help message and exit.");
+    trouble_options("version", "Show version and exit.");
 
-    _options.add_options("Debug")(
+    auto debug_options = _options.add_options("Debug");
+    debug_options(
         "dump",
         "Dump some data. One of these values: ast, ir.",
         cxxopts::value<std::string>()->implicit_value("all")->default_value("none")

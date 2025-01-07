@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+lcov --ignore-errors version --directory "$ROOT_DIR" --capture --output-file coverage.info
+
+# Remove external files and dependencies
+lcov --ignore-errors unused --remove coverage.info '/nix/store/*' --output-file coverage.info
+lcov --ignore-errors unused --remove coverage.info "$ROOT_DIR/out/*/antlr4cpp_generated_src/*" --output-file coverage.info
+
+# Display result
+lcov --list coverage.info

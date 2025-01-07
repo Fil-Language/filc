@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+WORKDIR="$ROOT_DIR/out/release"
+
+cmake -B "$WORKDIR" -DCMAKE_BUILD_TYPE=Release -G Ninja
+cmake --build "$WORKDIR"
+cp "$(cat "$WORKDIR/filc.path")" "$ROOT_DIR"

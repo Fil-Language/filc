@@ -1,6 +1,10 @@
+{ pkgs ? (import ./tools/nix/pin-nixpkgs.nix) {} }:
+
 let
-  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/eb28b94bd14835836b539bc3854a6abf929876d4.tar.gz";
-  pkgs = import nixpkgs { config = {}; overlays = []; };
+  currentDir = builtins.toString ./.;
+  pnpm = pkgs.callPackage ./tools/nix/pnpm.nix { nodejs = pkgs.nodejs_20; };
+  cxxopts = pkgs.callPackage ./tools/nix/cxxopts.nix { };
+  antlr4 = pkgs.callPackage ./tools/nix/antlr4.nix { };
 in
 
 pkgs.mkShell {
@@ -17,13 +21,19 @@ pkgs.mkShell {
     pkgs.rpm
     pkgs.jre_minimal
     pkgs.nodejs_20
-    pkgs.corepack_20
+    pnpm
+    pkgs.httpie
     pkgs.llvmPackages_18.libllvm
     pkgs.libffi
     pkgs.libxml2
+    cxxopts
+    antlr4.antlr
+    antlr4.runtime.cpp
   ];
 
   shellHook = ''
+    export ROOT_DIR="${currentDir}"
+    export PATH="$PATH:${currentDir}/tools/bin"
     pnpm install;
     echo -e "\n\033[34mWelcome to \033[1mfilc\033[0m\033[34m dev environment\033[0m\n"
   '';

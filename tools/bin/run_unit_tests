@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+WORKDIR="$ROOT_DIR/out/unit_tests"
+
+cmake -B "$WORKDIR" -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=On -DCODE_COVERAGE=On -G Ninja
+cmake --build "$WORKDIR" --target unit-tests
+cd "$WORKDIR"
+ctest -L unit --output-on-failure
