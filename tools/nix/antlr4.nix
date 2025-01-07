@@ -54,7 +54,7 @@ let
       src = fetchFromGitHub {
         owner = "antlr";
         repo = "antlr4";
-        tag = version;
+        rev = version;
         hash = srcHash;
       };
 

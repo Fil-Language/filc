@@ -2,7 +2,7 @@
 
 let
   pinNixpkgs = import (fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/3e889463e499537c602e3ea83da6e33f9dc974da.tar.gz";
-    sha256 = "1w7hilh5ix6vppxh5c2zd71l4k1y5wsx5h5s4jya3vw2hhhr99v6";
+    url = "https://github.com/NixOS/nixpkgs/archive/eb28b94bd14835836b539bc3854a6abf929876d4.tar.gz";
+    sha256 = "1wwr70sw70ib0qdr0cf7d9g7czlib5zm8hg8xjll7lsind6cfvwi";
   } ) { config = {}; overlays = []; };
 in pinNixpkgs
