@@ -416,3 +416,60 @@ TEST(ValidationVisitor, variableAddress_valid) {
     ASSERT_STREQ("i32*", program->getExpressions()[1]->getType()->getName().c_str());
     ASSERT_STREQ("i32", program->getExpressions()[2]->getType()->getName().c_str());
 }
+
+TEST(ValidationVisitor, array_differentType) {
+    VISITOR;
+    const auto program = parseString("[1, true];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("All values of an array should be of the same type")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, array_valid) {
+    VISITOR;
+    const auto program = parseString("val foo = [1, 2, 3];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("i32[3]", program->getExpressions()[0]->getType()->getName().c_str());
+}
+
+TEST(ValidationVisitor, array_validCast) {
+    VISITOR;
+    const auto program = parseString("val foo: i8[3] = [1, 2, 3];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("i8[3]", program->getExpressions()[0]->getType()->getName().c_str());
+}
+
+TEST(ValidationVisitor, array_invalidCast) {
+    VISITOR;
+    const auto program = parseString("val foo: u32 = [1, 2, 3]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}),
+        HasSubstr("Cannot cast an array to a type not corresponding to an array: u32")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, array_empty) {
+    VISITOR;
+    const auto program = parseString("[];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Value not used"));
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("void[0]", program->getExpressions()[0]->getType()->getName().c_str());
+}
+
+TEST(ValidationVisitor, array_emptyCast) {
+    VISITOR;
+    const auto program = parseString("val foo: char[0] = [];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("char[0]", program->getExpressions()[0]->getType()->getDisplayName().c_str());
+}

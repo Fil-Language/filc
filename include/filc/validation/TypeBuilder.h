@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_AST_H
-#define FILC_AST_H
+#ifndef FILC_TYPEBUILDER_H
+#define FILC_TYPEBUILDER_H
+
+#include "filc/validation/Environment.h"
+
+#include <string>
+#include <regex>
 
 namespace filc {
-class Program;
+class TypeBuilder final {
+  public:
+    explicit TypeBuilder(Environment *environment);
 
-class Expression;
+    [[nodiscard]] auto tryBuildType(const std::string &type) const noexcept -> bool;
 
-template<typename T>
-class Literal;
+  private:
+    Environment *_environment;
+    std::regex _pointer_type_regex;
+    std::regex _array_type_regex;
 
-class BooleanLiteral;
+    [[nodiscard]] auto tryBuildPointerType(const std::string &type) const noexcept -> bool;
 
-class IntegerLiteral;
+    [[nodiscard]] auto tryBuildArrayType(const std::string &type) const noexcept -> bool;
+};
+} // namespace filc
 
-class FloatLiteral;
-
-class CharacterLiteral;
-
-class StringLiteral;
-
-class VariableDeclaration;
-
-class Identifier;
-
-class BinaryCalcul;
-
-class Assignation;
-
-class Pointer;
-
-class PointerDereferencing;
-
-class VariableAddress;
-
-class Array;
-}
-
-#endif // FILC_AST_H
+#endif // FILC_TYPEBUILDER_H

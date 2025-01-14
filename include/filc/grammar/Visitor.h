@@ -59,6 +59,8 @@ template<typename Return> class Visitor {
 
     virtual auto visitVariableAddress(VariableAddress *address) -> Return = 0;
 
+    virtual auto visitArray(Array *array) -> Return = 0;
+
   protected:
     Visitor() = default;
 };

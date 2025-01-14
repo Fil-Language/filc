@@ -36,6 +36,7 @@ options {
 #include "filc/grammar/identifier/Identifier.h"
 #include "filc/grammar/assignation/Assignation.h"
 #include "filc/grammar/pointer/Pointer.h"
+#include "filc/grammar/array/Array.h"
 #include <memory>
 #include <vector>
 }
@@ -69,6 +70,9 @@ expression returns[std::shared_ptr<filc::Expression> tree]
     }
     | po=pointer_operation {
         $tree = $po.tree;
+    }
+    | ar=array {
+        $tree = $ar.tree;
     }
 
     // === Binary calcul ===
@@ -156,7 +160,7 @@ variable_declaration returns[std::shared_ptr<filc::VariableDeclaration> tree]
         value = $value.tree;
     })?;
 
-type : IDENTIFIER STAR?;
+type : IDENTIFIER (STAR | LBRACK INTEGER RBRACK)?;
 
 assignation returns[std::shared_ptr<filc::Assignation> tree]
     : i1=IDENTIFIER EQ e1=expression {
@@ -180,3 +184,25 @@ pointer_operation returns[std::shared_ptr<filc::Expression> tree]
     | AMP i=IDENTIFIER {
         $tree = std::make_shared<filc::VariableAddress>($i.text);
     };
+
+array returns[std::shared_ptr<filc::Array> tree]
+@init {
+    std::vector<std::shared_ptr<filc::Expression>> values;
+}
+@after {
+    $tree = std::make_shared<filc::Array>(values);
+}
+    : LBRACK (v=array_values {
+        values = $v.values;
+    })? RBRACK;
+
+array_values returns[std::vector<std::shared_ptr<filc::Expression>> values]
+@init {
+    $values = std::vector<std::shared_ptr<filc::Expression>>();
+}
+    : e=expression {
+        $values.push_back($e.tree);
+    } (COMMA v=array_values {
+        auto values_to_insert = $v.values;
+        $values.insert($values.end(), values_to_insert.begin(), values_to_insert.end());
+    })?;

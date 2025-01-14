@@ -68,6 +68,8 @@ class IRGenerator final: public Visitor<llvm::Value *> {
 
     auto visitVariableAddress(VariableAddress *address) -> llvm::Value * override;
 
+    auto visitArray(Array *array) -> llvm::Value * override;
+
   private:
     std::unique_ptr<llvm::LLVMContext> _llvm_context;
     std::unique_ptr<llvm::Module> _module;

@@ -23,6 +23,7 @@
  */
 #include "filc/validation/ValidationVisitor.h"
 
+#include "filc/grammar/array/Array.h"
 #include "filc/grammar/assignation/Assignation.h"
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
@@ -38,7 +39,8 @@
 using namespace filc;
 
 ValidationVisitor::ValidationVisitor(std::ostream &out)
-    : _context(new ValidationContext()), _environment(new Environment()), _out(out), _error(false) {}
+    : _context(new ValidationContext()), _environment(new Environment()), _type_builder(_environment.get()), _out(out),
+      _error(false) {}
 
 auto ValidationVisitor::getEnvironment() const -> const Environment * {
     return _environment.get();
@@ -160,7 +162,7 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
 
     std::shared_ptr<AbstractType> variable_type = nullptr;
     if (! variable->getTypeName().empty()) {
-        if (! _environment->hasType(variable->getTypeName())) {
+        if (! _environment->hasType(variable->getTypeName()) && ! _type_builder.tryBuildType(variable->getTypeName())) {
             displayError("Unknown type: " + variable->getTypeName(), variable->getPosition());
             return;
         }
@@ -371,5 +373,65 @@ auto ValidationVisitor::visitVariableAddress(VariableAddress *address) -> void {
 
     if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("Value not used", address->getPosition());
+    }
+}
+
+auto ValidationVisitor::visitArray(Array *array) -> void {
+    if (array->getSize() == 0) {
+        if (_context->has("cast_type")) {
+            array->setType(_context->get<std::shared_ptr<AbstractType>>("cast_type"));
+        } else {
+            if (! _environment->hasType("void[0]")) {
+                _environment->addType(std::make_shared<ArrayType>(0, _environment->getType("void")));
+            }
+            array->setType(_environment->getType("void[0]"));
+        }
+    } else {
+        if (_context->has("cast_type")) {
+            const auto cast_type  = _context->get<std::shared_ptr<AbstractType>>("cast_type");
+            const auto array_type = std::dynamic_pointer_cast<ArrayType>(cast_type);
+            if (array_type == nullptr) {
+                displayError(
+                    "Cannot cast an array to a type not corresponding to an array: " + cast_type->toDisplay(),
+                    array->getPosition()
+                );
+                return;
+            }
+
+            _context->stack();
+            _context->set("cast_type", array_type->getContainedType());
+            _context->set("return", true);
+        }
+
+        std::vector<std::shared_ptr<AbstractType>> values_types;
+        for (const auto &value : array->getValues()) {
+            value->acceptVoidVisitor(this);
+
+            const auto value_type = value->getType();
+            if (value_type == nullptr) {
+                return;
+            }
+            values_types.push_back(value_type);
+        }
+
+        if (_context->has("cast_type")) {
+            _context->unstack();
+        }
+
+        const auto it = std::adjacent_find(values_types.begin(), values_types.end(), std::not_equal_to<>());
+        if (it != values_types.end()) {
+            displayError("All values of an array should be of the same type", array->getPosition());
+            return;
+        }
+
+        const auto type_name = values_types[0]->getDisplayName() + "[" + std::to_string(array->getSize()) + "]";
+        if (! _environment->hasType(type_name)) {
+            _environment->addType(std::make_shared<ArrayType>(array->getSize(), values_types[0]));
+        }
+        array->setType(_environment->getType(type_name));
+    }
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", array->getPosition());
     }
 }

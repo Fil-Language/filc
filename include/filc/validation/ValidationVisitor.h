@@ -24,15 +24,17 @@
 #ifndef FILC_VALIDATIONVISITOR_H
 #define FILC_VALIDATIONVISITOR_H
 
-#include "filc/grammar/Visitor.h"
 #include "filc/grammar/Position.h"
+#include "filc/grammar/Visitor.h"
 #include "filc/validation/Environment.h"
+#include "filc/validation/TypeBuilder.h"
+
+#include <any>
+#include <map>
 #include <memory>
 #include <stack>
-#include <map>
-#include <any>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace filc {
 class ValidationContext final {
@@ -96,9 +98,12 @@ class ValidationVisitor final : public Visitor<void> {
 
     auto visitVariableAddress(VariableAddress *address) -> void override;
 
+    auto visitArray(Array *array) -> void override;
+
   private:
     std::unique_ptr<ValidationContext> _context;
     std::unique_ptr<Environment> _environment;
+    TypeBuilder _type_builder;
     std::ostream &_out;
     bool _error;
 

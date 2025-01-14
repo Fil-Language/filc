@@ -31,6 +31,8 @@
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 
+#include <filc/grammar/array/Array.h>
+
 using namespace filc;
 
 DumpVisitor::DumpVisitor(std::ostream &out): _out(out), _indent_level(0) {}
@@ -161,6 +163,16 @@ auto DumpVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> vo
 auto DumpVisitor::visitVariableAddress(VariableAddress *address) -> void {
     printIdent();
     _out << "[VariableAddress:" << address->getName() << "]\n";
+}
+
+auto DumpVisitor::visitArray(Array *array) -> void {
+    printIdent();
+    _out << "[Array:" << array->getSize() << "]\n";
+    _indent_level++;
+    for (const auto &value : array->getValues()) {
+        value->acceptVoidVisitor(this);
+    }
+    _indent_level--;
 }
 
 auto DumpVisitor::printIdent() const -> void {

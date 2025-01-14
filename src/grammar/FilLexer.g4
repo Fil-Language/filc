@@ -49,6 +49,9 @@ GT: '>';
 GTE: '>=';
 LPAREN: '(';
 RPAREN: ')';
+LBRACK: '[';
+RBRACK: ']';
+COMMA: ',';
 AMP: '&';
 
 // Assignation operators

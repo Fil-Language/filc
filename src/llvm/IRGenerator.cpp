@@ -204,3 +204,8 @@ auto IRGenerator::visitVariableAddress(VariableAddress *address) -> llvm::Value 
 
     return alloca;
 }
+
+auto IRGenerator::visitArray(Array *array) -> llvm::Value * {
+    // TODO: alloc array size + add values, return pointer to first value
+    return nullptr;
+}

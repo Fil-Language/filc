@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,42 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_AST_H
-#define FILC_AST_H
+#ifndef FILC_ARRAY_H
+#define FILC_ARRAY_H
+
+#include "filc/grammar/expression/Expression.h"
+
+#include <memory>
+#include <vector>
 
 namespace filc {
-class Program;
+class Array final : public Expression {
+  public:
+    explicit Array(const std::vector<std::shared_ptr<Expression>> &values);
 
-class Expression;
+    [[nodiscard]] auto getValues() const -> const std::vector<std::shared_ptr<Expression>> &;
 
-template<typename T>
-class Literal;
+    [[nodiscard]] auto getSize() const -> unsigned int;
 
-class BooleanLiteral;
+    auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
 
-class IntegerLiteral;
+    auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
 
-class FloatLiteral;
+  private:
+    unsigned long _size;
+    std::vector<std::shared_ptr<Expression>> _values;
+};
+} // namespace filc
 
-class CharacterLiteral;
-
-class StringLiteral;
-
-class VariableDeclaration;
-
-class Identifier;
-
-class BinaryCalcul;
-
-class Assignation;
-
-class Pointer;
-
-class PointerDereferencing;
-
-class VariableAddress;
-
-class Array;
-}
-
-#endif // FILC_AST_H
+#endif // FILC_ARRAY_H

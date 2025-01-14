@@ -27,6 +27,7 @@
 #include "FilParser.h"
 #include "antlr4-runtime.h"
 
+#include <filc/grammar/array/Array.h>
 #include <filc/validation/ValidationVisitor.h>
 
 auto toStringArray(const std::vector<std::string> &data) -> std::vector<char *> {
@@ -132,6 +133,15 @@ auto PrinterVisitor::visitPointerDereferencing(filc::PointerDereferencing *point
 
 auto PrinterVisitor::visitVariableAddress(filc::VariableAddress *address) -> void {
     _out << "&" << address->getName();
+}
+
+auto PrinterVisitor::visitArray(filc::Array *array) -> void {
+    _out << "[";
+    for (const auto &value : array->getValues()) {
+        value->acceptVoidVisitor(this);
+        _out << ", ";
+    }
+    _out << "]";
 }
 
 TokenSourceStub::TokenSourceStub(std::string filename): _filename(std::move(filename)) {}

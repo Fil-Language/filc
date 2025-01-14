@@ -19,7 +19,7 @@ file(READ ${CMAKE_CURRENT_SOURCE_DIR}/VERSION FILC_VERSION)
 project(
         filc
         VERSION ${FILC_VERSION}
-        LANGUAGES CXX
+        LANGUAGES C CXX
 )
 
 include(FetchContent)
@@ -91,8 +91,8 @@ message(DEBUG SRC_FILES=${SRC_FILES})
 add_library(filc_lib ${SRC_FILES} ${ANTLR_Lexer_CXX_OUTPUTS} ${ANTLR_Parser_CXX_OUTPUTS})
 target_link_libraries(filc_lib PRIVATE additional_config cxxopts::cxxopts antlr4_static ${llvm_libs} ${llvm_targets})
 
-target_include_directories(filc_lib PUBLIC
-        "${PROJECT_SOURCE_DIR}/include"
+target_include_directories(filc_lib PUBLIC "${PROJECT_SOURCE_DIR}/include")
+target_include_directories(filc_lib SYSTEM PUBLIC
         ${cxxopts_INCLUDE_DIR}
         ${ANTLR4_INCLUDE_DIR}
         ${ANTLR_Lexer_OUTPUT_DIR}

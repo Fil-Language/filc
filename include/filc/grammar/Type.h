@@ -86,6 +86,25 @@ class PointerType final : public AbstractType {
     std::shared_ptr<AbstractType> _pointed_type;
 };
 
+class ArrayType final : public AbstractType {
+  public:
+    ArrayType(unsigned int size, std::shared_ptr<AbstractType> contained_type);
+
+    [[nodiscard]] auto getName() const noexcept -> std::string override;
+
+    [[nodiscard]] auto getDisplayName() const noexcept -> std::string override;
+
+    [[nodiscard]] auto toDisplay() const noexcept -> std::string override;
+
+    [[nodiscard]] auto getContainedType() const noexcept -> std::shared_ptr<AbstractType>;
+
+    auto generateLLVMType(llvm::LLVMContext *context) -> void override;
+
+  private:
+    unsigned int _size;
+    std::shared_ptr<AbstractType> _contained_type;
+};
+
 class AliasType final : public AbstractType {
   public:
     AliasType(std::string name, std::shared_ptr<AbstractType> aliased_type);
