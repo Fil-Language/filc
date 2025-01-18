@@ -61,6 +61,8 @@ template<typename Return> class Visitor {
 
     virtual auto visitArray(Array *array) -> Return = 0;
 
+    virtual auto visitArrayAccess(ArrayAccess *array) -> Return = 0;
+
   protected:
     Visitor() = default;
 };

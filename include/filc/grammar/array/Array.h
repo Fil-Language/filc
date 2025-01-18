@@ -46,6 +46,28 @@ class Array final : public Expression {
     unsigned long _size;
     std::vector<std::shared_ptr<Expression>> _values;
 };
+
+class ArrayAccess final : public Expression {
+  public:
+    ArrayAccess(std::string name, unsigned int index);
+
+    [[nodiscard]] auto getName() const -> std::string;
+
+    [[nodiscard]] auto getIndex() const -> unsigned int;
+
+    auto setArrayType(const std::shared_ptr<ArrayType> &array_type) -> void;
+
+    [[nodiscard]] auto getArrayType() const -> const std::shared_ptr<ArrayType> &;
+
+    auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
+
+    auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
+
+  private:
+    std::string _name;
+    unsigned int _index;
+    std::shared_ptr<ArrayType> _array_type;
+};
 } // namespace filc
 
 #endif // FILC_ARRAY_H

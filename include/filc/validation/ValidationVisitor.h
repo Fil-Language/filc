@@ -100,6 +100,8 @@ class ValidationVisitor final : public Visitor<void> {
 
     auto visitArray(Array *array) -> void override;
 
+    auto visitArrayAccess(ArrayAccess *array) -> void override;
+
   private:
     std::unique_ptr<ValidationContext> _context;
     std::unique_ptr<Environment> _environment;

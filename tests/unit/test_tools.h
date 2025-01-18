@@ -72,6 +72,8 @@ class PrinterVisitor final: public filc::Visitor<void> {
 
     auto visitArray(filc::Array *array) -> void override;
 
+    auto visitArrayAccess(filc::ArrayAccess *array) -> void override;
+
   private:
     std::stringstream _out;
 };

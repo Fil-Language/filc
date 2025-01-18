@@ -473,3 +473,43 @@ TEST(ValidationVisitor, array_emptyCast) {
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("char[0]", program->getExpressions()[0]->getType()->getDisplayName().c_str());
 }
+
+TEST(ValidationVisitor, arrayAccess_unknownName) {
+    VISITOR;
+    const auto program = parseString("foo[0]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Unknown name, don't know what it refers to: foo")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, arrayAccess_notAnArray) {
+    VISITOR;
+    const auto program = parseString("val foo = 2;foo[0]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Cannot access to offset on a variable of type int")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, arrayAccess_outOfBound) {
+    VISITOR;
+    const auto program = parseString("val foo = [25];foo[5]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}),
+        HasSubstr("Out of bound access to an array. Array has a size of 1")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, arrayAccess_valid) {
+    VISITOR;
+    const auto program = parseString("val foo = [1];foo[0]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("i32", program->getExpressions()[1]->getType()->getName().c_str());
+}

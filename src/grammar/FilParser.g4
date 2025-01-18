@@ -62,6 +62,9 @@ expression returns[std::shared_ptr<filc::Expression> tree]
     | v=variable_declaration {
         $tree = $v.tree;
     }
+    | aa=array_access {
+        $tree = $aa.tree;
+    }
     | i=IDENTIFIER {
         $tree = std::make_shared<filc::Identifier>($i.text);
     }
@@ -206,3 +209,8 @@ array_values returns[std::vector<std::shared_ptr<filc::Expression>> values]
         auto values_to_insert = $v.values;
         $values.insert($values.end(), values_to_insert.begin(), values_to_insert.end());
     })?;
+
+array_access returns[std::shared_ptr<filc::ArrayAccess> tree]
+    : i=IDENTIFIER LBRACK n=INTEGER RBRACK {
+        $tree = std::make_shared<filc::ArrayAccess>($i.text, stoi($n.text));
+    };

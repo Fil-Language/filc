@@ -134,3 +134,16 @@ TEST(IRGenerator, variableAddress_notThrow) {
     ASSERT_THAT(ir, HasSubstr("store i32 0, ptr %0")); // bar = &foo
     ASSERT_THAT(ir, HasSubstr("ret i32 %1"));          // Register %1 is *foo
 }
+
+TEST(IRGenerator, array_notThrow) {
+    const auto ir = getIR("[1, 2, 3];0");
+    ASSERT_THAT(ir, HasSubstr("alloca [3 x i32]"));
+    ASSERT_THAT(ir, HasSubstr("store i32 1"));
+    ASSERT_THAT(ir, HasSubstr("store i32 2"));
+    ASSERT_THAT(ir, HasSubstr("store i32 3"));
+}
+
+TEST(IRGenerator, arrayAccess_notThrow) {
+    const auto ir = getIR("val foo = [0];foo[0]");
+    ASSERT_THAT(ir, HasSubstr("ret i32 %3"));
+}

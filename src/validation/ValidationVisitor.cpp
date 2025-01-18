@@ -435,3 +435,34 @@ auto ValidationVisitor::visitArray(Array *array) -> void {
         displayWarning("Value not used", array->getPosition());
     }
 }
+
+auto ValidationVisitor::visitArrayAccess(ArrayAccess *array) -> void {
+    if (! _environment->hasName(array->getName())) {
+        displayError("Unknown name, don't know what it refers to: " + array->getName(), array->getPosition());
+        return;
+    }
+
+    const auto name = _environment->getName(array->getName());
+    const auto type = std::dynamic_pointer_cast<ArrayType>(name.getType());
+    if (type == nullptr) {
+        displayError(
+            "Cannot access to offset on a variable of type " + name.getType()->toDisplay(), array->getPosition()
+        );
+        return;
+    }
+
+    if (array->getIndex() >= type->getSize()) {
+        displayError(
+            "Out of bound access to an array. Array has a size of " + std::to_string(type->getSize()),
+            array->getPosition()
+        );
+        return;
+    }
+
+    array->setArrayType(type);
+    array->setType(type->getContainedType());
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", array->getPosition());
+    }
+}

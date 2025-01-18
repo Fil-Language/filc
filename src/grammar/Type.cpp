@@ -94,6 +94,10 @@ auto ArrayType::getDisplayName() const noexcept -> std::string {
     return _contained_type->getDisplayName() + "[" + std::to_string(_size) + "]";
 }
 
+auto ArrayType::getSize() const noexcept -> unsigned int {
+    return _size;
+}
+
 auto ArrayType::getContainedType() const noexcept -> std::shared_ptr<AbstractType> {
     return _contained_type;
 }

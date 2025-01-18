@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,44 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_AST_H
-#define FILC_AST_H
+#include "test_tools.h"
 
-namespace filc {
-class Program;
+#include <filc/grammar/array/Array.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-class Expression;
+using namespace ::testing;
 
-template<typename T>
-class Literal;
-
-class BooleanLiteral;
-
-class IntegerLiteral;
-
-class FloatLiteral;
-
-class CharacterLiteral;
-
-class StringLiteral;
-
-class VariableDeclaration;
-
-class Identifier;
-
-class BinaryCalcul;
-
-class Assignation;
-
-class Pointer;
-
-class PointerDereferencing;
-
-class VariableAddress;
-
-class Array;
-
-class ArrayAccess;
+TEST(ArrayAccess, parsing) {
+    const auto program     = parseString("foo[12]");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    const auto array_access = std::dynamic_pointer_cast<filc::ArrayAccess>(expressions[0]);
+    ASSERT_NE(nullptr, array_access);
+    ASSERT_STREQ("foo", array_access->getName().c_str());
+    ASSERT_EQ(12, array_access->getIndex());
 }
-
-#endif // FILC_AST_H

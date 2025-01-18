@@ -175,6 +175,11 @@ auto DumpVisitor::visitArray(Array *array) -> void {
     _indent_level--;
 }
 
+auto DumpVisitor::visitArrayAccess(ArrayAccess *array) -> void {
+    printIdent();
+    _out << "[ArrayAccess:" << array->getName() << ":" << array->getIndex() << "]\n";
+}
+
 auto DumpVisitor::printIdent() const -> void {
     _out << std::string(_indent_level, '\t');
 }

@@ -96,6 +96,8 @@ class ArrayType final : public AbstractType {
 
     [[nodiscard]] auto toDisplay() const noexcept -> std::string override;
 
+    [[nodiscard]] auto getSize() const noexcept -> unsigned int;
+
     [[nodiscard]] auto getContainedType() const noexcept -> std::shared_ptr<AbstractType>;
 
     auto generateLLVMType(llvm::LLVMContext *context) -> void override;

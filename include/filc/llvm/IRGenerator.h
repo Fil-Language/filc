@@ -70,6 +70,8 @@ class IRGenerator final: public Visitor<llvm::Value *> {
 
     auto visitArray(Array *array) -> llvm::Value * override;
 
+    auto visitArrayAccess(ArrayAccess *array) -> llvm::Value * override;
+
   private:
     std::unique_ptr<llvm::LLVMContext> _llvm_context;
     std::unique_ptr<llvm::Module> _module;

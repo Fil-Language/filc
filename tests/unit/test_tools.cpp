@@ -144,6 +144,10 @@ auto PrinterVisitor::visitArray(filc::Array *array) -> void {
     _out << "]";
 }
 
+auto PrinterVisitor::visitArrayAccess(filc::ArrayAccess *array) -> void {
+    _out << array->getName() << "[" << array->getIndex() << "]";
+}
+
 TokenSourceStub::TokenSourceStub(std::string filename): _filename(std::move(filename)) {}
 
 auto TokenSourceStub::nextToken() -> std::unique_ptr<antlr4::Token> {

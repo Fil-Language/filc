@@ -32,6 +32,7 @@
 #include "filc/grammar/variable/Variable.h"
 #include "filc/llvm/CalculBuilder.h"
 
+#include <filc/grammar/array/Array.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/MC/MCTargetOptions.h>
@@ -74,7 +75,9 @@ auto IRGenerator::toTarget(const std::string &output_file, const std::string &ta
         return 1;
     }
     const llvm::TargetOptions options;
-    const auto target_machine = target->createTargetMachine(used_target_triple, "", "", options, llvm::Reloc::PIC_);
+    const auto target_machine = target->createTargetMachine(
+        used_target_triple, "", "", options, llvm::Reloc::PIC_, std::nullopt, llvm::CodeGenOptLevel::None
+    );
 
     _module->setDataLayout(target_machine->createDataLayout());
     _module->setTargetTriple(used_target_triple);
@@ -206,6 +209,22 @@ auto IRGenerator::visitVariableAddress(VariableAddress *address) -> llvm::Value 
 }
 
 auto IRGenerator::visitArray(Array *array) -> llvm::Value * {
-    // TODO: alloc array size + add values, return pointer to first value
-    return nullptr;
+    const auto array_type    = array->getType()->getLLVMType(_llvm_context.get());
+    const auto alloca        = _builder->CreateAlloca(array_type, array->getSize());
+    const auto &array_values = array->getValues();
+    for (unsigned int i = 0; i < array_values.size(); ++i) {
+        const auto llvm_value   = array_values[i]->acceptIRVisitor(this);
+        const auto array_access = _builder->CreateConstInBoundsGEP2_64(array_type, alloca, 0, i);
+        _builder->CreateStore(llvm_value, array_access);
+    }
+
+    return alloca;
+}
+
+auto IRGenerator::visitArrayAccess(ArrayAccess *array) -> llvm::Value * {
+    const auto value = _context.getValue(array->getName());
+    const auto gep   = _builder->CreateConstInBoundsGEP2_64(
+        array->getArrayType()->getLLVMType(_llvm_context.get()), value, 0, array->getIndex()
+    );
+    return _builder->CreateLoad(array->getType()->getLLVMType(_llvm_context.get()), gep);
 }
