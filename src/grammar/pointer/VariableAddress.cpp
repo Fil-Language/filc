@@ -23,14 +23,12 @@
  */
 #include "filc/grammar/pointer/Pointer.h"
 
-#include <utility>
-
 using namespace filc;
 
-VariableAddress::VariableAddress(std::string name): _name(std::move(name)) {}
+VariableAddress::VariableAddress(const std::shared_ptr<Expression> &variable): _variable(variable) {}
 
-auto VariableAddress::getName() const -> std::string {
-    return _name;
+auto VariableAddress::getVariable() const -> std::shared_ptr<Expression> {
+    return _variable;
 }
 
 auto VariableAddress::acceptVoidVisitor(Visitor<void> *visitor) -> void {

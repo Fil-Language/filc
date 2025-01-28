@@ -193,17 +193,13 @@ auto IRGenerator::visitPointer(Pointer *pointer) -> llvm::Value * {
 }
 
 auto IRGenerator::visitPointerDereferencing(PointerDereferencing *pointer) -> llvm::Value * {
-    const auto pointer_value = _context.getValue(pointer->getName());
-    if (pointer_value == nullptr) {
-        throw std::logic_error("Tried to access to a variable without a value set");
-    }
-
+    const auto pointer_value = pointer->getPointer()->acceptIRVisitor(this);
     return _builder->CreateLoad(pointer->getType()->getLLVMType(_llvm_context.get()), pointer_value);
 }
 
 auto IRGenerator::visitVariableAddress(VariableAddress *address) -> llvm::Value * {
-    const auto value  = _context.getValue(address->getName());
-    const auto alloca = _builder->CreateAlloca(value->getType());
+    const auto value  = address->getVariable()->acceptIRVisitor(this);
+    const auto alloca = _builder->CreateAlloca(address->getType()->getLLVMType(_llvm_context.get()));
     _builder->CreateStore(value, alloca);
 
     return alloca;

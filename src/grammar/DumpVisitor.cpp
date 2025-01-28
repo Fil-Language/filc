@@ -157,12 +157,18 @@ auto DumpVisitor::visitPointer(Pointer *pointer) -> void {
 
 auto DumpVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> void {
     printIdent();
-    _out << "[PointerDereferencing:" << pointer->getName() << "]\n";
+    _out << "[PointerDereferencing]\n";
+    _indent_level++;
+    pointer->getPointer()->acceptVoidVisitor(this);
+    _indent_level--;
 }
 
 auto DumpVisitor::visitVariableAddress(VariableAddress *address) -> void {
     printIdent();
-    _out << "[VariableAddress:" << address->getName() << "]\n";
+    _out << "[VariableAddress]\n";
+    _indent_level++;
+    address->getVariable()->acceptVoidVisitor(this);
+    _indent_level--;
 }
 
 auto DumpVisitor::visitArray(Array *array) -> void {

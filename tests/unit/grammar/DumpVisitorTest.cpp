@@ -195,12 +195,14 @@ TEST(DumpVisitor, Pointer) {
 
 TEST(DumpVisitor, PointerDereferencing) {
     const auto dump = dumpProgram("*foo");
-    ASSERT_THAT(dump, SizeIs(1));
-    ASSERT_STREQ("[PointerDereferencing:foo]", dump[0].c_str());
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[PointerDereferencing]", dump[0].c_str());
+    ASSERT_STREQ("\t[Identifier:foo]", dump[1].c_str());
 }
 
 TEST(DumpVisitor, VariableAddress) {
     const auto dump = dumpProgram("&foo");
-    ASSERT_THAT(dump, SizeIs(1));
-    ASSERT_STREQ("[VariableAddress:foo]", dump[0].c_str());
+    ASSERT_THAT(dump, SizeIs(2));
+    ASSERT_STREQ("[VariableAddress]", dump[0].c_str());
+    ASSERT_STREQ("\t[Identifier:foo]", dump[1].c_str());
 }

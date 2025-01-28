@@ -51,30 +51,30 @@ class Pointer final : public Expression {
 
 class PointerDereferencing final : public Expression {
   public:
-    explicit PointerDereferencing(std::string name);
+    explicit PointerDereferencing(const std::shared_ptr<Expression> &pointer);
 
-    [[nodiscard]] auto getName() const -> std::string;
+    [[nodiscard]] auto getPointer() const -> std::shared_ptr<Expression>;
 
     auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
 
     auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
 
   private:
-    std::string _name;
+    std::shared_ptr<Expression> _pointer;
 };
 
 class VariableAddress final : public Expression {
   public:
-    explicit VariableAddress(std::string name);
+    explicit VariableAddress(const std::shared_ptr<Expression> &variable);
 
-    [[nodiscard]] auto getName() const -> std::string;
+    [[nodiscard]] auto getVariable() const -> std::shared_ptr<Expression>;
 
     auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
 
     auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
 
   private:
-    std::string _name;
+    std::shared_ptr<Expression> _variable;
 };
 } // namespace filc
 

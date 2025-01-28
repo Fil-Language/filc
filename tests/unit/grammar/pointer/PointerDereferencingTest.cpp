@@ -23,6 +23,7 @@
  */
 #include "test_tools.h"
 
+#include <filc/grammar/identifier/Identifier.h>
 #include <filc/grammar/pointer/Pointer.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -35,5 +36,7 @@ TEST(PointerDereferencing, parsing) {
     ASSERT_THAT(expressions, SizeIs(1));
     const auto pointer_dereferencing = std::dynamic_pointer_cast<filc::PointerDereferencing>(expressions[0]);
     ASSERT_NE(nullptr, pointer_dereferencing);
-    ASSERT_STREQ("foo", pointer_dereferencing->getName().c_str());
+    const auto pointer = std::dynamic_pointer_cast<filc::Identifier>(pointer_dereferencing->getPointer());
+    ASSERT_NE(nullptr, pointer_dereferencing);
+    ASSERT_STREQ("foo", pointer->getName().c_str());
 }

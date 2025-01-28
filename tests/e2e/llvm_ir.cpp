@@ -65,6 +65,10 @@ TEST(ir_dump, address_program) {
     ASSERT_EQ(4, getProgramResult("val foo = 4;val bar = &foo;*bar"));
 }
 
+TEST(ir_dump, pointer_address_program) {
+    ASSERT_EQ(3, getProgramResult("val foo = new i32(3);**&*&foo"));
+}
+
 TEST(ir_dump, array_program) {
     ASSERT_EQ(2, getProgramResult("val foo = [1, 2, 3];foo[1]"));
     ASSERT_EQ(6, getProgramResult("[4, 5, 6][2]"));

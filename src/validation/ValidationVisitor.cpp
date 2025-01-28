@@ -334,13 +334,16 @@ auto ValidationVisitor::visitPointer(Pointer *pointer) -> void {
 }
 
 auto ValidationVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> void {
-    if (! _environment->hasName(pointer->getName())) {
-        displayError("Unknown name, don't know what it refers to: " + pointer->getName(), pointer->getPosition());
+    _context->stack();
+    _context->set("return", true);
+    pointer->getPointer()->acceptVoidVisitor(this);
+    _context->unstack();
+
+    const auto pointer_type = pointer->getPointer()->getType();
+    if (pointer_type == nullptr) {
         return;
     }
-
-    const auto name = _environment->getName(pointer->getName());
-    const auto type = std::dynamic_pointer_cast<PointerType>(name.getType());
+    const auto type = std::dynamic_pointer_cast<PointerType>(pointer_type);
     if (type == nullptr) {
         displayError("Cannot dereference a variable which is not a pointer", pointer->getPosition());
         return;
@@ -354,13 +357,15 @@ auto ValidationVisitor::visitPointerDereferencing(PointerDereferencing *pointer)
 }
 
 auto ValidationVisitor::visitVariableAddress(VariableAddress *address) -> void {
-    if (! _environment->hasName(address->getName())) {
-        displayError("Unknown name, don't know what it refers to: " + address->getName(), address->getPosition());
+    _context->stack();
+    _context->set("return", true);
+    address->getVariable()->acceptVoidVisitor(this);
+    _context->unstack();
+
+    const auto pointed_type = address->getVariable()->getType();
+    if (pointed_type == nullptr) {
         return;
     }
-
-    const auto name                    = _environment->getName(address->getName());
-    const auto pointed_type            = name.getType();
     std::shared_ptr<AbstractType> type = nullptr;
     if (_environment->hasType(pointed_type->getName() + "*")) {
         type = _environment->getType(pointed_type->getName() + "*");

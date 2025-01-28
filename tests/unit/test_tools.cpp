@@ -128,11 +128,13 @@ auto PrinterVisitor::visitPointer(filc::Pointer *pointer) -> void {
 }
 
 auto PrinterVisitor::visitPointerDereferencing(filc::PointerDereferencing *pointer) -> void {
-    _out << "*" << pointer->getName();
+    _out << "*";
+    pointer->getPointer()->acceptVoidVisitor(this);
 }
 
 auto PrinterVisitor::visitVariableAddress(filc::VariableAddress *address) -> void {
-    _out << "&" << address->getName();
+    _out << "&";
+    address->getVariable()->acceptVoidVisitor(this);
 }
 
 auto PrinterVisitor::visitArray(filc::Array *array) -> void {

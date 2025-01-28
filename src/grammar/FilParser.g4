@@ -181,11 +181,11 @@ pointer returns[std::shared_ptr<filc::Pointer> tree]
     };
 
 pointer_operation returns[std::shared_ptr<filc::Expression> tree]
-    : STAR i=IDENTIFIER {
-        $tree = std::make_shared<filc::PointerDereferencing>($i.text);
+    : STAR e=expression {
+        $tree = std::make_shared<filc::PointerDereferencing>($e.tree);
     }
-    | AMP i=IDENTIFIER {
-        $tree = std::make_shared<filc::VariableAddress>($i.text);
+    | AMP e=expression {
+        $tree = std::make_shared<filc::VariableAddress>($e.tree);
     };
 
 array returns[std::shared_ptr<filc::Array> tree]
