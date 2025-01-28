@@ -25,22 +25,15 @@
 
 using namespace filc;
 
-ArrayAccess::ArrayAccess(std::string name, const unsigned int index): _name(std::move(name)), _index(index) {}
+ArrayAccess::ArrayAccess(std::shared_ptr<Expression> array, const unsigned int index)
+    : _array(std::move(array)), _index(index) {}
 
-auto ArrayAccess::getName() const -> std::string {
-    return _name;
+auto ArrayAccess::getArray() const -> std::shared_ptr<Expression> {
+    return _array;
 }
 
 auto ArrayAccess::getIndex() const -> unsigned int {
     return _index;
-}
-
-auto ArrayAccess::setArrayType(const std::shared_ptr<ArrayType> &array_type) -> void {
-    _array_type = array_type;
-}
-
-auto ArrayAccess::getArrayType() const -> const std::shared_ptr<ArrayType> & {
-    return _array_type;
 }
 
 auto ArrayAccess::acceptVoidVisitor(Visitor<void> *visitor) -> void {

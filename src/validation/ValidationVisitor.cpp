@@ -39,7 +39,7 @@
 using namespace filc;
 
 ValidationVisitor::ValidationVisitor(std::ostream &out)
-    : _context(new ValidationContext()), _environment(new Environment()), _type_builder(_environment.get()), _out(out),
+    : _context(new VisitorContext()), _environment(new Environment()), _type_builder(_environment.get()), _out(out),
       _error(false) {}
 
 auto ValidationVisitor::getEnvironment() const -> const Environment * {
@@ -378,6 +378,7 @@ auto ValidationVisitor::visitVariableAddress(VariableAddress *address) -> void {
 
 auto ValidationVisitor::visitArray(Array *array) -> void {
     if (array->getSize() == 0) {
+        array->setFullSize(0);
         if (_context->has("cast_type")) {
             array->setType(_context->get<std::shared_ptr<AbstractType>>("cast_type"));
         } else {
@@ -404,6 +405,7 @@ auto ValidationVisitor::visitArray(Array *array) -> void {
         }
 
         std::vector<std::shared_ptr<AbstractType>> values_types;
+        unsigned long full_size = 0;
         for (const auto &value : array->getValues()) {
             value->acceptVoidVisitor(this);
 
@@ -412,7 +414,15 @@ auto ValidationVisitor::visitArray(Array *array) -> void {
                 return;
             }
             values_types.push_back(value_type);
+
+            if (_context->has("array_size")) {
+                full_size += _context->get<unsigned long>("array_size");
+                _context->unset("array_size");
+            } else {
+                full_size++;
+            }
         }
+        array->setFullSize(full_size);
 
         if (_context->has("cast_type")) {
             _context->unstack();
@@ -431,38 +441,40 @@ auto ValidationVisitor::visitArray(Array *array) -> void {
         array->setType(_environment->getType(type_name));
     }
 
+    _context->set("array_size", array->getFullSize());
+
     if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("Value not used", array->getPosition());
     }
 }
 
-auto ValidationVisitor::visitArrayAccess(ArrayAccess *array) -> void {
-    if (! _environment->hasName(array->getName())) {
-        displayError("Unknown name, don't know what it refers to: " + array->getName(), array->getPosition());
+auto ValidationVisitor::visitArrayAccess(ArrayAccess *array_access) -> void {
+    const auto array = array_access->getArray();
+    array->acceptVoidVisitor(this);
+
+    const auto array_type = array->getType();
+    if (array_type == nullptr) {
         return;
     }
-
-    const auto name = _environment->getName(array->getName());
-    const auto type = std::dynamic_pointer_cast<ArrayType>(name.getType());
+    const auto type = std::dynamic_pointer_cast<ArrayType>(array_type);
     if (type == nullptr) {
         displayError(
-            "Cannot access to offset on a variable of type " + name.getType()->toDisplay(), array->getPosition()
+            "Cannot access to offset on a variable of type " + array_type->toDisplay(), array_access->getPosition()
         );
         return;
     }
 
-    if (array->getIndex() >= type->getSize()) {
+    if (array_access->getIndex() >= type->getSize()) {
         displayError(
             "Out of bound access to an array. Array has a size of " + std::to_string(type->getSize()),
-            array->getPosition()
+            array_access->getPosition()
         );
         return;
     }
 
-    array->setArrayType(type);
-    array->setType(type->getContainedType());
+    array_access->setType(type->getContainedType());
 
     if (! _context->has("return") || ! _context->get<bool>("return")) {
-        displayWarning("Value not used", array->getPosition());
+        displayWarning("Value not used", array_access->getPosition());
     }
 }

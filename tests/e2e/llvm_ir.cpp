@@ -67,4 +67,14 @@ TEST(ir_dump, address_program) {
 
 TEST(ir_dump, array_program) {
     ASSERT_EQ(2, getProgramResult("val foo = [1, 2, 3];foo[1]"));
+    ASSERT_EQ(6, getProgramResult("[4, 5, 6][2]"));
+}
+
+TEST(ir_dump, multi_dim_array_program) {
+    ASSERT_EQ(5, getProgramResult("[[1, 2, 3], [4, 5, 6], [7, 8, 9]][1][1]"));
+    ASSERT_EQ(
+        1,
+        getProgramResult("[[[0, 1, 2], [3, 4, 5], [6, 7, 8]], [[9, 0, 1], [2, 3, 4], [5, 6, 7]], [[8, 9, 0], [1, 2, "
+                         "3], [4, 5, 6]]][2][1][0]")
+    );
 }

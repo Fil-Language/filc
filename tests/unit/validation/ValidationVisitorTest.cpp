@@ -23,6 +23,7 @@
  */
 #include "test_tools.h"
 
+#include <filc/grammar/array/Array.h>
 #include <filc/grammar/expression/Expression.h>
 #include <filc/validation/ValidationVisitor.h>
 #include <gmock/gmock.h>
@@ -434,6 +435,16 @@ TEST(ValidationVisitor, array_valid) {
     ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("i32[3]", program->getExpressions()[0]->getType()->getName().c_str());
+}
+
+TEST(ValidationVisitor, array_validFullSize) {
+    VISITOR;
+    const auto program = parseString("[[1, 2], [3, 4]];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_FALSE(visitor.hasError());
+    const auto array = std::dynamic_pointer_cast<filc::Array>(program->getExpressions()[0]);
+    ASSERT_STREQ("i32[2][2]", array->getType()->getName().c_str());
+    ASSERT_EQ(4, array->getFullSize());
 }
 
 TEST(ValidationVisitor, array_validCast) {

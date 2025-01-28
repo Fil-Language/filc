@@ -25,14 +25,23 @@
 
 using namespace filc;
 
-Array::Array(const std::vector<std::shared_ptr<Expression>> &values): _size(values.size()), _values(values) {}
+Array::Array(const std::vector<std::shared_ptr<Expression>> &values)
+    : _size(values.size()), _full_size(0), _values(values) {}
 
 auto Array::getValues() const -> const std::vector<std::shared_ptr<Expression>> & {
     return _values;
 }
 
-auto Array::getSize() const -> unsigned int {
+auto Array::getSize() const -> unsigned long {
     return _size;
+}
+
+auto Array::setFullSize(const unsigned long full_size) -> void {
+    _full_size = full_size;
+}
+
+auto Array::getFullSize() const -> unsigned long {
+    return _full_size;
 }
 
 auto Array::acceptVoidVisitor(Visitor<void> *visitor) -> void {

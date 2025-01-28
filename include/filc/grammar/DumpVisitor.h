@@ -60,7 +60,7 @@ class DumpVisitor final: public Visitor<void> {
 
     auto visitArray(Array *array) -> void override;
 
-    auto visitArrayAccess(ArrayAccess *array) -> void override;
+    auto visitArrayAccess(ArrayAccess *array_access) -> void override;
 
   private:
     std::ostream &_out;

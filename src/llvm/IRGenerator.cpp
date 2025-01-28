@@ -45,9 +45,10 @@
 using namespace filc;
 
 IRGenerator::IRGenerator(const std::string &filename, const Environment *environment) {
-    _llvm_context = std::make_unique<llvm::LLVMContext>();
-    _module       = std::make_unique<llvm::Module>(llvm::StringRef(filename), *_llvm_context);
-    _builder      = std::make_unique<llvm::IRBuilder<>>(*_llvm_context);
+    _visitor_context = std::make_unique<VisitorContext>();
+    _llvm_context    = std::make_unique<llvm::LLVMContext>();
+    _module          = std::make_unique<llvm::Module>(llvm::StringRef(filename), *_llvm_context);
+    _builder         = std::make_unique<llvm::IRBuilder<>>(*_llvm_context);
     environment->prepareLLVMTypes(_llvm_context.get());
 }
 
@@ -209,22 +210,47 @@ auto IRGenerator::visitVariableAddress(VariableAddress *address) -> llvm::Value 
 }
 
 auto IRGenerator::visitArray(Array *array) -> llvm::Value * {
-    const auto array_type    = array->getType()->getLLVMType(_llvm_context.get());
-    const auto alloca        = _builder->CreateAlloca(array_type, array->getSize());
+    const auto array_type   = array->getType()->getLLVMType(_llvm_context.get());
+    const auto in_array_def = _visitor_context->has("in_array_def");
+    const auto alloca
+        = in_array_def
+            ? nullptr
+            : _builder->CreateAlloca(
+                  array_type, llvm::ConstantInt::get(*_llvm_context, llvm::APInt(64, array->getFullSize(), false))
+              );
     const auto &array_values = array->getValues();
     for (unsigned int i = 0; i < array_values.size(); ++i) {
-        const auto llvm_value   = array_values[i]->acceptIRVisitor(this);
-        const auto array_access = _builder->CreateConstInBoundsGEP2_64(array_type, alloca, 0, i);
-        _builder->CreateStore(llvm_value, array_access);
+        const auto array_value = in_array_def ? _visitor_context->get<llvm::Value *>("in_array_def") : alloca;
+        _visitor_context->stack();
+
+        const auto array_access = _builder->CreateConstInBoundsGEP2_64(array_type, array_value, 0, i);
+        _visitor_context->set("in_array_def", array_access);
+        const auto llvm_value = array_values[i]->acceptIRVisitor(this);
+
+        if (! _visitor_context->has("was_in_array_def") || ! _visitor_context->get<bool>("was_in_array_def")) {
+            _builder->CreateStore(llvm_value, array_access);
+        }
+
+        _visitor_context->unstack();
     }
+
+    _visitor_context->set("was_in_array_def", true);
 
     return alloca;
 }
 
-auto IRGenerator::visitArrayAccess(ArrayAccess *array) -> llvm::Value * {
-    const auto value = _context.getValue(array->getName());
-    const auto gep   = _builder->CreateConstInBoundsGEP2_64(
-        array->getArrayType()->getLLVMType(_llvm_context.get()), value, 0, array->getIndex()
+auto IRGenerator::visitArrayAccess(ArrayAccess *array_access) -> llvm::Value * {
+    _visitor_context->stack();
+    _visitor_context->set("in_array_access", true);
+    const auto value = array_access->getArray()->acceptIRVisitor(this);
+    _visitor_context->unstack();
+    const auto gep = _builder->CreateConstInBoundsGEP2_64(
+        array_access->getArray()->getType()->getLLVMType(_llvm_context.get()), value, 0, array_access->getIndex()
     );
-    return _builder->CreateLoad(array->getType()->getLLVMType(_llvm_context.get()), gep);
+
+    if (_visitor_context->has("in_array_access") && _visitor_context->get<bool>("in_array_access")) {
+        return gep;
+    }
+
+    return _builder->CreateLoad(array_access->getType()->getLLVMType(_llvm_context.get()), gep);
 }

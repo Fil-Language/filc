@@ -24,6 +24,7 @@
 #include "test_tools.h"
 
 #include <filc/grammar/array/Array.h>
+#include <filc/grammar/identifier/Identifier.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -35,6 +36,7 @@ TEST(ArrayAccess, parsing) {
     ASSERT_THAT(expressions, SizeIs(1));
     const auto array_access = std::dynamic_pointer_cast<filc::ArrayAccess>(expressions[0]);
     ASSERT_NE(nullptr, array_access);
-    ASSERT_STREQ("foo", array_access->getName().c_str());
+    const auto identifier = std::dynamic_pointer_cast<filc::Identifier>(array_access->getArray());
+    ASSERT_STREQ("foo", identifier->getName().c_str());
     ASSERT_EQ(12, array_access->getIndex());
 }

@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,32 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "filc/validation/ValidationVisitor.h"
+#include "filc/grammar/Visitor.h"
 
 using namespace filc;
 
-ValidationContext::ValidationContext() {
+VisitorContext::VisitorContext() {
     stack();
 }
 
-auto ValidationContext::stack() -> void {
+auto VisitorContext::stack() -> void {
     _values.emplace();
 }
 
-auto ValidationContext::unstack() -> void {
+auto VisitorContext::unstack() -> void {
     if (_values.size() > 1) {
         _values.pop();
     }
 }
 
-auto ValidationContext::set(const std::string &key, const std::any &value) -> void {
+auto VisitorContext::set(const std::string &key, const std::any &value) -> void {
     _values.top()[key] = value;
 }
 
-auto ValidationContext::has(const std::string &key) const -> bool {
+auto VisitorContext::unset(const std::string &key) -> void {
+    _values.top().erase(key);
+}
+
+auto VisitorContext::has(const std::string &key) const -> bool {
     return _values.top().find(key) != _values.top().end();
 }
 
-auto ValidationContext::clear() -> void {
+auto VisitorContext::clear() -> void {
     _values.top().clear();
 }

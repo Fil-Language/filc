@@ -144,8 +144,9 @@ auto PrinterVisitor::visitArray(filc::Array *array) -> void {
     _out << "]";
 }
 
-auto PrinterVisitor::visitArrayAccess(filc::ArrayAccess *array) -> void {
-    _out << array->getName() << "[" << array->getIndex() << "]";
+auto PrinterVisitor::visitArrayAccess(filc::ArrayAccess *array_access) -> void {
+    array_access->getArray()->acceptVoidVisitor(this);
+    _out << "[" << array_access->getIndex() << "]";
 }
 
 TokenSourceStub::TokenSourceStub(std::string filename): _filename(std::move(filename)) {}

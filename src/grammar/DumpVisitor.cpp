@@ -175,9 +175,12 @@ auto DumpVisitor::visitArray(Array *array) -> void {
     _indent_level--;
 }
 
-auto DumpVisitor::visitArrayAccess(ArrayAccess *array) -> void {
+auto DumpVisitor::visitArrayAccess(ArrayAccess *array_access) -> void {
     printIdent();
-    _out << "[ArrayAccess:" << array->getName() << ":" << array->getIndex() << "]\n";
+    _out << "[ArrayAccess:" << array_access->getIndex() << "]\n";
+    _indent_level++;
+    array_access->getArray()->acceptVoidVisitor(this);
+    _indent_level--;
 }
 
 auto DumpVisitor::printIdent() const -> void {

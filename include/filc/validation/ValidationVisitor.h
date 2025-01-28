@@ -29,41 +29,10 @@
 #include "filc/validation/Environment.h"
 #include "filc/validation/TypeBuilder.h"
 
-#include <any>
-#include <map>
 #include <memory>
-#include <stack>
-#include <stdexcept>
 #include <string>
 
 namespace filc {
-class ValidationContext final {
-  public:
-    ValidationContext();
-
-    auto stack() -> void;
-
-    auto unstack() -> void;
-
-    auto set(const std::string &key, const std::any &value) -> void;
-
-    [[nodiscard]] auto has(const std::string &key) const -> bool;
-
-    template<typename T>
-    auto get(const std::string &key) const -> T {
-        if (_values.top().find(key) == _values.top().end()) {
-            throw std::logic_error("There is not value for key: " + key);
-        }
-
-        return std::any_cast<T>(_values.top().at(key));
-    }
-
-    auto clear() -> void;
-
-  private:
-    std::stack<std::map<std::string, std::any>> _values;
-};
-
 class ValidationVisitor final : public Visitor<void> {
   public:
     explicit ValidationVisitor(std::ostream &out);
@@ -100,10 +69,10 @@ class ValidationVisitor final : public Visitor<void> {
 
     auto visitArray(Array *array) -> void override;
 
-    auto visitArrayAccess(ArrayAccess *array) -> void override;
+    auto visitArrayAccess(ArrayAccess *array_access) -> void override;
 
   private:
-    std::unique_ptr<ValidationContext> _context;
+    std::unique_ptr<VisitorContext> _context;
     std::unique_ptr<Environment> _environment;
     TypeBuilder _type_builder;
     std::ostream &_out;
