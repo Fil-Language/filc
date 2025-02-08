@@ -33,6 +33,8 @@
 
 namespace filc {
 class IRGenerator final: public Visitor<llvm::Value *> {
+  friend class CalculBuilder;
+
   public:
     explicit IRGenerator(const std::string &filename, const Environment *environment);
 

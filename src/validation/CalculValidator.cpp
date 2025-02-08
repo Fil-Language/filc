@@ -35,10 +35,8 @@ auto CalculValidator::isCalculValid(
     const std::string &op,
     const std::shared_ptr<AbstractType> &right_type
 ) const -> std::shared_ptr<AbstractType> {
-    if (left_type != right_type) {
-        return nullptr;
-    }
-    const auto type = left_type->getName();
+    const auto left_name  = left_type->getName();
+    const auto right_name = right_type->getName();
 
     const std::vector<std::string> numeric_type = {
       "i8",
@@ -54,16 +52,17 @@ auto CalculValidator::isCalculValid(
       "f32",
       "f64",
     };
-    if (std::find(numeric_type.begin(), numeric_type.end(), type) != numeric_type.end()) {
+    if (std::find(numeric_type.begin(), numeric_type.end(), left_name) != numeric_type.end()
+        && left_type == right_type) {
         return isNumericOperatorValid(left_type, op);
     }
 
-    if (type == "bool") {
+    if (left_name == "bool" && left_type == right_type) {
         return isBoolOperatorValid(op);
     }
 
-    if (type[type.length() - 1] == '*') { // A pointer
-        return isPointerOperatorValid(op);
+    if (left_name[left_name.length() - 1] == '*') { // A pointer
+        return isPointerOperatorValid(op, left_type, right_type);
     }
 
     // We don't know what it is, so we assert it cannot be done
@@ -94,9 +93,31 @@ auto CalculValidator::isBoolOperatorValid(const std::string &op) const -> std::s
     return nullptr;
 }
 
-auto CalculValidator::isPointerOperatorValid(const std::string &op) const -> std::shared_ptr<AbstractType> {
-    if (op == "==" || op == "!=") {
+auto CalculValidator::isPointerOperatorValid(
+    const std::string &op,
+    const std::shared_ptr<AbstractType> &left_type,
+    const std::shared_ptr<AbstractType> &right_type
+) const -> std::shared_ptr<AbstractType> {
+    if ((op == "==" || op == "!=") && left_type == right_type) {
         return _environment->getType("bool");
+    }
+
+    if (op == "+") {
+        const std::vector<std::string> integer_type = {
+          "i8",
+          "i16",
+          "i32",
+          "i64",
+          "i128",
+          "u8",
+          "u16",
+          "u32",
+          "u64",
+          "u128",
+        };
+        if (std::find(integer_type.begin(), integer_type.end(), right_type->getName()) != integer_type.end()) {
+            return left_type;
+        }
     }
 
     return nullptr;

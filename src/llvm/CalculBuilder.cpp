@@ -354,6 +354,21 @@ auto CalculBuilder::buildPointer(const BinaryCalcul *calcul) const -> llvm::Valu
             "pointer_inequality"
         );
     }
+    if (operation == "+") {
+        const auto left_type         = calcul->getLeftExpression()->getType();
+        const auto left_pointer_type = std::dynamic_pointer_cast<PointerType>(left_type);
+        if (left_pointer_type == nullptr) {
+            throw std::logic_error("Left operand of 'pointer +' is not a pointer");
+        }
+
+        const auto add = _builder->CreateGEP(
+            left_pointer_type->getPointedType()->getLLVMType(_generator->_llvm_context.get()),
+            calcul->getLeftExpression()->acceptIRVisitor(_generator),
+            calcul->getRightExpression()->acceptIRVisitor(_generator),
+            "pointer_add"
+        );
+        return add;
+    }
     throw buildError(calcul);
 }
 

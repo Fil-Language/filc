@@ -63,6 +63,13 @@ TEST(CalculValidator, validPointer) {
             ->getName()
             .c_str()
     );
+
+    ASSERT_STREQ(
+        "bool*",
+        validator.isCalculValid(std::make_shared<filc::PointerType>(env->getType("bool")), "+", env->getType("i32"))
+            ->getName()
+            .c_str()
+    );
 }
 
 TEST(CalculValidator, invalidUnknown) {
