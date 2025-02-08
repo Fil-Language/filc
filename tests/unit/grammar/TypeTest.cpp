@@ -49,6 +49,21 @@ TEST(PonterType, getPointedType) {
     ASSERT_STREQ("int", type.getPointedType()->getDisplayName().c_str());
 }
 
+TEST(ArrayType, getName) {
+    const filc::ArrayType type(2, std::make_shared<filc::Type>("int"));
+    ASSERT_STREQ("int[2]", type.getName().c_str());
+}
+
+TEST(ArrayType, getDisplayName) {
+    const filc::ArrayType type(2, std::make_shared<filc::Type>("int"));
+    ASSERT_STREQ("int[2]", type.getDisplayName().c_str());
+}
+
+TEST(ArrayType, getContainedType) {
+    const filc::ArrayType type(2, std::make_shared<filc::Type>("int"));
+    ASSERT_STREQ("int", type.getContainedType()->getName().c_str());
+}
+
 TEST(AliasType, getName) {
     const filc::AliasType type("char", std::make_shared<filc::Type>("u8"));
     ASSERT_STREQ("u8", type.getName().c_str());

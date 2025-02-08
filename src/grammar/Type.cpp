@@ -83,6 +83,36 @@ auto PointerType::generateLLVMType(llvm::LLVMContext *context) -> void {
     setLLVMType(llvm::PointerType::getUnqual(_pointed_type->getLLVMType(context)));
 }
 
+ArrayType::ArrayType(const unsigned int size, std::shared_ptr<AbstractType> contained_type)
+    : _size(size), _contained_type(std::move(contained_type)) {}
+
+auto ArrayType::getName() const noexcept -> std::string {
+    return _contained_type->getName() + "[" + std::to_string(_size) + "]";
+}
+
+auto ArrayType::getDisplayName() const noexcept -> std::string {
+    return _contained_type->getDisplayName() + "[" + std::to_string(_size) + "]";
+}
+
+auto ArrayType::getSize() const noexcept -> unsigned int {
+    return _size;
+}
+
+auto ArrayType::getContainedType() const noexcept -> std::shared_ptr<AbstractType> {
+    return _contained_type;
+}
+
+auto ArrayType::toDisplay() const noexcept -> std::string {
+    if (_contained_type->getName() != _contained_type->getDisplayName()) {
+        return getDisplayName() + " aka " + getName();
+    }
+    return getName();
+}
+
+auto ArrayType::generateLLVMType(llvm::LLVMContext *context) -> void {
+    setLLVMType(llvm::ArrayType::get(_contained_type->getLLVMType(context), _size));
+}
+
 AliasType::AliasType(std::string name, std::shared_ptr<AbstractType> aliased_type)
     : _name(std::move(name)), _aliased_type(std::move(aliased_type)) {}
 

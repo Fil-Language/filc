@@ -23,6 +23,7 @@
  */
 #include "test_tools.h"
 
+#include <filc/grammar/array/Array.h>
 #include <filc/grammar/expression/Expression.h>
 #include <filc/validation/ValidationVisitor.h>
 #include <gmock/gmock.h>
@@ -368,16 +369,6 @@ TEST(ValidationVisitor, pointer_valid) {
     ASSERT_STREQ("i32*", program->getExpressions()[0]->getType()->getName().c_str());
 }
 
-TEST(ValidationVisitor, pointerDereferencing_unknown) {
-    VISITOR;
-    const auto program = parseString("*foo");
-    program->acceptVoidVisitor(&visitor);
-    ASSERT_THAT(
-        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Unknown name, don't know what it refers to: foo")
-    );
-    ASSERT_TRUE(visitor.hasError());
-}
-
 TEST(ValidationVisitor, pointerDereferencing_notAPointer) {
     VISITOR;
     const auto program = parseString("val foo = 'a';*foo");
@@ -397,16 +388,6 @@ TEST(ValidationVisitor, pointerDereferencing_valid) {
     ASSERT_STREQ("i32", program->getExpressions()[1]->getType()->getName().c_str());
 }
 
-TEST(ValidationVisitor, variableAddress_unknown) {
-    VISITOR;
-    const auto program = parseString("&foo");
-    program->acceptVoidVisitor(&visitor);
-    ASSERT_THAT(
-        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Unknown name, don't know what it refers to: foo")
-    );
-    ASSERT_TRUE(visitor.hasError());
-}
-
 TEST(ValidationVisitor, variableAddress_valid) {
     VISITOR;
     const auto program = parseString("val foo = 2;val bar = &foo;*bar");
@@ -415,4 +396,111 @@ TEST(ValidationVisitor, variableAddress_valid) {
     ASSERT_FALSE(visitor.hasError());
     ASSERT_STREQ("i32*", program->getExpressions()[1]->getType()->getName().c_str());
     ASSERT_STREQ("i32", program->getExpressions()[2]->getType()->getName().c_str());
+}
+
+TEST(ValidationVisitor, array_differentType) {
+    VISITOR;
+    const auto program = parseString("[1, true];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("All values of an array should be of the same type")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, array_valid) {
+    VISITOR;
+    const auto program = parseString("val foo = [1, 2, 3];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("i32[3]", program->getExpressions()[0]->getType()->getName().c_str());
+}
+
+TEST(ValidationVisitor, array_validFullSize) {
+    VISITOR;
+    const auto program = parseString("[[1, 2], [3, 4]];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_FALSE(visitor.hasError());
+    const auto array = std::dynamic_pointer_cast<filc::Array>(program->getExpressions()[0]);
+    ASSERT_STREQ("i32[2][2]", array->getType()->getName().c_str());
+    ASSERT_EQ(4, array->getFullSize());
+}
+
+TEST(ValidationVisitor, array_validCast) {
+    VISITOR;
+    const auto program = parseString("val foo: i8[3] = [1, 2, 3];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("i8[3]", program->getExpressions()[0]->getType()->getName().c_str());
+}
+
+TEST(ValidationVisitor, array_invalidCast) {
+    VISITOR;
+    const auto program = parseString("val foo: u32 = [1, 2, 3]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}),
+        HasSubstr("Cannot cast an array to a type not corresponding to an array: u32")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, array_empty) {
+    VISITOR;
+    const auto program = parseString("[];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Value not used"));
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("void[0]", program->getExpressions()[0]->getType()->getName().c_str());
+}
+
+TEST(ValidationVisitor, array_emptyCast) {
+    VISITOR;
+    const auto program = parseString("val foo: char[0] = [];0");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("char[0]", program->getExpressions()[0]->getType()->getDisplayName().c_str());
+}
+
+TEST(ValidationVisitor, arrayAccess_unknownName) {
+    VISITOR;
+    const auto program = parseString("foo[0]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Unknown name, don't know what it refers to: foo")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, arrayAccess_notAnArray) {
+    VISITOR;
+    const auto program = parseString("val foo = 2;foo[0]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}), HasSubstr("Cannot access to offset on a variable of type int")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, arrayAccess_outOfBound) {
+    VISITOR;
+    const auto program = parseString("val foo = [25];foo[5]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(
+        std::string(std::istreambuf_iterator(ss), {}),
+        HasSubstr("Out of bound access to an array. Array has a size of 1")
+    );
+    ASSERT_TRUE(visitor.hasError());
+}
+
+TEST(ValidationVisitor, arrayAccess_valid) {
+    VISITOR;
+    const auto program = parseString("val foo = [1];foo[0]");
+    program->acceptVoidVisitor(&visitor);
+    ASSERT_THAT(std::string(std::istreambuf_iterator(ss), {}), IsEmpty());
+    ASSERT_FALSE(visitor.hasError());
+    ASSERT_STREQ("i32", program->getExpressions()[1]->getType()->getName().c_str());
 }

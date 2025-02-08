@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,32 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "filc/validation/ValidationVisitor.h"
+#include "test_tools.h"
 
-using namespace filc;
+#include <filc/grammar/array/Array.h>
+#include <filc/grammar/identifier/Identifier.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-ValidationContext::ValidationContext() {
-    stack();
-}
+using namespace ::testing;
 
-auto ValidationContext::stack() -> void {
-    _values.emplace();
-}
-
-auto ValidationContext::unstack() -> void {
-    if (_values.size() > 1) {
-        _values.pop();
-    }
-}
-
-auto ValidationContext::set(const std::string &key, const std::any &value) -> void {
-    _values.top()[key] = value;
-}
-
-auto ValidationContext::has(const std::string &key) const -> bool {
-    return _values.top().find(key) != _values.top().end();
-}
-
-auto ValidationContext::clear() -> void {
-    _values.top().clear();
+TEST(ArrayAccess, parsing) {
+    const auto program     = parseString("foo[12]");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    const auto array_access = std::dynamic_pointer_cast<filc::ArrayAccess>(expressions[0]);
+    ASSERT_NE(nullptr, array_access);
+    const auto identifier = std::dynamic_pointer_cast<filc::Identifier>(array_access->getArray());
+    ASSERT_STREQ("foo", identifier->getName().c_str());
+    ASSERT_EQ(12, array_access->getIndex());
 }

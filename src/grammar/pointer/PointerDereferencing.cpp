@@ -23,14 +23,12 @@
  */
 #include "filc/grammar/pointer/Pointer.h"
 
-#include <utility>
-
 using namespace filc;
 
-PointerDereferencing::PointerDereferencing(std::string name): _name(std::move(name)) {}
+PointerDereferencing::PointerDereferencing(const std::shared_ptr<Expression> &pointer): _pointer(pointer) {}
 
-auto PointerDereferencing::getName() const -> std::string {
-    return _name;
+auto PointerDereferencing::getPointer() const -> std::shared_ptr<Expression> {
+    return _pointer;
 }
 
 auto PointerDereferencing::acceptVoidVisitor(Visitor<void> *visitor) -> void {

@@ -64,3 +64,25 @@ TEST(ir_dump, pointer_program) {
 TEST(ir_dump, address_program) {
     ASSERT_EQ(4, getProgramResult("val foo = 4;val bar = &foo;*bar"));
 }
+
+TEST(ir_dump, pointer_address_program) {
+    ASSERT_EQ(3, getProgramResult("val foo = new i32(3);**&*&foo"));
+}
+
+TEST(ir_dump, pointer_arithmetic) {
+    ASSERT_EQ(3, getProgramResult("val foo = new i32(2);val bar = new i32(3);*(foo + 1)"));
+}
+
+TEST(ir_dump, array_program) {
+    ASSERT_EQ(2, getProgramResult("val foo = [1, 2, 3];foo[1]"));
+    ASSERT_EQ(6, getProgramResult("[4, 5, 6][2]"));
+}
+
+TEST(ir_dump, multi_dim_array_program) {
+    ASSERT_EQ(5, getProgramResult("[[1, 2, 3], [4, 5, 6], [7, 8, 9]][1][1]"));
+    ASSERT_EQ(
+        1,
+        getProgramResult("[[[0, 1, 2], [3, 4, 5], [6, 7, 8]], [[9, 0, 1], [2, 3, 4], [5, 6, 7]], [[8, 9, 0], [1, 2, "
+                         "3], [4, 5, 6]]][2][1][0]")
+    );
+}

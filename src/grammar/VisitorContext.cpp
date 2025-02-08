@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,44 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_AST_H
-#define FILC_AST_H
+#include "filc/grammar/Visitor.h"
 
-namespace filc {
-class Program;
+using namespace filc;
 
-class Expression;
-
-template<typename T>
-class Literal;
-
-class BooleanLiteral;
-
-class IntegerLiteral;
-
-class FloatLiteral;
-
-class CharacterLiteral;
-
-class StringLiteral;
-
-class VariableDeclaration;
-
-class Identifier;
-
-class BinaryCalcul;
-
-class Assignation;
-
-class Pointer;
-
-class PointerDereferencing;
-
-class VariableAddress;
-
-class Array;
-
-class ArrayAccess;
+VisitorContext::VisitorContext() {
+    stack();
 }
 
-#endif // FILC_AST_H
+auto VisitorContext::stack() -> void {
+    _values.emplace();
+}
+
+auto VisitorContext::unstack() -> void {
+    if (_values.size() > 1) {
+        _values.pop();
+    }
+}
+
+auto VisitorContext::set(const std::string &key, const std::any &value) -> void {
+    _values.top()[key] = value;
+}
+
+auto VisitorContext::unset(const std::string &key) -> void {
+    _values.top().erase(key);
+}
+
+auto VisitorContext::has(const std::string &key) const -> bool {
+    return _values.top().find(key) != _values.top().end();
+}
+
+auto VisitorContext::clear() -> void {
+    _values.top().clear();
+}

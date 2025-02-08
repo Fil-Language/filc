@@ -130,7 +130,35 @@ TEST(IRGenerator, pointerDereferencing_notThrow) {
 
 TEST(IRGenerator, variableAddress_notThrow) {
     const auto ir = getIR("val foo = 0;val bar = &foo;*bar");
-    ASSERT_THAT(ir, HasSubstr("%0 = alloca i32"));
+    ASSERT_THAT(ir, HasSubstr("%0 = alloca ptr"));
     ASSERT_THAT(ir, HasSubstr("store i32 0, ptr %0")); // bar = &foo
     ASSERT_THAT(ir, HasSubstr("ret i32 %1"));          // Register %1 is *foo
+}
+
+TEST(IRGenerator, array_notThrow) {
+    const auto ir = getIR("[1, 2, 3];0");
+    ASSERT_THAT(ir, HasSubstr("alloca [3 x i32], i64 3, align 4"));
+    ASSERT_THAT(ir, HasSubstr("store i32 1"));
+    ASSERT_THAT(ir, HasSubstr("store i32 2"));
+    ASSERT_THAT(ir, HasSubstr("store i32 3"));
+}
+
+TEST(IRGenerator, array_multiDimensions) {
+    const auto ir2D = getIR("[[1, 2], [3, 4]];0");
+    ASSERT_THAT(ir2D, HasSubstr("alloca [2 x [2 x i32]], i64 4, align 4"));
+
+    const auto ir3D = getIR(
+        "["
+        "   [[0, 1, 2], [3, 4, 5], [6, 7, 8]],"
+        "   [[9, 0, 1], [2, 3, 4], [5, 6, 7]],"
+        "   [[8, 9, 0], [1, 2, 3], [4, 5, 6]]"
+        "]"
+        ";0"
+    );
+    ASSERT_THAT(ir3D, HasSubstr("alloca [3 x [3 x [3 x i32]]], i64 27, align 4"));
+}
+
+TEST(IRGenerator, arrayAccess_notThrow) {
+    const auto ir = getIR("val foo = [0];foo[0]");
+    ASSERT_THAT(ir, HasSubstr("ret i32 %3"));
 }

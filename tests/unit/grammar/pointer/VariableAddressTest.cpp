@@ -23,6 +23,7 @@
  */
 #include "test_tools.h"
 
+#include <filc/grammar/identifier/Identifier.h>
 #include <filc/grammar/pointer/Pointer.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -35,5 +36,7 @@ TEST(VariableAddress, parsing) {
     ASSERT_THAT(expressions, SizeIs(1));
     const auto variable_address = std::dynamic_pointer_cast<filc::VariableAddress>(expressions[0]);
     ASSERT_NE(nullptr, variable_address);
-    ASSERT_STREQ("foo", variable_address->getName().c_str());
+    const auto variable = std::dynamic_pointer_cast<filc::Identifier>(variable_address->getVariable());
+    ASSERT_NE(nullptr, variable);
+    ASSERT_STREQ("foo", variable->getName().c_str());
 }

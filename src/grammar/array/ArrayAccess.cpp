@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,44 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_AST_H
-#define FILC_AST_H
+#include "filc/grammar/array/Array.h"
 
-namespace filc {
-class Program;
+using namespace filc;
 
-class Expression;
+ArrayAccess::ArrayAccess(std::shared_ptr<Expression> array, const unsigned int index)
+    : _array(std::move(array)), _index(index) {}
 
-template<typename T>
-class Literal;
-
-class BooleanLiteral;
-
-class IntegerLiteral;
-
-class FloatLiteral;
-
-class CharacterLiteral;
-
-class StringLiteral;
-
-class VariableDeclaration;
-
-class Identifier;
-
-class BinaryCalcul;
-
-class Assignation;
-
-class Pointer;
-
-class PointerDereferencing;
-
-class VariableAddress;
-
-class Array;
-
-class ArrayAccess;
+auto ArrayAccess::getArray() const -> std::shared_ptr<Expression> {
+    return _array;
 }
 
-#endif // FILC_AST_H
+auto ArrayAccess::getIndex() const -> unsigned int {
+    return _index;
+}
+
+auto ArrayAccess::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitArrayAccess(this);
+}
+
+auto ArrayAccess::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitArrayAccess(this);
+}

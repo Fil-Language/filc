@@ -32,6 +32,7 @@
 #include "filc/grammar/variable/Variable.h"
 #include "filc/llvm/CalculBuilder.h"
 
+#include <filc/grammar/array/Array.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/MC/MCTargetOptions.h>
@@ -44,9 +45,10 @@
 using namespace filc;
 
 IRGenerator::IRGenerator(const std::string &filename, const Environment *environment) {
-    _llvm_context = std::make_unique<llvm::LLVMContext>();
-    _module       = std::make_unique<llvm::Module>(llvm::StringRef(filename), *_llvm_context);
-    _builder      = std::make_unique<llvm::IRBuilder<>>(*_llvm_context);
+    _visitor_context = std::make_unique<VisitorContext>();
+    _llvm_context    = std::make_unique<llvm::LLVMContext>();
+    _module          = std::make_unique<llvm::Module>(llvm::StringRef(filename), *_llvm_context);
+    _builder         = std::make_unique<llvm::IRBuilder<>>(*_llvm_context);
     environment->prepareLLVMTypes(_llvm_context.get());
 }
 
@@ -74,7 +76,9 @@ auto IRGenerator::toTarget(const std::string &output_file, const std::string &ta
         return 1;
     }
     const llvm::TargetOptions options;
-    const auto target_machine = target->createTargetMachine(used_target_triple, "", "", options, llvm::Reloc::PIC_);
+    const auto target_machine = target->createTargetMachine(
+        used_target_triple, "", "", options, llvm::Reloc::PIC_, std::nullopt, llvm::CodeGenOptLevel::None
+    );
 
     _module->setDataLayout(target_machine->createDataLayout());
     _module->setTargetTriple(used_target_triple);
@@ -189,18 +193,60 @@ auto IRGenerator::visitPointer(Pointer *pointer) -> llvm::Value * {
 }
 
 auto IRGenerator::visitPointerDereferencing(PointerDereferencing *pointer) -> llvm::Value * {
-    const auto pointer_value = _context.getValue(pointer->getName());
-    if (pointer_value == nullptr) {
-        throw std::logic_error("Tried to access to a variable without a value set");
-    }
-
+    const auto pointer_value = pointer->getPointer()->acceptIRVisitor(this);
     return _builder->CreateLoad(pointer->getType()->getLLVMType(_llvm_context.get()), pointer_value);
 }
 
 auto IRGenerator::visitVariableAddress(VariableAddress *address) -> llvm::Value * {
-    const auto value  = _context.getValue(address->getName());
-    const auto alloca = _builder->CreateAlloca(value->getType());
+    const auto value  = address->getVariable()->acceptIRVisitor(this);
+    const auto alloca = _builder->CreateAlloca(address->getType()->getLLVMType(_llvm_context.get()));
     _builder->CreateStore(value, alloca);
 
     return alloca;
+}
+
+auto IRGenerator::visitArray(Array *array) -> llvm::Value * {
+    const auto array_type   = array->getType()->getLLVMType(_llvm_context.get());
+    const auto in_array_def = _visitor_context->has("in_array_def");
+    const auto alloca
+        = in_array_def
+            ? nullptr
+            : _builder->CreateAlloca(
+                  array_type, llvm::ConstantInt::get(*_llvm_context, llvm::APInt(64, array->getFullSize(), false))
+              );
+    const auto &array_values = array->getValues();
+    for (unsigned int i = 0; i < array_values.size(); ++i) {
+        const auto array_value = in_array_def ? _visitor_context->get<llvm::Value *>("in_array_def") : alloca;
+        _visitor_context->stack();
+
+        const auto array_access = _builder->CreateConstInBoundsGEP2_64(array_type, array_value, 0, i);
+        _visitor_context->set("in_array_def", array_access);
+        const auto llvm_value = array_values[i]->acceptIRVisitor(this);
+
+        if (! _visitor_context->has("was_in_array_def") || ! _visitor_context->get<bool>("was_in_array_def")) {
+            _builder->CreateStore(llvm_value, array_access);
+        }
+
+        _visitor_context->unstack();
+    }
+
+    _visitor_context->set("was_in_array_def", true);
+
+    return alloca;
+}
+
+auto IRGenerator::visitArrayAccess(ArrayAccess *array_access) -> llvm::Value * {
+    _visitor_context->stack();
+    _visitor_context->set("in_array_access", true);
+    const auto value = array_access->getArray()->acceptIRVisitor(this);
+    _visitor_context->unstack();
+    const auto gep = _builder->CreateConstInBoundsGEP2_64(
+        array_access->getArray()->getType()->getLLVMType(_llvm_context.get()), value, 0, array_access->getIndex()
+    );
+
+    if (_visitor_context->has("in_array_access") && _visitor_context->get<bool>("in_array_access")) {
+        return gep;
+    }
+
+    return _builder->CreateLoad(array_access->getType()->getLLVMType(_llvm_context.get()), gep);
 }

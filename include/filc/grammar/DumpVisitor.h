@@ -58,6 +58,10 @@ class DumpVisitor final: public Visitor<void> {
 
     auto visitVariableAddress(VariableAddress *address) -> void override;
 
+    auto visitArray(Array *array) -> void override;
+
+    auto visitArrayAccess(ArrayAccess *array_access) -> void override;
+
   private:
     std::ostream &_out;
     int _indent_level;

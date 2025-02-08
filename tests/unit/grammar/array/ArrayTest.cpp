@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,20 +23,34 @@
  */
 #include "test_tools.h"
 
-#include <filc/grammar/identifier/Identifier.h>
-#include <filc/grammar/pointer/Pointer.h>
+#include <filc/grammar/array/Array.h>
+#include <filc/grammar/literal/Literal.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 using namespace ::testing;
 
-TEST(PointerDereferencing, parsing) {
-    const auto program     = parseString("*foo");
+TEST(Array, parsingEmpty) {
+    const auto program     = parseString("[]");
     const auto expressions = program->getExpressions();
     ASSERT_THAT(expressions, SizeIs(1));
-    const auto pointer_dereferencing = std::dynamic_pointer_cast<filc::PointerDereferencing>(expressions[0]);
-    ASSERT_NE(nullptr, pointer_dereferencing);
-    const auto pointer = std::dynamic_pointer_cast<filc::Identifier>(pointer_dereferencing->getPointer());
-    ASSERT_NE(nullptr, pointer_dereferencing);
-    ASSERT_STREQ("foo", pointer->getName().c_str());
+    const auto array = std::dynamic_pointer_cast<filc::Array>(expressions[0]);
+    ASSERT_NE(nullptr, array);
+    ASSERT_EQ(0, array->getSize());
+    ASSERT_THAT(array->getValues(), IsEmpty());
+}
+
+TEST(Array, parsingSimple) {
+    const auto program     = parseString("[1, 2, 3]");
+    const auto expressions = program->getExpressions();
+    ASSERT_THAT(expressions, SizeIs(1));
+    const auto array = std::dynamic_pointer_cast<filc::Array>(expressions[0]);
+    ASSERT_NE(nullptr, array);
+    ASSERT_EQ(3, array->getSize());
+    const auto values = array->getValues();
+    for (unsigned int i = 0; i < array->getSize(); i++) {
+        const auto value = std::dynamic_pointer_cast<filc::IntegerLiteral>(values[i]);
+        ASSERT_NE(nullptr, value);
+        ASSERT_EQ(i + 1, value->getValue());
+    }
 }

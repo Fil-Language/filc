@@ -23,6 +23,7 @@
  */
 #include "filc/validation/ValidationVisitor.h"
 
+#include "filc/grammar/array/Array.h"
 #include "filc/grammar/assignation/Assignation.h"
 #include "filc/grammar/calcul/Calcul.h"
 #include "filc/grammar/identifier/Identifier.h"
@@ -38,7 +39,8 @@
 using namespace filc;
 
 ValidationVisitor::ValidationVisitor(std::ostream &out)
-    : _context(new ValidationContext()), _environment(new Environment()), _out(out), _error(false) {}
+    : _context(new VisitorContext()), _environment(new Environment()), _type_builder(_environment.get()), _out(out),
+      _error(false) {}
 
 auto ValidationVisitor::getEnvironment() const -> const Environment * {
     return _environment.get();
@@ -160,7 +162,7 @@ auto ValidationVisitor::visitVariableDeclaration(VariableDeclaration *variable) 
 
     std::shared_ptr<AbstractType> variable_type = nullptr;
     if (! variable->getTypeName().empty()) {
-        if (! _environment->hasType(variable->getTypeName())) {
+        if (! _environment->hasType(variable->getTypeName()) && ! _type_builder.tryBuildType(variable->getTypeName())) {
             displayError("Unknown type: " + variable->getTypeName(), variable->getPosition());
             return;
         }
@@ -332,13 +334,16 @@ auto ValidationVisitor::visitPointer(Pointer *pointer) -> void {
 }
 
 auto ValidationVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> void {
-    if (! _environment->hasName(pointer->getName())) {
-        displayError("Unknown name, don't know what it refers to: " + pointer->getName(), pointer->getPosition());
+    _context->stack();
+    _context->set("return", true);
+    pointer->getPointer()->acceptVoidVisitor(this);
+    _context->unstack();
+
+    const auto pointer_type = pointer->getPointer()->getType();
+    if (pointer_type == nullptr) {
         return;
     }
-
-    const auto name = _environment->getName(pointer->getName());
-    const auto type = std::dynamic_pointer_cast<PointerType>(name.getType());
+    const auto type = std::dynamic_pointer_cast<PointerType>(pointer_type);
     if (type == nullptr) {
         displayError("Cannot dereference a variable which is not a pointer", pointer->getPosition());
         return;
@@ -352,13 +357,15 @@ auto ValidationVisitor::visitPointerDereferencing(PointerDereferencing *pointer)
 }
 
 auto ValidationVisitor::visitVariableAddress(VariableAddress *address) -> void {
-    if (! _environment->hasName(address->getName())) {
-        displayError("Unknown name, don't know what it refers to: " + address->getName(), address->getPosition());
+    _context->stack();
+    _context->set("return", true);
+    address->getVariable()->acceptVoidVisitor(this);
+    _context->unstack();
+
+    const auto pointed_type = address->getVariable()->getType();
+    if (pointed_type == nullptr) {
         return;
     }
-
-    const auto name                    = _environment->getName(address->getName());
-    const auto pointed_type            = name.getType();
     std::shared_ptr<AbstractType> type = nullptr;
     if (_environment->hasType(pointed_type->getName() + "*")) {
         type = _environment->getType(pointed_type->getName() + "*");
@@ -371,5 +378,108 @@ auto ValidationVisitor::visitVariableAddress(VariableAddress *address) -> void {
 
     if (! _context->has("return") || ! _context->get<bool>("return")) {
         displayWarning("Value not used", address->getPosition());
+    }
+}
+
+auto ValidationVisitor::visitArray(Array *array) -> void {
+    if (array->getSize() == 0) {
+        array->setFullSize(0);
+        if (_context->has("cast_type")) {
+            array->setType(_context->get<std::shared_ptr<AbstractType>>("cast_type"));
+        } else {
+            if (! _environment->hasType("void[0]")) {
+                _environment->addType(std::make_shared<ArrayType>(0, _environment->getType("void")));
+            }
+            array->setType(_environment->getType("void[0]"));
+        }
+    } else {
+        if (_context->has("cast_type")) {
+            const auto cast_type  = _context->get<std::shared_ptr<AbstractType>>("cast_type");
+            const auto array_type = std::dynamic_pointer_cast<ArrayType>(cast_type);
+            if (array_type == nullptr) {
+                displayError(
+                    "Cannot cast an array to a type not corresponding to an array: " + cast_type->toDisplay(),
+                    array->getPosition()
+                );
+                return;
+            }
+
+            _context->stack();
+            _context->set("cast_type", array_type->getContainedType());
+            _context->set("return", true);
+        }
+
+        std::vector<std::shared_ptr<AbstractType>> values_types;
+        unsigned long full_size = 0;
+        for (const auto &value : array->getValues()) {
+            value->acceptVoidVisitor(this);
+
+            const auto value_type = value->getType();
+            if (value_type == nullptr) {
+                return;
+            }
+            values_types.push_back(value_type);
+
+            if (_context->has("array_size")) {
+                full_size += _context->get<unsigned long>("array_size");
+                _context->unset("array_size");
+            } else {
+                full_size++;
+            }
+        }
+        array->setFullSize(full_size);
+
+        if (_context->has("cast_type")) {
+            _context->unstack();
+        }
+
+        const auto it = std::adjacent_find(values_types.begin(), values_types.end(), std::not_equal_to<>());
+        if (it != values_types.end()) {
+            displayError("All values of an array should be of the same type", array->getPosition());
+            return;
+        }
+
+        const auto type_name = values_types[0]->getDisplayName() + "[" + std::to_string(array->getSize()) + "]";
+        if (! _environment->hasType(type_name)) {
+            _environment->addType(std::make_shared<ArrayType>(array->getSize(), values_types[0]));
+        }
+        array->setType(_environment->getType(type_name));
+    }
+
+    _context->set("array_size", array->getFullSize());
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", array->getPosition());
+    }
+}
+
+auto ValidationVisitor::visitArrayAccess(ArrayAccess *array_access) -> void {
+    const auto array = array_access->getArray();
+    array->acceptVoidVisitor(this);
+
+    const auto array_type = array->getType();
+    if (array_type == nullptr) {
+        return;
+    }
+    const auto type = std::dynamic_pointer_cast<ArrayType>(array_type);
+    if (type == nullptr) {
+        displayError(
+            "Cannot access to offset on a variable of type " + array_type->toDisplay(), array_access->getPosition()
+        );
+        return;
+    }
+
+    if (array_access->getIndex() >= type->getSize()) {
+        displayError(
+            "Out of bound access to an array. Array has a size of " + std::to_string(type->getSize()),
+            array_access->getPosition()
+        );
+        return;
+    }
+
+    array_access->setType(type->getContainedType());
+
+    if (! _context->has("return") || ! _context->get<bool>("return")) {
+        displayWarning("Value not used", array_access->getPosition());
     }
 }

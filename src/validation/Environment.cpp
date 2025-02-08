@@ -50,6 +50,8 @@ Environment::Environment() {
 
     addType(std::make_shared<AliasType>("char", getType("u8")));
     addType(std::make_shared<PointerType>(getType("char")));
+
+    addType(std::make_shared<Type>("void"));
 }
 
 auto Environment::prepareLLVMTypes(llvm::LLVMContext *context) const -> void {
@@ -74,6 +76,8 @@ auto Environment::prepareLLVMTypes(llvm::LLVMContext *context) const -> void {
 
     getType("char")->setLLVMType(llvm::Type::getInt8Ty(*context));
     getType("char*")->setLLVMType(llvm::PointerType::get(llvm::Type::getInt8Ty(*context), 0));
+
+    getType("void")->setLLVMType(llvm::Type::getVoidTy(*context));
 }
 
 auto Environment::hasType(const std::string &name) const -> bool {

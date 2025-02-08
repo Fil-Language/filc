@@ -26,7 +26,11 @@
 
 #include "filc/grammar/ast.h"
 
+#include <any>
 #include <llvm/IR/Value.h>
+#include <map>
+#include <stack>
+#include <stdexcept>
 
 namespace filc {
 template<typename Return> class Visitor {
@@ -59,6 +63,10 @@ template<typename Return> class Visitor {
 
     virtual auto visitVariableAddress(VariableAddress *address) -> Return = 0;
 
+    virtual auto visitArray(Array *array) -> Return = 0;
+
+    virtual auto visitArrayAccess(ArrayAccess *array_access) -> Return = 0;
+
   protected:
     Visitor() = default;
 };
@@ -70,6 +78,35 @@ class Visitable {
     virtual auto acceptVoidVisitor(Visitor<void> *visitor) -> void = 0;
 
     virtual auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * = 0;
+};
+
+class VisitorContext final {
+  public:
+    VisitorContext();
+
+    auto stack() -> void;
+
+    auto unstack() -> void;
+
+    auto set(const std::string &key, const std::any &value) -> void;
+
+    auto unset(const std::string &key) -> void;
+
+    [[nodiscard]] auto has(const std::string &key) const -> bool;
+
+    template<typename T>
+    auto get(const std::string &key) const -> T {
+        if (_values.top().find(key) == _values.top().end()) {
+            throw std::logic_error("There is not value for key: " + key);
+        }
+
+        return std::any_cast<T>(_values.top().at(key));
+    }
+
+    auto clear() -> void;
+
+  private:
+    std::stack<std::map<std::string, std::any>> _values;
 };
 } // namespace filc
 

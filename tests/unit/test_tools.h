@@ -70,6 +70,10 @@ class PrinterVisitor final: public filc::Visitor<void> {
 
     auto visitVariableAddress(filc::VariableAddress *address) -> void override;
 
+    auto visitArray(filc::Array *array) -> void override;
+
+    auto visitArrayAccess(filc::ArrayAccess *array_access) -> void override;
+
   private:
     std::stringstream _out;
 };

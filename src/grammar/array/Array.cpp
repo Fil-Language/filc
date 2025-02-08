@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,44 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_AST_H
-#define FILC_AST_H
+#include "filc/grammar/array/Array.h"
 
-namespace filc {
-class Program;
+using namespace filc;
 
-class Expression;
+Array::Array(const std::vector<std::shared_ptr<Expression>> &values)
+    : _size(values.size()), _full_size(0), _values(values) {}
 
-template<typename T>
-class Literal;
-
-class BooleanLiteral;
-
-class IntegerLiteral;
-
-class FloatLiteral;
-
-class CharacterLiteral;
-
-class StringLiteral;
-
-class VariableDeclaration;
-
-class Identifier;
-
-class BinaryCalcul;
-
-class Assignation;
-
-class Pointer;
-
-class PointerDereferencing;
-
-class VariableAddress;
-
-class Array;
-
-class ArrayAccess;
+auto Array::getValues() const -> const std::vector<std::shared_ptr<Expression>> & {
+    return _values;
 }
 
-#endif // FILC_AST_H
+auto Array::getSize() const -> unsigned long {
+    return _size;
+}
+
+auto Array::setFullSize(const unsigned long full_size) -> void {
+    _full_size = full_size;
+}
+
+auto Array::getFullSize() const -> unsigned long {
+    return _full_size;
+}
+
+auto Array::acceptVoidVisitor(Visitor<void> *visitor) -> void {
+    visitor->visitArray(this);
+}
+
+auto Array::acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * {
+    return visitor->visitArray(this);
+}

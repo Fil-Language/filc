@@ -31,6 +31,8 @@
 #include "filc/grammar/program/Program.h"
 #include "filc/grammar/variable/Variable.h"
 
+#include <filc/grammar/array/Array.h>
+
 using namespace filc;
 
 DumpVisitor::DumpVisitor(std::ostream &out): _out(out), _indent_level(0) {}
@@ -155,12 +157,36 @@ auto DumpVisitor::visitPointer(Pointer *pointer) -> void {
 
 auto DumpVisitor::visitPointerDereferencing(PointerDereferencing *pointer) -> void {
     printIdent();
-    _out << "[PointerDereferencing:" << pointer->getName() << "]\n";
+    _out << "[PointerDereferencing]\n";
+    _indent_level++;
+    pointer->getPointer()->acceptVoidVisitor(this);
+    _indent_level--;
 }
 
 auto DumpVisitor::visitVariableAddress(VariableAddress *address) -> void {
     printIdent();
-    _out << "[VariableAddress:" << address->getName() << "]\n";
+    _out << "[VariableAddress]\n";
+    _indent_level++;
+    address->getVariable()->acceptVoidVisitor(this);
+    _indent_level--;
+}
+
+auto DumpVisitor::visitArray(Array *array) -> void {
+    printIdent();
+    _out << "[Array:" << array->getSize() << "]\n";
+    _indent_level++;
+    for (const auto &value : array->getValues()) {
+        value->acceptVoidVisitor(this);
+    }
+    _indent_level--;
+}
+
+auto DumpVisitor::visitArrayAccess(ArrayAccess *array_access) -> void {
+    printIdent();
+    _out << "[ArrayAccess:" << array_access->getIndex() << "]\n";
+    _indent_level++;
+    array_access->getArray()->acceptVoidVisitor(this);
+    _indent_level--;
 }
 
 auto DumpVisitor::printIdent() const -> void {

@@ -1,7 +1,7 @@
 /**
  * MIT License
  *
- * Copyright (c) 2024-Present Kevin Traini
+ * Copyright (c) 2025-Present Kevin Traini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,61 +21,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef FILC_POINTER_H
-#define FILC_POINTER_H
+#ifndef FILC_ARRAY_H
+#define FILC_ARRAY_H
 
 #include "filc/grammar/expression/Expression.h"
 
 #include <memory>
-#include <string>
+#include <vector>
 
 namespace filc {
-class Pointer final : public Expression {
+class Array final : public Expression {
   public:
-    Pointer(std::string type_name, const std::shared_ptr<Expression> &value);
+    explicit Array(const std::vector<std::shared_ptr<Expression>> &values);
 
-    [[nodiscard]] auto getTypeName() const -> std::string;
+    [[nodiscard]] auto getValues() const -> const std::vector<std::shared_ptr<Expression>> &;
 
-    [[nodiscard]] auto getValue() const -> std::shared_ptr<Expression>;
+    [[nodiscard]] auto getSize() const -> unsigned long;
 
-    [[nodiscard]] auto getPointedType() const -> std::shared_ptr<AbstractType>;
+    auto setFullSize(unsigned long full_size) -> void;
+
+    [[nodiscard]] auto getFullSize() const -> unsigned long;
 
     auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
 
     auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
 
   private:
-    std::string _type_name;
-    std::shared_ptr<Expression> _value;
+    unsigned long _size;
+    unsigned long _full_size;
+    std::vector<std::shared_ptr<Expression>> _values;
 };
 
-class PointerDereferencing final : public Expression {
+class ArrayAccess final : public Expression {
   public:
-    explicit PointerDereferencing(const std::shared_ptr<Expression> &pointer);
+    ArrayAccess(std::shared_ptr<Expression> array, unsigned int index);
 
-    [[nodiscard]] auto getPointer() const -> std::shared_ptr<Expression>;
+    [[nodiscard]] auto getArray() const -> std::shared_ptr<Expression>;
+
+    [[nodiscard]] auto getIndex() const -> unsigned int;
 
     auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
 
     auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
 
   private:
-    std::shared_ptr<Expression> _pointer;
-};
-
-class VariableAddress final : public Expression {
-  public:
-    explicit VariableAddress(const std::shared_ptr<Expression> &variable);
-
-    [[nodiscard]] auto getVariable() const -> std::shared_ptr<Expression>;
-
-    auto acceptVoidVisitor(Visitor<void> *visitor) -> void override;
-
-    auto acceptIRVisitor(Visitor<llvm::Value *> *visitor) -> llvm::Value * override;
-
-  private:
-    std::shared_ptr<Expression> _variable;
+    std::shared_ptr<Expression> _array;
+    unsigned int _index;
 };
 } // namespace filc
 
-#endif // FILC_POINTER_H
+#endif // FILC_ARRAY_H
