@@ -19,7 +19,7 @@ file(READ ${CMAKE_CURRENT_SOURCE_DIR}/VERSION FILC_VERSION)
 project(
         filc
         VERSION ${FILC_VERSION}
-        LANGUAGES C CXX
+        LANGUAGES CXX
 )
 
 include(FetchContent)

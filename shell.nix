@@ -3,8 +3,7 @@
 let
   currentDir = builtins.toString ./.;
   pnpm = pkgs.callPackage ./tools/nix/pnpm.nix { nodejs = pkgs.nodejs_20; };
-  cxxopts = pkgs.callPackage ./tools/nix/cxxopts.nix { };
-  antlr4 = pkgs.callPackage ./tools/nix/antlr4.nix { };
+  cxxopts = pkgs.cxxopts.override { enableUnicodeHelp = false; };
 in
 
 pkgs.mkShell {
@@ -27,8 +26,8 @@ pkgs.mkShell {
     pkgs.libffi
     pkgs.libxml2
     cxxopts
-    antlr4.antlr
-    antlr4.runtime.cpp
+    pkgs.antlr4_13
+    pkgs.antlr4_13.runtime.cpp
   ];
 
   shellHook = ''
