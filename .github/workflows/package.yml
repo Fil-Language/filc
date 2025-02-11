@@ -104,3 +104,15 @@ jobs:
         with:
           file: "${{ github.workspace }}/out/rpm_package/*.rpm;${{ github.workspace }}/out/rpm_package/*.rpm.sha512"
           tags: true
+
+  nix:
+    name: Build nix package
+    runs-on: ubuntu-22.04
+    needs: metadata
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@3715ab1a11cac9e991980d7b4a28d80c7ebdd8f9 # v28
+      - name: Build
+        run: nix-build ${{ github.workspace }}/tools/nix -A filc

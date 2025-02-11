@@ -5,6 +5,7 @@ filc
 !include/*
 !src/*
 out
+result
 !bin/*
 coverage.info
 .idea
