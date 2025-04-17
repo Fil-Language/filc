@@ -1,7 +1,7 @@
 # filc
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Version](version.svg)
+[![License: MIT](https://img.shields.io/github/license/fil-language/filc)](https://opensource.org/licenses/MIT)
+![Version](https://img.shields.io/github/v/release/fil-language/filc?include_prereleases)
 
 [![Tests](https://github.com/Fil-Language/filc/actions/workflows/tests.yml/badge.svg)](https://github.com/Fil-Language/filc/actions/workflows/tests.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6e3d7ce34c884e0abb9769896667b3e7)](https://app.codacy.com/gh/Fil-Language/filc/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
@@ -28,7 +28,7 @@ Entire project is based on cmake. So you can just run cmake as for every cmake p
 Or you can run a pre-defined script:
 
 ```shell
-./bin/build_release.sh
+build_release
 ```
 
 `filc` executable is copied at the root of repository, you can then copy it in a directory of your `$PATH`.
@@ -40,13 +40,13 @@ There is 2 tests suites:
 **Unit tests**
 
 ```shell
-./bin/run_unit_tests.sh
+run_unit_tests
 ```
 
 You can then get coverage of these tests with:
 
 ```shell
-./bin/build_coverage.sh
+build_coverage
 ```
 
 **e2e tests**
@@ -54,7 +54,7 @@ You can then get coverage of these tests with:
 They run directly filc
 
 ```shell
-./bin/run_e2e_tests.sh
+run_e2e_tests
 ```
 
 ## Contributing
